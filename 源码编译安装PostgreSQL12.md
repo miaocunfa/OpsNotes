@@ -92,7 +92,7 @@ Success. You can now start the database server using:
 # 查看一下 $HOME/data 路径中的内容
 [postgre@jiexian ~]$cd data
 [postgre@jiexian ~/data]$ll
-总用量 116
+总用量 116
 drwx------ 5 postgre postgre  4096 11月  8 21:31 base
 drwx------ 2 postgre postgre  4096 11月  8 21:31 global
 drwx------ 2 postgre postgre  4096 11月  8 21:31 pg_commit_ts
