@@ -1,17 +1,26 @@
+# Gitlab 定时备份脚本
+## 脚本主程序如下
 ```
 #===========================Set Parameter========================================
 ENVFILE="/etc/profile"
 EXITCODE=0
 fileDate=`date +'%Y_%m_%d'`
 curDate=`date +'%Y%m%d'`
+curTime=`date +'%H%M%S'`
 backupDir=/var/opt/gitlab/backups
-backupFile=`find $backupDir -name "*${fileDate}*gitlab_backup.tar" -print`
+gitlab_backupLog=/var/opt/gitlab/backups/gitlab_backup.log
+gitlab_optLog=gitlab_opt.log
 mailContext="邮件内容初始化"
 
-#===========================Exit Program=========================================
-exit_handler()
+#===========================Function =========================================
+function __exit_handler()
 {
 	exit $EXITCODE
+}
+
+function __write_log()
+{
+  echo "$(date "+%Y-%m-%d %H:%M:%S") [$1] $2" >> $gitlab_backupLog
 }
 
 #===========================Load the environment file============================
@@ -20,34 +29,68 @@ then
 	source $ENVFILE
 else
 	EXITCODE=-1
-	exit_handler
+	__exit_handler
 fi
 
 #===========================Backup And Send The File To Remote Host=========================
 cd $backupDir
 
-gitlab-rake gitlab:backup:create
+__write_log "log" "gitlab-rake Start!"
 
-lftp << EOF
- open sftp://10.0.0.18:1022
- user backup backup!@#
- put $backupFile
- exit
-EOF
+gitlab-rake gitlab:backup:create > $gitlab_optLog
+
+__write_log "log" "gitlab-rake Success!"
+
+backupFile=$(cat $gitlab_optLog | grep "Creating backup archive:" | awk '{print $4}')
+
+__write_log "log" "gitlab-backupFile: $backupFile"
+
+scp $backupFile root@gitbackup:/home/gitlab/backup
 
 if [ $? == 0 ]
 then
     mailContext="gitlab 备份成功及上传ftp成功"
+    __write_log "log" "SCP file Success!"
     
-    # Delete BackupFile
+    # Delete BackupFile And OptLog
     rm -f $backupFile
+    rm -f $gitlab_optLog
+    __write_log "log" "Remove file: $backupFile"
+    __write_log "log" "Remove file: $gitlab_optLog"
 else
     mailContext="gitlab 备份成功但上传ftp不成功"
+    __write_log "log" "SCP file Fail!"
+
+    # Delete OptLog
+    rm -f $gitlab_optLog
+    __write_log "log" "Remove file: $gitlab_optLog"
 fi
 
 # Send Mail to admin
 echo $mailContext | mail -s "gitlab $curDate 备份" shu-xian@163.com
 
+__write_log "log" "Mail Send Success!"
+__write_log "log" "End of Program!"
+
 # Exit Shell Script
-exit_handler
+__exit_handler
+```
+
+## 定时任务
+``` shell
+[root@localhost bin]# crontab -l
+00 01 * * * /bin/bash /home/gitlab/bin/gitlab_backup.sh
+```
+
+## 日志打印
+我特意在新改版的shell中添加了日志记录的功能，每次执行脚本记录的日志如下。
+``` log
+2019-11-15 10:14:01 [log] gitlab-rake Start!
+2019-11-15 10:16:11 [log] gitlab-rake Success!
+2019-11-15 10:16:11 [log] gitlab-backupFile: 1573784126_2019_11_15_11.11.3_gitlab_backup.tar
+2019-11-15 10:16:37 [log] SCP file Success!
+2019-11-15 10:16:37 [log] Remove file: 1573784126_2019_11_15_11.11.3_gitlab_backup.tar
+2019-11-15 10:16:37 [log] Remove file: gitlab_opt.log
+2019-11-15 10:16:37 [log] Mail Send Success!
+2019-11-15 10:16:37 [log] End of Program!
 ```
