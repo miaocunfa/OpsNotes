@@ -115,5 +115,5 @@ Redis 的配置 定义在 redis.conf 文件中，下面我们介绍一下各个�
     include /path/to/local.conf
 ```
 
-> @作者：eastfu  
-> @出处：https://www.cnblogs.com/eastfu/p/8052239.html
+> 作者：eastfu  
+> 出处：https://www.cnblogs.com/eastfu/p/8052239.html
