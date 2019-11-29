@@ -1,5 +1,5 @@
 # 详解Redis配置文件
-> @Author：eastfu
+> @Author：eastfu  
 > @Form：https://www.cnblogs.com/eastfu/p/8052239.html
 
 ## 一、Redis可执行文件简介
