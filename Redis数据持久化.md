@@ -40,11 +40,11 @@ total 2624
 ## 三、AOF持久化方案
 先把命令追加到操作日志的尾部，保存所有的历史操作。
 
-1、相比于RDB持久化方案的优点：  
+### 1、相比于RDB持久化方案的优点：  
 （1）数据非常完整，故障恢复丢失数据少  
 （2）可对历史操作进行处理  
 
-2、开启AOF持久化
+### 2、开启AOF持久化
 ```
 vi redis.conf
 appendonly yes                    # 打开AOF模式
@@ -52,7 +52,7 @@ appendfilename "appendonly.aof"   # 操作日志文件名
 appendfsync everysec              # AOF同步方式，每秒一次
 ```
 
-3、验证AOF
+### 3、验证AOF
 ``` bash
 # 连接redis进行操作
 [root@zabbix_server ~]# redis-cli
@@ -92,7 +92,7 @@ $3
 fri
 ```
 
-4、缺点  
+### 4、缺点  
 （1）因为AOF模式要把每一步redis命令都记录下来，所以就导致文件的体积会很大  
 （2）而且会导致速度低于RDB，并且恢复速度慢  
 
