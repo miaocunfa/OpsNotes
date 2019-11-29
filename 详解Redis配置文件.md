@@ -1,4 +1,7 @@
 # 详解Redis配置文件
+> @Author：eastfu
+> @Form：https://www.cnblogs.com/eastfu/p/8052239.html
+
 ## 一、Redis可执行文件简介
 在我们介绍Redis的配置文件之前，我们先来说一下Redis安装完成后生成的几个可执行文件： redis-server、redis-cli、redis-benchmark、redis-stat、redis-check-dump、redis-check-aof:
 ```
