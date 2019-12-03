@@ -24,7 +24,25 @@ http {
 }
 ```
 
-## zabbix配置文件
+## ssl配置文件
+```
+ server {
+        listen  443;
+        server_name dev.aihangcloud.cn;
+        ssl on;
+        ssl_certificate_key cert/dev.aihangcloud.cn.key;
+        ssl_certificate cert/dev.aihangcloud.cn.pem;
+        ssl_session_timeout 5m;
+        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+        ssl_prefer_server_ciphers on;
+        location / {
+             proxy_pass http://localhost:9999;
+        }
+    }
+```
+
+## php配置文件
 ``` conf
 [miaocunfa@ng1 conf.d]$ cat zabbix.conf
     server {
