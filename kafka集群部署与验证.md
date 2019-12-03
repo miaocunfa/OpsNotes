@@ -72,21 +72,20 @@ Mode: leader
 # 当前机器在集群中的唯一标识，和zookeeper的myid性质一样
 broker.id=1
 
+# 学名叫监听器，其实就是告诉外部连接者要通过什么协议访问指定主机名和端口开放的 Kafka 服务。
 listeners=PLAINTEXT://172.19.26.3:9092
+# listeners 相比多了个 advertised。Advertised 的含义表示宣称的、公布的，就是说这组监听器是 Broker 用于对外发布的。
 advertised.listeners=PLAINTEXT://172.19.26.3:9092
 
 # broker 处理消息的最大线程数，一般情况下不需要去修改
 num.network.threads=3
-
 # broker处理磁盘IO 的线程数 ，数值应该大于你的硬盘数
 num.io.threads=8
 
 # 发送缓冲区buffer大小，数据不是一下子就发送的，先回存储到缓冲区了到达一定的大小后在发送，能提高性能
 socket.send.buffer.bytes=102400
-
 # kafka接收缓冲区大小，当数据到达一定大小后在序列化到磁盘
 socket.receive.buffer.bytes=102400
-
 # 这个参数是向kafka请求消息或者向kafka发送消息的请请求的最大数，这个值不能超过java的堆栈大小
 socket.request.max.bytes=104857600
 
@@ -106,16 +105,13 @@ transaction.state.log.min.isr=3
 
 # 默认消息的最大持久化时间，168小时，7天
 log.retention.hours=168
-
 #这个参数是：因为kafka的消息是以追加的形式落地到文件，当超过这个值的时候，kafka会新起一个文件
 log.segment.bytes=1073741824
-
 # 每隔300000毫秒去检查上面配置的log失效时间
 log.retention.check.interval.ms=300000
 
 # zookeeper的连接端口
 zookeeper.connect=172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181
-
 # zookeeper的连接超时时间
 zookeeper.connection.timeout.ms=6000
 
@@ -169,7 +165,7 @@ Topic:demo_topics	PartitionCount:3	ReplicationFactor:2	Configs:
 ### 4.2、生产消费验证
 
 ps. 1) 若producer 和 consumer 两个窗口同时打开，在producer输入信息，consumer会立即消费信息并打印在终端  
-    2）新开一个终端，去消费同一个topic，刚刚已经消费过的消息还会被新终端继续消费。也就是说，消息被消费过后不会立即被删除。　
+&emsp;&emsp;&emsp;&emsp;2）新开一个终端，去消费同一个topic，刚刚已经消费过的消息还会被新终端继续消费。也就是说，消息被消费过后不会立即被删除。　
 
 #### 4.2.1、生产者发送消息
 ``` bash
