@@ -99,12 +99,10 @@ num.partitions=3
 # 每个数据目录用来日志恢复的线程数目
 num.recovery.threads.per.data.dir=1
 
-# topic的offset的备份份数。建议设置更高的数字保证更高的可用性
-offsets.topic.replication.factor=1
-
-transaction.state.log.replication.factor=1
-
-transaction.state.log.min.isr=1
+# 集群高可用参数，建议使用大于1的值来确保可用性，比如3。
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=3
+transaction.state.log.min.isr=3
 
 # 默认消息的最大持久化时间，168小时，7天
 log.retention.hours=168
@@ -170,7 +168,7 @@ Topic:demo_topics	PartitionCount:3	ReplicationFactor:2	Configs:
 
 ### 4.2、生产消费验证
 
-ps. 1) 若producer 和 consumer 两个窗口同时打开，在producer输入信息，consumer会立即消费信息并打印在终端
+ps. 1) 若producer 和 consumer 两个窗口同时打开，在producer输入信息，consumer会立即消费信息并打印在终端  
     2）新开一个终端，去消费同一个topic，刚刚已经消费过的消息还会被新终端继续消费。也就是说，消息被消费过后不会立即被删除。　
 
 #### 4.2.1、生产者发送消息
@@ -189,7 +187,7 @@ Hello Kafka!
 
 ### 4.3、删除测试topic
 ``` bash
-# delete.topic.enable=true才可
+# 配置文件中delete.topic.enable=true才可删除topic
 [miaocunfa@db1 config]$ /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --delete --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --topic demo_topics
 Topic demo_topics is marked for deletion.
 Note: This will have no impact if delete.topic.enable is not set to true.
@@ -199,3 +197,4 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 > 1.https://www.cnblogs.com/qingyunzong/p/8619184.html  
 > 2.https://www.cnblogs.com/qingyunzong/p/9005062.html#_label3_5  
 > 3.https://www.cnblogs.com/cici20166/p/9426417.html  
+> 4.https://www.orchome.com/805
