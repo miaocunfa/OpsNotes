@@ -39,7 +39,7 @@ configure arguments: --prefix=/usr/local/nginx-1.16.1 --with-http_stub_status_mo
 ```
 
 ## 五、创建软连接
-讲nginx可执行文件链接至/usr/bin下，可以在系统任意路径执行nginx程序。
+将nginx可执行文件链接至/usr/bin下，可以在系统任意路径执行nginx
 ```
 ln -s /usr/local/nginx-1.16.1/sbin/nginx /usr/bin/nginx
 ```
