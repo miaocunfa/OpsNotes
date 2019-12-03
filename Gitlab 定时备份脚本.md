@@ -88,12 +88,12 @@ __exit_handler
 ## 日志打印
 我特意在新改版的shell中添加了日志记录的功能，每次执行脚本记录的日志如下。
 ``` log
-2019-11-15 10:14:01 [log] gitlab-rake Start!
-2019-11-15 10:16:11 [log] gitlab-rake Success!
-2019-11-15 10:16:11 [log] gitlab-backupFile: 1573784126_2019_11_15_11.11.3_gitlab_backup.tar
-2019-11-15 10:16:37 [log] SCP file Success!
-2019-11-15 10:16:37 [log] Remove file: 1573784126_2019_11_15_11.11.3_gitlab_backup.tar
-2019-11-15 10:16:37 [log] Remove file: gitlab_opt.log
-2019-11-15 10:16:37 [log] Mail Send Success!
-2019-11-15 10:16:37 [log] End of Program!
+2019-12-03 14:32:15 [log] gitlab-rake Start!
+2019-12-03 14:35:03 [log] gitlab-rake Success!
+2019-12-03 14:35:03 [log] gitlab-backupFile: gitlab_backup_Tue.tar
+2019-12-03 14:35:29 [log] SCP file Success!
+2019-12-03 14:35:29 [log] Remove file: gitlab_backup_Tue.tar
+2019-12-03 14:35:29 [log] Remove file: gitlab_opt.log
+2019-12-03 14:35:29 [log] Mail Send Success!
+2019-12-03 14:35:29 [log] End of Program!
 ```
