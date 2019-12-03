@@ -165,7 +165,7 @@ Topic:demo_topics	PartitionCount:3	ReplicationFactor:2	Configs:
 ### 4.2、生产消费验证
 
 ps. 1) 若producer 和 consumer 两个窗口同时打开，在producer输入信息，consumer会立即消费信息并打印在终端  
-&emsp;&emsp;2）新开一个终端，去消费同一个topic，刚刚已经消费过的消息还会被新终端继续消费。也就是说，消息被消费过后不会立即被删除。　
+&ensp;&ensp;&ensp;&ensp;2）新开一个终端，去消费同一个topic，刚刚已经消费过的消息还会被新终端继续消费。也就是说，消息被消费过后不会立即被删除。　
 
 #### 4.2.1、生产者发送消息
 ``` bash
