@@ -7,6 +7,7 @@ EXITCODE=0
 fileDate=`date +'%Y_%m_%d'`
 curDate=`date +'%Y%m%d'`
 curTime=`date +'%H%M%S'`
+weekday=`date +'%a'`
 backupDir=/var/opt/gitlab/backups
 gitlab_backupLog=/var/opt/gitlab/backups/gitlab_backup.log
 gitlab_optLog=gitlab_opt.log
@@ -42,10 +43,11 @@ gitlab-rake gitlab:backup:create > $gitlab_optLog
 __write_log "log" "gitlab-rake Success!"
 
 backupFile=$(cat $gitlab_optLog | grep "Creating backup archive:" | awk '{print $4}')
+mv $backupFile gitlab_backup_$weekday.tar
 
-__write_log "log" "gitlab-backupFile: $backupFile"
+__write_log "log" "gitlab-backupFile: gitlab_backup_$weekday.tar"
 
-scp $backupFile root@gitbackup:/home/gitlab/backup
+sshpass -p test123 scp gitlab_backup_$weekday.tar root@192.168.100.238:/root/gitlab/backup
 
 if [ $? == 0 ]
 then
@@ -53,9 +55,9 @@ then
     __write_log "log" "SCP file Success!"
     
     # Delete BackupFile And OptLog
-    rm -f $backupFile
+    rm -f gitlab_backup_$weekday.tar
     rm -f $gitlab_optLog
-    __write_log "log" "Remove file: $backupFile"
+    __write_log "log" "Remove file: gitlab_backup_$weekday.tar"
     __write_log "log" "Remove file: $gitlab_optLog"
 else
     mailContext="gitlab 备份成功但上传ftp不成功"
@@ -67,7 +69,8 @@ else
 fi
 
 # Send Mail to admin
-echo $mailContext | mail -s "gitlab $curDate 备份" shu-xian@163.com
+echo $mailContext | mail -s "gitlab $curDate 备份" shu-xian@126.com
+echo $mailContext | mail -s "gitlab $curDate 备份" miaocunf@126.com
 
 __write_log "log" "Mail Send Success!"
 __write_log "log" "End of Program!"
