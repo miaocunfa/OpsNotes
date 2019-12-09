@@ -20,7 +20,7 @@ wget http://apache.mirrors.hoobly.com/cassandra/3.11.5/apache-cassandra-3.11.5-b
 192.168.100.228 ansible_ssh_user='root' ansible_ssh_pass='test123'
 ```
 
-### 1.2、创建cassandra用户
+### 1.3、创建cassandra用户
 ``` bash
 # 创建用户
 ansible casd -m user -a "name=cassandra state=present"
@@ -35,7 +35,7 @@ ansible casd -m copy -a "src=apache-cassandra-3.11.5.tar.gz dest=/home/cassandra
 ansible casd -m shell -a "cd /home/cassandra/; tar -zxvf apache-cassandra-3.11.5.tar.gz"
 ```
 
-### 1.3、java环境准备
+### 1.4、java环境准备
 ``` bash
 # 拷贝jdk至部署节点
 ansible casd -m copy -a "src=java-1.8.0-amazon-corretto-devel-1.8.0_212.b04-2.x86_64.rpm dest=/root"
@@ -51,7 +51,7 @@ OpenJDK Runtime Environment Corretto-8.212.04.2 (build 1.8.0_212-b04)
 OpenJDK 64-Bit Server VM Corretto-8.212.04.2 (build 25.212-b04, mixed mode)
 ```
 
-### 1.4、配置用户环境变量
+### 1.5、配置用户环境变量
 ``` bash
 # 切换用户
 [root@localhost ~]# su - cassandra 
