@@ -51,7 +51,7 @@ OpenJDK Runtime Environment Corretto-8.212.04.2 (build 1.8.0_212-b04)
 OpenJDK 64-Bit Server VM Corretto-8.212.04.2 (build 25.212-b04, mixed mode)
 ```
 
-# 配置用户环境变量
+### 1.4、配置用户环境变量
 ``` bash
 # 切换用户
 [root@localhost ~]# su - cassandra 
