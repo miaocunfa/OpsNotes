@@ -1,3 +1,9 @@
+---
+title: "详解Redis配置文件"
+date: 2019-12-14T09:55:27-05:00
+draft: false
+---
+
 # 详解Redis配置文件
 
 ## 一、Redis可执行文件简介
