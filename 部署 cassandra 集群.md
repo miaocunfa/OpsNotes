@@ -1,4 +1,14 @@
-# 部署cassandra集群
+---
+title: "部署cassandra集群"
+date: "2019-12-09"
+categories:
+    - "技术"
+tags:
+    - "cassandra"
+toc: true
+---
+
+# 部署 cassandra 集群
 
 ## 一、环境准备
 ### 1.1、下载二进制源码包
