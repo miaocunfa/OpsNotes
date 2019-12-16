@@ -1,3 +1,15 @@
+---
+title: "elasticdump迁移elasticsearch数据"
+date: "2019-12-11"
+categories:
+    - "技术"
+tags:
+    - "Elasticsearch"
+    - "Elasticdump"
+    - "Docker"
+toc: true
+---
+
 # elasticdump 迁移 elasticsearch 数据
 
 > elasticdump github地址  
