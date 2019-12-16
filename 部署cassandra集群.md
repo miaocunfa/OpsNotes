@@ -1,5 +1,5 @@
 ---
-title: "部署cassandra集群"
+title: "部署 cassandra 集群"
 date: "2019-12-09"
 categories:
     - "技术"
