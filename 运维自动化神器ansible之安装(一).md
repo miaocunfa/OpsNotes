@@ -1,3 +1,15 @@
+---
+title: "运维自动化神器ansible之安装(一)"
+date: "2019-11-09"
+categories:
+    - "技术"
+tags:
+    - "ansible"
+    - "自动化运维"
+    - "DevOps"
+toc: false
+---
+
 # 运维自动化神器ansible之安装(一)
 
 ## 一、安装部署
