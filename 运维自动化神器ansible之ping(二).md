@@ -1,5 +1,5 @@
 ---
-title: "运维自动化神器ansible之安装(一)"
+title: "运维自动化神器ansible之ping(二)"
 date: "2019-11-09"
 categories:
     - "技术"
