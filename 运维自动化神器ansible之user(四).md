@@ -1,3 +1,15 @@
+---
+title: "运维自动化神器ansible之user(四)"
+date: "2019-11-09"
+categories:
+    - "技术"
+tags:
+    - "ansible"
+    - "自动化运维"
+    - "DevOps"
+toc: false
+---
+
 ## 运维自动化神器ansible之user(四)
 
 ### 一、概述
