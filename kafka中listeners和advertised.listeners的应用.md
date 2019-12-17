@@ -1,4 +1,15 @@
-# kafka listeners 和 advertised.listeners 的应用
+---
+title: "kafka中listeners和advertised.listeners的应用"
+date: "2019-12-03"
+categories:
+    - "技术"
+tags:
+    - "kafka"
+    - "消息队列"
+toc: false
+---
+
+# kafka中listeners和advertised.listeners的应用
 
 ## 介绍区别
 在公司内网部署kafka集群只需要用到listeners，所以一直也不用管advertised.listeners是做啥的，刚开始有查过，因为经验不足，始终理解的不够，后来发现在docker部署和云服务器上部署，内外网需要作区分时，发挥了它强大的作用。
