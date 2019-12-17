@@ -1,3 +1,15 @@
+---
+title: "kafka集群部署与验证"
+date: "2019-12-02"
+categories:
+    - "技术"
+tags:
+    - "kafka"
+    - "消息队列"
+    - "服务部署"
+toc: false
+---
+
 # kafka集群部署与验证
 
 ## 一、官网下载kafka
