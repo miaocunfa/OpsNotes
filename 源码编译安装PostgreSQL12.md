@@ -1,3 +1,15 @@
+---
+title: "源码编译安装PostgreSQL 12"
+date: "2019-11-08"
+categories:
+    - "技术"
+tags:
+    - "PostgreSQL"
+    - "数据库"
+    - "服务部署"
+toc: false
+---
+
 # 源码编译安装PG12
 
 ## 一、环境准备
