@@ -26,10 +26,9 @@ http {
 
 ## ssl配置文件
 ```
- server {
-        listen  443;
+server {
+        listen 443 ssl;
         server_name dev.aihangcloud.cn;
-        ssl on;
         ssl_certificate_key cert/dev.aihangcloud.cn.key;
         ssl_certificate cert/dev.aihangcloud.cn.pem;
         ssl_session_timeout 5m;
