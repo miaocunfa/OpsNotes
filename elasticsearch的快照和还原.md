@@ -33,7 +33,9 @@ $ chown -R es:es /var/log/history/elasticsearch      # 因 es用户 uid、gid �
 $ yum install -y nfs-utils
 
 # node1配置nfs
-
+$ cat /etc/exports
+/ahdata/elasticsearch-repository 192.168.100.0/24(rw,no_root_squash)
+$ systemctl start nfs  # 启动nfs服务
 
 # node2、node3执行挂载共享存储，并验证可行性
 $ mount -t nfs DB1:/ahdata/elasticsearch-repository /ahdata/elasticsearch-repository
@@ -50,7 +52,7 @@ path.repo: ["/data", "/mnt"]    # 多仓库路径
 
 ### 1.3、创建仓库
 ``` json
-curl -XPOST "localhost:9200/_snapshot/ah_backup" -H 'Content-Type: application/json' -d '
+curl -XPOST "192.168.100.217:9200/_snapshot/ah_backup" -H 'Content-Type: application/json' -d '
 {
   "type": "fs",
   "settings": {
@@ -66,8 +68,7 @@ curl -XPOST "localhost:9200/_snapshot/ah_backup" -H 'Content-Type: application/j
 
 ### 1.4、查看仓库
 ``` json
-
-curl -X GET "localhost:9200/_snapshot/my_backup/_all"
+curl -X GET "localhost:9200/_snapshot/ah_backup/_all"
 ```
 
 ## 二、创建快照
@@ -76,9 +77,9 @@ curl -X GET "localhost:9200/_snapshot/my_backup/_all"
 # 创建快照名为 snapshot_info-ad-topic 的快照，仅将索引 info-ad-topic 写入快照。
 # wait_for_completion=true
 
-curl -X PUT "localhost:9200/_snapshot/ah_backup/snapshot_info-ad-topic?wait_for_completion=true" -H 'Content-Type: application/json' -d'
+curl -X PUT "localhost:9200/_snapshot/ah_backup/snapshot_info-ad?wait_for_completion=true" -H 'Content-Type: application/json' -d'
 {
-  "indices": "info-ad-topic",
+  "indices": "info-ad",
   "ignore_unavailable": true,
   "include_global_state": false
 }'
@@ -173,7 +174,6 @@ curl -X POST "localhost:9200/_snapshot/ah_backup/snapshot_20191213/_restore"  -H
 ## 四、清除仓库
 ``` bash
 curl -X DELETE "localhost:9200/_snapshot/ah_backup"
-curl -X DELETE "localhost:9200/_snapshot/ahprod_backup"
 ```
 
 ## 五、重建索引
