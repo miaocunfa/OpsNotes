@@ -16,14 +16,6 @@ $ tar -zxvf mongodb-linux-x86_64-rhel70-4.2.2.tgz -C /opt
 $ cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
 $ ./mongo --version
 MongoDB shell version v4.2.2
-git version: a0bbbff6ada159e19298d37946ac8dc4b497eadf
-OpenSSL version: OpenSSL 1.0.1e-fips 11 Feb 2013
-allocator: tcmalloc
-modules: none
-build environment:
-    distmod: rhel70
-    distarch: x86_64
-    target_arch: x86_64
 
 # 创建mongodb配置文件目录
 $ mkdir -p /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf   
