@@ -147,3 +147,9 @@ rs0:SECONDARY> rs.isMaster()
 	"operationTime" : Timestamp(1578883252, 1)
 }
 ```
+
+## 四、常用命令
+```
+# 将主节点降级
+rs.stepDown()
+```
