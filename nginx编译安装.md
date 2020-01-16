@@ -3,7 +3,7 @@
 ## 一、环境准备
 
 ``` bash
-yum -y install gcc gcc-c++ automake pcre pcre-devel zlip zlib-devel openssl openssl-devel
+yum -y install gcc gcc-c++ automake pcre pcre-devel zlib zlib-devel openssl openssl-devel
 ```
 
 ## 二、下载源码包
