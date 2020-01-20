@@ -107,6 +107,34 @@ original: false
 | visudo | 编辑 /etc/sudoers 文件的专属命令 |
 | sudo | 以另外一个用户身份(默认 root 用户) 执行事先在 sudoers 文件允许的命令 |
 
+## 基础网络操作命令
+| 命令 | 释义 | 
+| ---- | ---- |
+| telnet | 使用 TELNET 协议远程登录 |
+| ssh | 使用 SSH 加密协议远程登录 |
+| scp | 全拼 secure copy, 用于不同主机之间复制文件 |
+| wget | 命令行下载文件 |
+| ping | 测试主机之间网络的连通性 |
+| route | 显示和设置 linux 系统的路由表 |
+| ifconfig | 查看、配置、启用或禁用网络接口的命令 |
+| ifup | 启动网卡 |
+| ifdown | 关闭网卡 |
+| netstat | 查看网络状态 |
+| ss | 查看网络状态 |
+
+## 深入网络操作命令
+| 命令 | 释义 | 
+| ---- | ---- |
+| nmap | 网络扫描命令 |
+| lsof | 全名 list open files, 也就是列举系统中已经被打开的文件 |
+| mail | 发送和接收邮件 |
+| mutt | 邮件管理命令 |
+| nslookup | 交互式查询互联网 DNS 服务器的命令 |
+| dig | 查找 DNS 解析过程 |
+| host | 查询 DNS 的命令 |
+| traceroute | 追踪数据传输路由状况 |
+| tcpdump | 命令行的抓包工具 |
+
 未完待续......
 
 > 作者：马哥linux运维  
