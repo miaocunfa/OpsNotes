@@ -38,7 +38,9 @@ Usage: iptables -[ACD] chain rule-specification [options]
 ```
 
 ### 1.2、iptables 格式
-`iptables [-t table] COMMAND chain [-m matchname [per-match-options]] -j targetname [per-target-options]`
+``` bash
+iptables [-t table] COMMAND chain [-m matchname [per-match-options]] -j targetname [per-target-options]
+```
 
 iptables命令由 `表 + 命令 + 链 + 匹配条件 + 处理动作` 组成
 
@@ -77,12 +79,12 @@ iptables由四表五链组成。每个表分别实现不同的功能，每个表
 iptables命令有三大类，查看，链管理，规则管理
 
 ### 3.1、查看iptables规则
--t ： 查看的表
--n ：不进行 IP 与 HOSTNAME 的反解
--v ：列出更多的信息，包括通过该规则的封包总位数、相关的网络接口等.
--L ：列出目前的 table 的规则.
--S ：查看规则定义，
---line-number用于查看规则号.
+-t ： 查看的表  
+-n ：不进行 IP 与 HOSTNAME 的反解  
+-v ：列出更多的信息，包括通过该规则的封包总位数、相关的网络接口等.  
+-L ：列出目前的 table 的规则.  
+-S ：查看规则定义，  
+--line-number用于查看规则号.  
 
 ``` bash
 #使用iptables查看规则
