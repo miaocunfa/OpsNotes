@@ -701,9 +701,9 @@ DROP     丢弃
 配置文件：`/etc/sysconfig/iptables-config`
 
 ### CentOS7
-(1) 自定义Unit File，进行`iptables-restore`
-(2) firewalld服务；
-(3) 自定义脚本；
+(1) 自定义Unit File，进行`iptables-restore`  
+(2) firewalld服务；  
+(3) 自定义脚本；  
 
 ## 七、规则优化
 1. 使用自定义链管理特定应用的相关规则，模块化管理规则；
