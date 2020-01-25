@@ -626,7 +626,7 @@ rtt min/avg/max/mdev = 0.684/0.969/1.893/0.409 ms
 
 #### 4.2.2.7、state
 
-state模块允许访问此数据包的连接跟踪状态。
+state模块允许访问此数据包的连接跟踪状态。  
 
 ```bash
 #仅放行哪些连接的状态。
@@ -634,60 +634,101 @@ state模块允许访问此数据包的连接跟踪状态。
 INVALID, ESTABLISHED, NEW, RELATED or UNTRACKED.
 ```
 
-NEW: 新连接请求；
-ESTABLISHED：已建立的连接；
-INVALID：无法识别的连接；
-RELATED：相关联的连接，当前连接是一个新请求，但附属于某个已存在的连接；
-UNTRACKED：未追踪的连接；
+NEW: 新连接请求；  
+ESTABLISHED：已建立的连接；  
+INVALID：无法识别的连接；  
+RELATED：相关联的连接，当前连接是一个新请求，但附属于某个已存在的连接；  
+UNTRACKED：未追踪的连接；  
 
-state扩展：
-内核模块装载：
-nf_conntrack
-nf_conntrack_ipv4
+state扩展：  
+内核模块装载：  
+nf_conntrack   
+nf_conntrack_ipv4  
 
-手动装载：
-nf_conntrack_ftp 
+手动装载：  
+nf_conntrack_ftp   
 
-追踪到的连接：
-/proc/net/nf_conntrack
+追踪到的连接：  
+/proc/net/nf_conntrack  
 
-调整可记录的连接数量最大值：
-/proc/sys/net/nf_conntrack_max
+调整可记录的连接数量最大值：  
+/proc/sys/net/nf_conntrack_max  
 
-超时时长：
-/proc/sys/net/netfilter/*timeout*
+超时时长：  
+/proc/sys/net/netfilter/*timeout*  
 
 ## 五、处理动作
 
 -j targetname [per-target-options]
 
 ### 5.1、基本处理动作
-ACCEPT 允许
-DROP     丢弃
+ACCEPT   允许  
+DROP     丢弃  
 
 ### 5.2、扩展处理动作
+
 #### 5.2.1、REJECT 拒绝
---reject-with type
+--reject-with type  
+type 拒绝理由 以什么理由去拒绝  
+
+```
+icmp-net-unreachable     网络不可达
+icmp-host-unreachable    主机不可达
+icmp-port-unreachable    端口不可达    默认
+icmp-proto-unreachable   协议不可达
+icmp-net-prohibited      网络被禁止
+icmp-host-prohibited     主机被禁止
+icmp-admin-prohibited    管理被禁止
+```
 
 #### 5.2.2、LOG 日志
---log-level
---log-prefix
+当有客户端访问用于记录日志  
+默认日志保存于/var/log/messages文件中    
 
-默认日志保存于/var/log/messages
+```
+--log-level   日志级别
+--log-prefix  日志前缀
+```
 
-#### 5.2.3、RETURN 返回
-返回调用者；
+举例说明，若使用-j REJECT拒绝时，-j LOG放在前面
 
-### 5.3、自定义链作为target
-自定义链做为target：
+``` bash
+iptables -I INPUT 3 -d 172.16.0.67 -p tcp --dport 23 -m state --state NEW -j LOG
+iptables -R INPUT 3 -d 172.16.0.67 -p tcp --dport 23 -m state --state NEW -j LOG --log-prefix "access telnet "
+grep -i "access telnet" /var/log/messages
+```
+
+### 5.3、自定义链作为target 
+我们假设所有的ping请求都通过自己定义的链中的定义来处理  
+
+``` bash
+$ iptables -N in_ping_rules
+$ iptables -A in_ping_rules -d 172.16.0.67 -p icmp --icmp-type 8 -j ACCEPT
+$ iptables -I in_ping_rules -d 172.16.0.67 -s 172.16.0.68 -p icmp -j REJECT
+
+$ iptables -vnL
+in_ping_rules (0 references) 现在是无效的，
+$ iptables -I INPUT 5 -d 172.16.0.67 -p icmp -j in_ping_rules
+
+$ iptables -vnL
+in_ping_rules (1 references) 1次引用
+
+$ iptables -X in_ping_rules
+调用链一旦被引用是无法删除的
+```
+
+#### 5.3.1、RETURN 返回  
+自定义链的调用跟函数类似，如果在某条链内部直接返回，使用RETURN函数，返回主链
 
 ## 六、保存、重载
+对 iptables 来讲，我们的所有规则都是定义在内存中，重启主机，所有规则全部清空。
+所有规则都是立即送往内核，立即生效的。我们使用命令进行保存、重载。
+
 保存：`iptables-save > /PATH/TO/SOME_RULE_FILE`
 
 重载：`iptabls-restore < /PATH/FROM/SOME_RULE_FILE`
             `-n, --noflush`：不清除原有规则
-            `-t, --test`：仅分析生成规则集，但不提交
-			
+            `-t, --test`：仅分析生成规则集，但不提交		
 
 ### CentOS6
 保存规则：
