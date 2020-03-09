@@ -29,7 +29,7 @@ Ceph的核心组件包括OSD、Monitor和MDS
 | --------------- | -------  | 
 | 192.168.100.236 |    OSD节点   | 
 | 192.168.100.237 |    OSD节点   |
-| 192.168.100.238 |    管理节点、Mon节点   | 
+| 192.168.100.238 |    管理节点、Mon节点、Mgr节点   | 
 
 ### 1.2、设置主机名
 ``` bash
@@ -150,6 +150,7 @@ osd_pool_default_size = 2
 
 ### 2.4、在所有节点安装ceph
 ``` bash
+# 先将ceph repo地址导出，会避免连接超时的问题
 $ export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-mimic/el7/
 $ export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 
@@ -165,6 +166,7 @@ $ mkdir -p /etc/ceph/    # 192.168.100.236
 $ mkdir -p /etc/ceph/    # 192.168.100.237
 $ mkdir -p /etc/ceph/    # 192.168.100.238
 
+# 将配置文件传送到每一个ceph节点
 $ ceph-deploy --overwrite-conf config push ceph-mon1 ceph-osd1 ceph-osd2
 ```
 
@@ -223,14 +225,14 @@ $ ceph -s
 $ ceph osd pool create kube pg_num
 ```
 
-其中：<pg_num> = 128 ,
-关于创建存储池
-确定 pg_num 取值是强制性的，因为不能自动计算。下面是几个常用的值：
-　　*少于 5 个 OSD 时可把 pg_num 设置为 128
-　　*OSD 数量在 5 到 10 个时，可把 pg_num 设置为 512
-　　*OSD 数量在 10 到 50 个时，可把 pg_num 设置为 4096
-　　*OSD 数量大于 50 时，你得理解权衡方法、以及如何自己计算 pg_num 取值
-　　*自己计算 pg_num 取值时可借助 pgcalc 工具
+其中：<pg_num> = 128,  
+关于创建存储池  
+确定 pg_num 取值是强制性的，因为不能自动计算。下面是几个常用的值：  
+　　*少于 5 个 OSD 时可把 pg_num 设置为 128  
+　　*OSD 数量在 5 到 10 个时，可把 pg_num 设置为 512  
+　　*OSD 数量在 10 到 50 个时，可把 pg_num 设置为 4096  
+　　*OSD 数量大于 50 时，你得理解权衡方法、以及如何自己计算 pg_num 取值  
+　　*自己计算 pg_num 取值时可借助 pgcalc 工具  
 随着 OSD 数量的增加，正确的 pg_num 取值变得更加重要，因为它显著地影响着集群的行为、以及出错时的数据持久性（即灾难性事件导致数据丢失的概率）。
 
 ``` bash
@@ -255,7 +257,7 @@ HEALTH_WARN Degraded data redundancy: 128 pgs undersized; OSD count 2 < osd_pool
 $ ceph -s
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
-    health: HEALTH_WARN
+    health: HEALTH_WARN                            # 集群状态已经处于warn状态，需要进行处理
             Degraded data redundancy: 128 pgs undersized
             OSD count 2 < osd_pool_default_size 3
  
@@ -265,9 +267,9 @@ $ ceph -s
     osd: 2 osds: 2 up, 2 in
  
   data:
-    pools:   1 pools, 128 pgs                      # 存储池等信息已经可以显示了
+    pools:   1 pools, 128 pgs                      # 存储池等信息
     objects: 0  objects, 0 B
-    usage:   2.0 GiB used, 96 GiB / 98 GiB avail   # 集群状态信息也已经有了
+    usage:   2.0 GiB used, 96 GiB / 98 GiB avail   # 集群状态信息
     pgs:     128 active+undersized
     
  ```
@@ -339,8 +341,8 @@ $ ceph-deploy admin ceph-mon1 ceph-osd1 ceph-osd2
 $ cp ceph.client.admin.keyring /etc/ceph 
 ```
 
-### 3.4、
-```
+### 3.4、创建osd失败
+``` bash
 $ ceph-deploy osd create --data /dev/sdb ceph-osd2
 [ceph-osd2][ERROR ] RuntimeError: command returned non-zero exit status: 1
 [ceph_deploy.osd][ERROR ] Failed to execute command: /usr/sbin/ceph-volume --cluster ceph lvm create --bluestore --data /dev/sdb
@@ -349,8 +351,9 @@ $ ceph-deploy osd create --data /dev/sdb ceph-osd2
 
 解决错误
 需要将挂载到文件系统磁盘卸载掉
-```
-[root@ceph-osd2 /etc/yum.repos.d]# lsblk
+``` bash
+# 未卸载磁盘之前
+$ lsblk
 NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda               8:0    0   80G  0 disk 
 ├─sda1            8:1    0    1G  0 part /boot
@@ -361,9 +364,10 @@ sda               8:0    0   80G  0 disk
 sdb               8:16   0   50G  0 disk /var/local/osd2
 sr0              11:0    1 1024M  0 rom  
 
-[root@ceph-osd2 /etc/yum.repos.d]# umount /var/local/osd2
+$ umount /var/local/osd2
 
-[root@ceph-osd2 /etc/yum.repos.d]# lsblk
+# 卸载磁盘后，重新加入osd后
+$ lsblk
 NAME                                                                                                  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda                                                                                                     8:0    0   80G  0 disk 
 ├─sda1                                                                                                  8:1    0    1G  0 part /boot
@@ -375,4 +379,25 @@ sdb                                                                             
 └─ceph--8d5d82e2--2f98--48a2--bda1--cb64aea5d328-osd--block--cc35252f--5531--4ad1--9c38--9e52086cde86 253:3    0   49G  0 lvm  
 sr0                                                                                                    11:0    1 1024M  0 rom  
 [root@ceph-osd2 /etc/yum.repos.d]#
+```
+
+### 3.5、集群健康度报错
+``` bash
+$ ceph health
+HEALTH_WARN Degraded data redundancy: 128 pgs undersized; OSD count 2 < osd_pool_default_size 3
+
+$ ceph health detail
+```
+
+解决问题
+首先查看/etc/ceph/ceph.conf,发现未设置osd_pool_default_size属性
+``` bash
+# 将副本数改为2
+$ vim /etc/ceph/ceph.conf
+osd_pool_default_size = 2
+
+# 将修改后的配置文件传送到每一个ceph节点
+$ ceph-deploy --overwrite-conf config push ceph-mon1 ceph-osd1 ceph-osd2
+
+
 ```
