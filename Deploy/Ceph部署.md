@@ -1,4 +1,14 @@
-# Ceph (mimic版) 部署
+---
+title: "Ceph (mimic版) 部署"
+date: "2020-03-05"
+categories:
+    - "技术"
+tags:
+    - "Ceph"
+    - "分布式存储"
+toc: false
+original: true
+---
 
 ## Ceph 概述
 
@@ -108,6 +118,17 @@ gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
 priority=1
 ```
 
+### 1.7、磁盘准备
+在每一个OSD节点上，准备一块50G的裸盘，为了使用ceph的分布式特性，这里我们将磁盘分为5分区，使每个分区激活为一个OSD
+``` bash
+$ parted -s /dev/sdb mklabel gpt
+$ parted -s /dev/sdb mkpart primary 0% 20%
+$ parted -s /dev/sdb mkpart primary 21% 40%
+$ parted -s /dev/sdb mkpart primary 41% 60%
+$ parted -s /dev/sdb mkpart primary 61% 80%
+$ parted -s /dev/sdb mkpart primary 81% 100%
+```
+
 ## 二、配置服务
 ### 2.1、安装ceph-deploy
 ``` bash
@@ -196,27 +217,36 @@ $ ceph -s
 
 ### 2.7、加入OSD节点
 ``` bash
-$ ceph-deploy osd create --data /dev/sdb ceph-osd1
-$ ceph-deploy osd create --data /dev/sdb ceph-osd2
+$ ceph-deploy osd create --data /dev/sdb1 ceph-osd1
+$ ceph-deploy osd create --data /dev/sdb2 ceph-osd1
+$ ceph-deploy osd create --data /dev/sdb3 ceph-osd1
+$ ceph-deploy osd create --data /dev/sdb4 ceph-osd1
+$ ceph-deploy osd create --data /dev/sdb5 ceph-osd1
+$ ceph-deploy osd create --data /dev/sdb1 ceph-osd2
+$ ceph-deploy osd create --data /dev/sdb2 ceph-osd2
+$ ceph-deploy osd create --data /dev/sdb3 ceph-osd2
+$ ceph-deploy osd create --data /dev/sdb4 ceph-osd2
+$ ceph-deploy osd create --data /dev/sdb5 ceph-osd2
 
 $ ceph -s
-[root@ceph-mon1 /opt/ceph-cluster]# ceph -s
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
     health: HEALTH_WARN
-            no active mgr
+            Reduced data availability: 128 pgs inactive, 128 pgs stale
+            Degraded data redundancy: 128 pgs undersized
+            too few PGs per OSD (12 < min 30)
  
   services:
     mon: 1 daemons, quorum ceph-mon1
-    mgr: no daemons active
-    osd: 2 osds: 2 up, 2 in            # 可以看到有2个OSD了
+    mgr: ceph-mon1(active)
+    osd: 10 osds: 10 up, 10 in
  
   data:
-    pools:   0 pools, 0 pgs
+    pools:   1 pools, 128 pgs
     objects: 0  objects, 0 B
-    usage:   0 B used, 0 B / 0 B avail   # 但是关于集群状态信息不显示，这是因为我们需要mgr节点收集信息
-    pgs:     
- 
+    usage:   10 GiB used, 80 GiB / 90 GiB avail
+    pgs:     100.000% pgs not active
+             128 stale+undersized+remapped+peered
 ```
 
 ### 2.8、创建存储池
@@ -274,10 +304,76 @@ $ ceph -s
     
  ```
 
-## 三、错误
-### 3.1、执行ceph-deploy报错
+## 三、高阶使用
+### 3.1、删除osd
 ``` bash
-[root@ceph-mon1 /opt/ceph-cluster]# ceph-deploy
+# 查看osd树
+$ ceph osd tree
+ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF 
+-1       0.09579 root default                               
+-3       0.04790     host ceph-osd1                         
+ 0   hdd 0.04790         osd.0          up  1.00000 1.00000 
+-5       0.04790     host ceph-osd2                         
+ 1   hdd 0.04790         osd.1          up  1.00000 1.00000 
+
+# 将osd移出集群
+$ ceph osd out 0
+marked out osd.0. 
+$ ceph osd out 1
+marked out osd.1. 
+
+# 再次查看osd树
+$ ceph osd tree
+ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF 
+-1       0.09579 root default                               
+-3       0.04790     host ceph-osd1                         
+ 0   hdd 0.04790         osd.0          up        0 1.00000      #发现权重变为0了
+-5       0.04790     host ceph-osd2                         
+ 1   hdd 0.04790         osd.1          up        0 1.00000 
+
+# 在ceph-osd1节点停止osd0
+$ systemctl stop ceph-osd@0
+# 在ceph-osd2节点停止osd1
+$ systemctl stop ceph-osd@1
+
+# 将osd从crush map中移除
+$ ceph osd crush remove osd.0
+removed item id 0 name 'osd.0' from crush map
+$ ceph osd crush remove osd.1
+removed item id 1 name 'osd.1' from crush map
+$ ceph osd tree
+ID CLASS WEIGHT TYPE NAME          STATUS REWEIGHT PRI-AFF 
+-1            0 root default                               
+-3            0     host ceph-osd1                         
+-5            0     host ceph-osd2                         
+ 0            0 osd.0                down        0 1.00000 
+ 1            0 osd.1                down        0 1.00000
+
+# 最后删除osd
+$ ceph auth del osd.0
+updated
+$ ceph osd rm 0
+removed osd.0
+$ ceph auth del osd.1
+updated
+$ ceph osd rm 1
+removed osd.1
+
+# 查看osd树，已经没有这个osd了
+$ ceph osd tree
+ID CLASS WEIGHT TYPE NAME          STATUS REWEIGHT PRI-AFF 
+-1            0 root default                               
+-3            0     host ceph-osd1                         
+-5            0     host ceph-osd2
+
+# 最后使用磁盘的清理命令，将块设备还原为裸盘
+$ ceph-disk zap /dev/sdb
+```
+
+## 四、错误
+### 4.1、执行ceph-deploy报错
+``` bash
+$ ceph-deploy
 Traceback (most recent call last):
   File "/usr/bin/ceph-deploy", line 18, in <module>
     from ceph_deploy.cli import main
@@ -291,8 +387,8 @@ ImportError: No module named pkg_resources
 yum install python-setuptools -y
 ```
 
-### 3.2、安装ceph连接超时
-```
+### 4.2、安装ceph连接超时
+``` log
 [node1][DEBUG ] Downloading packages:
 [node1][WARNIN] No data was received after 300 seconds, disconnecting...
 [node1][INFO  ] Running command: ceph --version
@@ -324,7 +420,7 @@ $ export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 $ ceph-deploy install ceph-mon1 ceph-osd1 ceph-osd2
 ```
 
-### 3.3、ceph -s 执行失败
+### 4.3、ceph -s 执行失败
 ``` bash
 $ ceph -s
 2020-03-06 03:41:43.104 7f5aedc74700 -1 auth: unable to find a keyring on /etc/ceph/ceph.client.admin.keyring,/etc/ceph/ceph.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,: (2) No such file or directory
@@ -341,32 +437,13 @@ $ ceph-deploy admin ceph-mon1 ceph-osd1 ceph-osd2
 $ cp ceph.client.admin.keyring /etc/ceph 
 ```
 
-### 3.4、创建osd失败
+### 4.4、硬盘无法格式化
 ``` bash
-$ ceph-deploy osd create --data /dev/sdb ceph-osd2
-[ceph-osd2][ERROR ] RuntimeError: command returned non-zero exit status: 1
-[ceph_deploy.osd][ERROR ] Failed to execute command: /usr/sbin/ceph-volume --cluster ceph lvm create --bluestore --data /dev/sdb
-[ceph_deploy][ERROR ] GenericError: Failed to create 1 OSDs
-```
+# 磁盘无法进行格式化
+$ mkfs.xfs /dev/sdb
+mkfs.xfs: cannot open /dev/sdb: Device or resource busy
 
-解决错误
-需要将挂载到文件系统磁盘卸载掉
-``` bash
-# 未卸载磁盘之前
-$ lsblk
-NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-sda               8:0    0   80G  0 disk 
-├─sda1            8:1    0    1G  0 part /boot
-└─sda2            8:2    0   79G  0 part 
-  ├─centos-root 253:0    0   50G  0 lvm  /
-  ├─centos-swap 253:1    0    2G  0 lvm  
-  └─centos-home 253:2    0   27G  0 lvm  /home
-sdb               8:16   0   50G  0 disk /var/local/osd2
-sr0              11:0    1 1024M  0 rom  
-
-$ umount /var/local/osd2
-
-# 卸载磁盘后，重新加入osd后
+# 查看磁盘状态
 $ lsblk
 NAME                                                                                                  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda                                                                                                     8:0    0   80G  0 disk 
@@ -376,28 +453,96 @@ sda                                                                             
   ├─centos-swap                                                                                       253:1    0    2G  0 lvm  
   └─centos-home                                                                                       253:2    0   27G  0 lvm  /home
 sdb                                                                                                     8:16   0   50G  0 disk 
-└─ceph--8d5d82e2--2f98--48a2--bda1--cb64aea5d328-osd--block--cc35252f--5531--4ad1--9c38--9e52086cde86 253:3    0   49G  0 lvm  
-sr0                                                                                                    11:0    1 1024M  0 rom  
-[root@ceph-osd2 /etc/yum.repos.d]#
+└─ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad 253:3    0   49G  0 lvm      # 发现ceph的一些服务占用着磁盘
+sr0
+
+# 列出占用
+$ dmsetup ls
+ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad	(253:3)
+centos-home	(253:2)
+centos-swap	(253:1)
+centos-root	(253:0)
+
+# 移除占用
+$ dmsetup remove ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad
+
+# 查看状态
+$ lsblk
+NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda               8:0    0   80G  0 disk 
+├─sda1            8:1    0    1G  0 part /boot
+└─sda2            8:2    0   79G  0 part 
+  ├─centos-root 253:0    0   50G  0 lvm  /
+  ├─centos-swap 253:1    0    2G  0 lvm  
+  └─centos-home 253:2    0   27G  0 lvm  /home
+sdb               8:16   0   50G  0 disk 
+sr0              11:0    1 1024M  0 rom 
 ```
 
-### 3.5、集群健康度报错
+### 4.5、too few PGs per OSD
 ``` bash
-$ ceph health
-HEALTH_WARN Degraded data redundancy: 128 pgs undersized; OSD count 2 < osd_pool_default_size 3
-
-$ ceph health detail
+$ ceph -s
+  cluster:
+    id:     243f3ae6-326a-4af6-9adb-6538defbacb7
+    health: HEALTH_WARN
+            Reduced data availability: 128 pgs inactive, 128 pgs stale
+            Degraded data redundancy: 128 pgs undersized
+            too few PGs per OSD (12 < min 30)
 ```
 
-解决问题
-首先查看/etc/ceph/ceph.conf,发现未设置osd_pool_default_size属性
-``` bash
-# 将副本数改为2
-$ vim /etc/ceph/ceph.conf
-osd_pool_default_size = 2
+关于创建存储池  
+确定 pg_num 取值是强制性的，因为不能自动计算。下面是几个常用的值：  
+　　*少于 5 个 OSD 时可把 pg_num 设置为 128  
+　　*OSD 数量在 5 到 10 个时，可把 pg_num 设置为 512  
+　　*OSD 数量在 10 到 50 个时，可把 pg_num 设置为 4096  
+　　*OSD 数量大于 50 时，你得理解权衡方法、以及如何自己计算 pg_num 取值  
+　　*自己计算 pg_num 取值时可借助 pgcalc 工具  
+随着 OSD 数量的增加，正确的 pg_num 取值变得更加重要，因为它显著地影响着集群的行为、以及出错时的数据持久性（即灾难性事件导致数据丢失的概率）。
 
-# 将修改后的配置文件传送到每一个ceph节点
+解决办法
+``` bash
+# 删除pool重建
+$ ceph osd pool delete kube kube --yes-i-really-really-mean-it
+Error EPERM: pool deletion is disabled; you must first set the mon_allow_pool_delete config option to true before you can destroy a pool
+
+#根据提示需要将mon_allow_pool_delete的value设置为true
+$ vim /opt/ceph-cluster/ceph.conf
+mon_allow_pool_delete = true
+
+# 传送配置文件
 $ ceph-deploy --overwrite-conf config push ceph-mon1 ceph-osd1 ceph-osd2
 
+# 列出所有ceph服务
+$ systemctl list-units --type=service | grep ceph
+ceph-crash.service                 loaded active running Ceph crash dump collector
+ceph-mgr@ceph-mon1.service         loaded active running Ceph cluster manager daemon
+ceph-mon@ceph-mon1.service         loaded active running Ceph cluster monitor daemon
 
+# 重启服务ceph服务
+$ systemctl restart ceph-mgr@ceph-mon1.service
+$ systemctl restart ceph-mon@ceph-mon1.service
+
+# 删除kube存储池
+$ ceph osd pool delete kube kube --yes-i-really-really-mean-it
+pool 'kube' removed
+
+# 重新创建kube存储池
+$ ceph osd pool create kube 512
+pool 'kube' created
+$ ceph  -s
+  cluster:
+    id:     243f3ae6-326a-4af6-9adb-6538defbacb7
+    health: HEALTH_OK               # 集群状态ok
+ 
+  services:
+    mon: 1 daemons, quorum ceph-mon1
+    mgr: ceph-mon1(active)
+    osd: 10 osds: 10 up, 10 in
+ 
+  data:
+    pools:   1 pools, 512 pgs
+    objects: 0  objects, 0 B
+    usage:   10 GiB used, 80 GiB / 90 GiB avail
+    pgs:     100.000% pgs unknown
+             512 unknown
 ```
