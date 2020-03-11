@@ -276,3 +276,9 @@ $ curl http://$POD_IP
 $ kubectl delete -f nginx-pod.yaml
 $ kubectl delete -f ceph-rdb-pvc-test.yaml
 ```
+
+> 参考链接：  
+> 1、https://www.jianshu.com/p/750a8fde377b?tdsourcetag=s_pctim_aiomsg  
+> 2、https://blog.51cto.com/fengjicheng/2401702  
+> 3、https://blog.csdn.net/ygqygq2/article/details/82011235  
+> 
