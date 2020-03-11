@@ -42,7 +42,7 @@ QVFDTlZtaGVDT1ZBRlJBQTlWYzM2VlF1bXFwZVdiZ1k5ZEVqTnc9PQ==
 
 ### 2.1、安装rbd驱动
 ``` yaml
-$ vim rbd-provisioner.yaml
+$ cat >rbd-provisioner.yaml << EOF
 kind: ClusterRole 
 apiVersion: rbac.authorization.k8s.io/v1 
 metadata: 
@@ -64,6 +64,9 @@ rules:
     resources: ["services"] 
     resourceNames: ["kube-dns","coredns"] 
     verbs: ["list", "get"] 
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "delete"]  
 --- 
 kind: ClusterRoleBinding 
 apiVersion: rbac.authorization.k8s.io/v1 
@@ -128,7 +131,7 @@ apiVersion: v1
 kind: ServiceAccount 
 metadata: 
   name: rbd-provisioner
-
+EOF
 
 $ kubectl apply -f rbd-provisioner.yaml
 ```
@@ -240,7 +243,7 @@ spec:
       containerPort: 80
     volumeMounts:
     - name: ceph-rdb
-      mountPath: /usr/share/nginx/html
+      mountPath: /usr/share/nginx/html    # 将主页挂载至ceph
   volumes:
   - name: ceph-rdb
     persistentVolumeClaim:
@@ -249,14 +252,14 @@ EOF
 
 $ kubectl apply -f nginx-pod.yaml
 
-# 查看
+# 查看pod
 $ kubectl get pods -o wide
  
-# 修改文件内容
+# 修改主页内容
 $ kubectl exec -ti nginx-pod1 -- /bin/sh -c 'echo Hello World from Ceph RBD!!! > /usr/share/nginx/html/index.html'
  
 # 访问测试
-$ POD_IP=$(kubectl get pods -o wide | grep nginx-pod1 | awk '{print $(NF-1)}')
+$ POD_IP=$(kubectl get pods -o wide | grep nginx-pod1 | awk '{print $6}')
 $ curl http://$POD_IP
 
 # 清理
