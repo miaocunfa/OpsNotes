@@ -1,5 +1,5 @@
 ---
-title: "Kubernetes使用Ceph共享存储"
+title: "Kubernetes使用Ceph生成动态PV"
 date: "2020-03-11"
 categories:
     - "技术"
@@ -14,6 +14,7 @@ original: true
 ## 一、环境准备
 
 ### 1.1、Ceph版本
+
 ceph mimic(13.2.8)
 ``` bash
 $ ceph version
@@ -21,26 +22,31 @@ ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
 ```
 
 ### 1.2、存储池
+
 ``` bash
 $ ceph osd pool ls
 kube
 ```
 
 ### 1.3、秘钥
+
 ``` bash
 # 生成k8s专用账号秘钥
 $ ceph auth get-or-create client.k8s mon 'allow r' osd 'allow rwx pool=kube' -o ceph.client.k8s.keyring
 $ cat ceph.client.k8s.keyring
 [client.k8s]
 	key = AQCNVmheCOVAFRAA9Vc36VQumqpeWbgY9dEjNw==
-
-$ ceph auth get-key client.k8s | base64
-QVFDTlZtaGVDT1ZBRlJBQTlWYzM2VlF1bXFwZVdiZ1k5ZEVqTnc9PQ==
 ```
 
 ## 二、K8S准备
 
-### 2.1、安装rbd驱动
+### 2.1、为controller-manager提供rbd命令
+
+如果使用kubeadm部署的k8s集群需要进行这些额外的步骤  
+由于使用动态存储时controller-manager需要使用rbd命令创建image  
+所以controller-manager需要使用rbd命令，由于官方controller-manager镜像里没有rbd命令，请执行下列yaml  
+若不配置会无法创建pvc，相关 issue https://github.com/kubernetes/kubernetes/issues/38923  
+
 ``` yaml
 $ cat >rbd-provisioner.yaml << EOF
 kind: ClusterRole 
@@ -122,6 +128,7 @@ spec:
       containers: 
       - name: rbd-provisioner 
         image: quay.mirrors.ustc.edu.cn/external_storage/rbd-provisioner:latest
+        #image: quay.io/external_storage/rbd-provisioner:latest
         env: 
         - name: PROVISIONER_NAME 
           value: ceph.com/rbd 
@@ -137,6 +144,7 @@ $ kubectl apply -f rbd-provisioner.yaml
 ```
 
 ### 2.2、为kubelet提供rbd命令
+
 创建pod时，kubelet需要使用rbd命令去检测和挂载pv对应的ceph image，所以要在所有的worker节点安装ceph客户端ceph-common-13.2.8。
 ``` bash
 $ yum install -y ceph-common-13.2.8
@@ -146,7 +154,8 @@ $ yum install -y ceph-common-13.2.8
 
 ### 3.1、secret
 
-创建 admin secret
+#### 3.1.1、创建admin secret
+在kube-system名称空间创建
 ``` bash
 # 在ceph Mon节点获取admin key
 $ ceph auth get-key client.admin
@@ -155,7 +164,8 @@ $ export CEPH_ADMIN_SECRET='AQCzDGJeEcGGLhAAut/m7RPgV7ZYlLHGhO8sfw=='
 $ kubectl create secret generic ceph-secret --type="kubernetes.io/rbd" --from-literal=key=$CEPH_ADMIN_SECRET --namespace=kube-system
 ```
 
-在default命名空间创建secret
+#### 3.1.2、创建用户secret
+在default名称空间创建
 ``` bash
 # 在ceph Mon节点获取user key
 $ ceph auth get-key client.k8s
@@ -164,7 +174,7 @@ $ export CEPH_KUBE_SECRET='AQCNVmheCOVAFRAA9Vc36VQumqpeWbgY9dEjNw=='
 $ kubectl create secret generic ceph-user-secret --type="kubernetes.io/rbd" --from-literal=key=$CEPH_KUBE_SECRET --namespace=default
 ```
 
-查看secret
+#### 3.1.3、查看secret
 ``` bash
 $ kubectl get secret ceph-user-secret -o yaml
 $ kubectl get secret ceph-secret -n kube-system -o yaml
