@@ -24,14 +24,7 @@ https://prometheus.io/docs/instrumenting/exporters/
 ``` bash
 $ cat /etc/ansible/hosts
 [21]
-192.168.100.211 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.212 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.213 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.214 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.215 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.216 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.217 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.218 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.[211:218] ansible_ssh_user='root' ansible_ssh_pass='test123
 ```
 
 #### 1.1.2、下载 node_exporter
@@ -58,8 +51,7 @@ $ ansible all -m shell -a "cd /opt; tar -zxvf node_exporter-0.18.1.linux-amd64.t
 ``` bash
 $ cat /etc/ansible/hosts
 [redis]
-192.168.100.211 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.212 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.[211:212] ansible_ssh_user='root' ansible_ssh_pass='test123'
 ```
 
 #### 1.2.2、下载 redis_exporter
@@ -86,8 +78,7 @@ $ ansible redis -m shell -a "cd /opt; tar -zxvf redis_exporter-v1.3.4.linux-amd6
 ``` bash
 $ cat /etc/ansible/hosts
 [mysql]
-192.168.100.212 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.213 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.[212:213] ansible_ssh_user='root' ansible_ssh_pass='test123'
 ```
 
 #### 1.3.1、下载 mysqld_exporter
@@ -114,9 +105,7 @@ $ ansible mysql -m shell -a "cd /opt; tar -zxvf mysqld_exporter-0.12.1.linux-amd
 ``` bash
 $ cat /etc/ansible/hosts
 [es]
-192.168.100.211 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.212 ansible_ssh_user='root' ansible_ssh_pass='test123'
-192.168.100.213 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.[211:213] ansible_ssh_user='root' ansible_ssh_pass='test123'
 ```
 
 #### 1.4.2、下载 elasticsearch_exporter

@@ -91,4 +91,92 @@ NAME                               READY   STATUS              RESTARTS   AGE
 rbd-provisioner-5b7b9c7b6c-2qn6q   1/1     Running             0          33s
 ```
 
-### 3、
+### 3、Statefulset 挂在Ceph 失败
+#### 错误信息
+``` bash
+$ kubectl get pods 
+NAME                               READY   STATUS              RESTARTS   AGE
+consul-0                           0/1     ContainerCreating   0          15h
+
+Events:
+  Type     Reason       Age                  From             Message
+  ----     ------       ----                 ----             -------
+  Warning  FailedMount  46m (x304 over 15h)  kubelet, mongo1  Unable to attach or mount volumes: unmounted volumes=[consul-ceph-pvc], unattached volumes=[consul-ceph-pvc default-token-8wntp]: timed out waiting for the condition
+  Warning  FailedMount  12m (x83 over 14h)   kubelet, mongo1  Unable to attach or mount volumes: unmounted volumes=[consul-ceph-pvc], unattached volumes=[default-token-8wntp consul-ceph-pvc]: timed out waiting for the condition
+  Warning  FailedMount  56s (x455 over 15h)  kubelet, mongo1  MountVolume.WaitForAttach failed for volume "pvc-025063c5-3a6e-4e34-a950-f72dee2f8b9b" : fail to check rbd image status with: (executable file not found in $PATH), rbd output: ()
+```
+
+#### 错误解决
+node节点未安装ceph-common
+
+ansible配置
+``` bash
+$ cat /etc/ansible/hosts
+[k8s-master]
+192.168.100.231 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.232 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.236 ansible_ssh_user='root' ansible_ssh_pass='test123'
+
+[k8s-node]
+192.168.100.225 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.226 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.227 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.228 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.234 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.237 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.238 ansible_ssh_user='root' ansible_ssh_pass='test123'
+192.168.100.239 ansible_ssh_user='root' ansible_ssh_pass='test123'
+```
+
+拷贝ceph.repo至每一个节点
+```
+$ ansible k8s-node -m copy -a "src=/etc/yum.repos.d/ceph.repo dest=/etc/yum.repos.d/ceph.repo"
+```
+
+安装ceph-common
+```
+$ ansible k8s-node -m shell -a "yum install -y ceph-common"
+$ ansible k8s-master -m shell -a "yum install -y ceph-common"
+```
+
+验证问题
+```
+$ kubectl get pods
+NAME                               READY   STATUS    RESTARTS   AGE
+consul-0                           1/1     Running   0          16h
+consul-1                           1/1     Running   0          9m54s
+consul-2                           1/1     Running   0          <invalid>
+```
+
+### 4、age invalid
+#### 错误信息
+发现pod的age不对，显示invalid
+``` bash
+kubectl get pods
+NAME                               READY   STATUS    RESTARTS   AGE
+consul-0                           1/1     Running   0          16h
+consul-1                           1/1     Running   0          10m
+consul-2                           1/1     Running   0          <invalid>
+```
+
+#### 错误解决
+``` bash
+# apiserver 的时间
+$ date
+Wed Mar 18 10:34:01 CST 2020
+
+# node 的时间
+$ date
+Tue Mar 17 22:34:01 EDT 2020
+
+# 发现问题是时间不同步
+# 同步所有主机时间
+$ ansible all -m shell -a "ntpdate ntp1.aliyun.com"
+
+# 验证
+$ kubectl get pods 
+NAME                               READY   STATUS    RESTARTS   AGE
+consul-0                           1/1     Running   0          17h
+consul-1                           1/1     Running   0          30m
+consul-2                           1/1     Running   0          18s
+```
