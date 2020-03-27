@@ -4,7 +4,7 @@ date: "2020-03-27"
 categories:
     - "技术"
 tags:
-    - "Haproxy"
+    - "haproxy"
     - "负载均衡"
 toc: false
 indent: false
@@ -38,7 +38,7 @@ Known bugs: http://www.haproxy.org/bugs/bugs-2.1.3.html
 
 ## 四、示例配置文件
 ``` zsh
-➜  vim 
+➜  vim haproxy.cnf
 global
     log     127.0.0.1  local0 info
     log     127.0.0.1  local1 notice
@@ -81,4 +81,9 @@ listen rabbitmq_cluster
     server  MQ1  192.168.100.217:5672  check  inter  5000  rise  2  fall  3
     server  MQ2  192.168.100.218:5672  check  inter  5000  rise  2  fall  3
     server  MQ3  192.168.100.219:5672  check  inter  5000  rise  2  fall  3
+```
+
+## 五、启动服务
+``` zsh
+➜  haproxy -f haproxy.cnf
 ```
