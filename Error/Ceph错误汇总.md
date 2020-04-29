@@ -2,7 +2,7 @@
 ### 1、执行ceph-deploy报错
 #### 错误信息
 ``` bash
-$ ceph-deploy
+➜  ceph-deploy
 Traceback (most recent call last):
   File "/usr/bin/ceph-deploy", line 18, in <module>
     from ceph_deploy.cli import main
@@ -13,7 +13,7 @@ ImportError: No module named pkg_resources
 
 #### 解决办法
 ``` bash
-yum install python-setuptools -y
+➜  yum install python-setuptools -y
 ```
 
 ### 2、安装ceph连接超时
@@ -44,42 +44,42 @@ yum install python-setuptools -y
 
 #### 解决方法
 ``` bash
-$ export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-mimic/el7/
-$ export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
+➜  export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-mimic/el7/
+➜  export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 
-$ ceph-deploy install ceph-mon1 ceph-osd1 ceph-osd2
+➜  ceph-deploy install ceph-mon1 ceph-osd1 ceph-osd2
 ```
 
 ### 3、ceph -s 执行失败
 #### 错误信息
 ``` bash
-$ ceph -s
+➜  ceph -s
 2020-03-06 03:41:43.104 7f5aedc74700 -1 auth: unable to find a keyring on /etc/ceph/ceph.client.admin.keyring,/etc/ceph/ceph.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,: (2) No such file or directory
 2020-03-06 03:41:43.104 7f5aedc74700 -1 monclient: ERROR: missing keyring, cannot use cephx for authentication
 ```
 
 #### 解决方法
 ``` bash
-$ cd /opt/ceph-cluster
+➜  cd /opt/ceph-cluster
 
 # 添加admin key至/etc/ceph
-$ ceph-deploy admin ceph-mon1 ceph-osd1 ceph-osd2
+➜  ceph-deploy admin ceph-mon1 ceph-osd1 ceph-osd2
 或
-$ cp ceph.client.admin.keyring /etc/ceph 
+➜  cp ceph.client.admin.keyring /etc/ceph 
 ```
 
 ### 4、硬盘无法格式化
 #### 错误信息
 ``` bash
 # 磁盘无法进行格式化
-$ mkfs.xfs /dev/sdb
+➜  mkfs.xfs /dev/sdb
 mkfs.xfs: cannot open /dev/sdb: Device or resource busy
 ```
 
 #### 错误解决
 ``` bash
 # 查看磁盘状态
-$ lsblk
+➜  lsblk
 NAME                                                                                                  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda                                                                                                     8:0    0   80G  0 disk 
 ├─sda1                                                                                                  8:1    0    1G  0 part /boot
@@ -92,17 +92,17 @@ sdb                                                                             
 sr0
 
 # 列出占用
-$ dmsetup ls
+➜  dmsetup ls
 ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad	(253:3)
 centos-home	(253:2)
 centos-swap	(253:1)
 centos-root	(253:0)
 
 # 移除占用
-$ dmsetup remove ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad
+➜  dmsetup remove ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad
 
 # 查看状态
-$ lsblk
+➜  lsblk
 NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda               8:0    0   80G  0 disk 
 ├─sda1            8:1    0    1G  0 part /boot
@@ -117,7 +117,7 @@ sr0              11:0    1 1024M  0 rom
 ### 5、too few PGs per OSD
 #### 错误信息
 ``` bash
-$ ceph -s
+➜  ceph -s
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
     health: HEALTH_WARN
@@ -138,34 +138,34 @@ $ ceph -s
 #### 解决办法
 ``` bash
 # 删除pool重建
-$ ceph osd pool delete kube kube --yes-i-really-really-mean-it
+➜  ceph osd pool delete kube kube --yes-i-really-really-mean-it
 Error EPERM: pool deletion is disabled; you must first set the mon_allow_pool_delete config option to true before you can destroy a pool
 
 #根据提示需要将mon_allow_pool_delete的value设置为true
-$ vim /opt/ceph-cluster/ceph.conf
+➜  vim /opt/ceph-cluster/ceph.conf
 mon_allow_pool_delete = true
 
 # 传送配置文件
-$ ceph-deploy --overwrite-conf config push ceph-mon1 ceph-osd1 ceph-osd2
+➜  ceph-deploy --overwrite-conf config push ceph-mon1 ceph-osd1 ceph-osd2
 
 # 列出所有ceph服务
-$ systemctl list-units --type=service | grep ceph
+➜  systemctl list-units --type=service | grep ceph
 ceph-crash.service                 loaded active running Ceph crash dump collector
 ceph-mgr@ceph-mon1.service         loaded active running Ceph cluster manager daemon
 ceph-mon@ceph-mon1.service         loaded active running Ceph cluster monitor daemon
 
 # 重启服务ceph服务
-$ systemctl restart ceph-mgr@ceph-mon1.service
-$ systemctl restart ceph-mon@ceph-mon1.service
+➜  systemctl restart ceph-mgr@ceph-mon1.service
+➜  systemctl restart ceph-mon@ceph-mon1.service
 
 # 删除kube存储池
-$ ceph osd pool delete kube kube --yes-i-really-really-mean-it
+➜  ceph osd pool delete kube kube --yes-i-really-really-mean-it
 pool 'kube' removed
 
 # 重新创建kube存储池
-$ ceph osd pool create kube 512
+➜  ceph osd pool create kube 512
 pool 'kube' created
-$ ceph  -s
+➜  ceph  -s
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
     health: HEALTH_OK               # 集群状态ok
@@ -186,20 +186,20 @@ $ ceph  -s
 ### 6、application not enabled on 1 pool
 #### 错误信息
 ``` bash
-$ ceph health
+➜  ceph health
 HEALTH_WARN application not enabled on 1 pool(s)
 ```
 
 #### 错误解决
 ``` bash
-$ ceph health detail
+➜  ceph health detail
 HEALTH_WARN application not enabled on 1 pool(s)
 POOL_APP_NOT_ENABLED application not enabled on 1 pool(s)
     application not enabled on pool 'kube'
     use 'ceph osd pool application enable <pool-name> <app-name>', where <app-name> is 'cephfs', 'rbd', 'rgw', or freeform for custom applications.
-$ ceph osd pool application enable kube rbd
+➜  ceph osd pool application enable kube rbd
 enabled application 'rbd' on pool 'kube'
-$ ceph health
+➜  ceph health
 HEALTH_OK
 ```
 
@@ -234,8 +234,85 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
 #### 错误解决
 ``` bash
 # 安装epel仓库
-$ ansible k8s-node -m copy -a "src=/etc/yum.repos.d/aliyun.repo dest=/etc/yum.repos.d/aliyun.repo"
+➜  ansible k8s-node -m copy -a "src=/etc/yum.repos.d/aliyun.repo dest=/etc/yum.repos.d/aliyun.repo"
 
 # 安装ceph-common
-$ ansible k8s-node -m shell -a "yum install -y ceph-common"
+➜  ansible k8s-node -m shell -a "yum install -y ceph-common"
+```
+
+### 8、修复down掉的ceph osd
+#### 错误信息
+``` zsh
+➜  ceph -s
+  cluster:
+    id:     243f3ae6-326a-4af6-9adb-6538defbacb7
+    health: HEALTH_ERR
+            2/99 objects unfound (2.020%)
+            Reduced data availability: 1 pg inactive, 1 pg peering, 1 pg stale
+            Possible data damage: 2 pgs recovery_unfound
+            Degraded data redundancy: 4/198 objects degraded (2.020%), 2 pgs degraded
+            16 slow ops, oldest one blocked for 47468 sec, daemons [osd.4,osd.8] have slow ops.
+            mon ceph-mon1 is low on available space
+ 
+  services:
+    mon: 1 daemons, quorum ceph-mon1
+    mgr: ceph-mon1(active)
+    osd: 10 osds: 7 up, 7 in      # 10个OSD，有三个不在集群内，已经down掉了。
+ 
+  data:
+    pools:   1 pools, 512 pgs
+    objects: 99  objects, 140 MiB
+    usage:   7.5 GiB used, 56 GiB / 63 GiB avail
+    pgs:     0.195% pgs not active
+             4/198 objects degraded (2.020%)
+             2/99 objects unfound (2.020%)
+             509 active+clean
+             2   active+recovery_unfound+degraded
+             1   stale+peering
+ 
+  io:
+    client:   28 KiB/s wr, 0 op/s rd, 2 op/s wr
+➜  ceph osd tree
+ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF 
+-1       0.08789 root default                               
+-3       0.04395     host ceph-osd1                         
+ 0   hdd 0.00879         osd.0          up  1.00000 1.00000 
+ 1   hdd 0.00879         osd.1          up  1.00000 1.00000 
+ 2   hdd 0.00879         osd.2        down        0 1.00000 
+ 3   hdd 0.00879         osd.3        down        0 1.00000 
+ 4   hdd 0.00879         osd.4          up  1.00000 1.00000 
+-5       0.04395     host ceph-osd2                         
+ 5   hdd 0.00879         osd.5          up  1.00000 1.00000 
+ 6   hdd 0.00879         osd.6          up  1.00000 1.00000 
+ 7   hdd 0.00879         osd.7          up  1.00000 1.00000 
+ 8   hdd 0.00879         osd.8          up  1.00000 1.00000 
+ 9   hdd 0.00879         osd.9        down        0 1.00000
+```
+
+#### 错误分析
+```
+  状态说明：
+    集群内(in)
+    集群外(out)
+    活着且在运行(up)
+    挂了且不再运行(down)
+
+  说明：
+    如果OSD活着，它也可以是 in或者 out 集群。如果它以前是 in 但最近 out 了， Ceph 会把其归置组迁移到其他OSD 。
+    如果OSD out 了， CRUSH 就不会再分配归置组给它。如果它挂了（ down ）其状态也应该是 out 。
+    如果OSD 状态为 down 且 in ，必定有问题，而且集群处于非健康状态。
+```
+
+#### 错误解决
+``` zsh
+# 先拉起所有osd
+# ceph-osd1
+➜  systemctl start ceph-osd@2
+➜  systemctl start ceph-osd@3
+
+# ceph-osd2
+➜  systemctl start ceph-osd@9
+
+ceph-deploy osd activate  ceph-osd1:/dev/sdb1 ceph-osd1:/dev/sdb2 ceph-osd1:/dev/sdb3 ceph-osd1:/dev/sdb4 ceph-osd1:/dev/sdb5 ceph-osd2:/dev/sdb1 ceph-osd2:/dev/sdb2 ceph-osd2:/dev/sdb3 ceph-osd2:/dev/sdb4 ceph-osd2:/dev/sdb5
+
 ```

@@ -87,7 +87,8 @@ backend webserver                           # webserver作用域
 　　mode http
 　　balance roundrobin                      # balance roundrobin 负载轮询，balance source 保存session值，支持static-rr，leastconn，first，uri等参数
 　　option httpchk /index.html HTTP/1.0     # 健康检查, 检测文件，如果分发到后台index.html访问不到就不再分发给它
-　　server web1 10.16.0.9:8085 cookie 1 weight 5 check inter 2000 rise 2 fall 3
+
+　　server web1 10.16.0.9:8085  cookie 1 weight 5 check inter 2000 rise 2 fall 3
 　　server web2 10.16.0.10:8085 cookie 2 weight 3 check inter 2000 rise 2 fall 3
     # cookie 1表示serverid为1
     # weight代表权重
