@@ -112,6 +112,18 @@ sda               8:0    0   80G  0 disk
   └─centos-home 253:2    0   27G  0 lvm  /home
 sdb               8:16   0   50G  0 disk 
 sr0              11:0    1 1024M  0 rom 
+
+# 格式化硬盘
+➜  mkfs.xfs -f /dev/sdb
+meta-data=/dev/sdb               isize=512    agcount=4, agsize=3276800 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=0, sparse=0
+data     =                       bsize=4096   blocks=13107200, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+log      =internal log           bsize=4096   blocks=6400, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
 ```
 
 ### 5、too few PGs per OSD
@@ -313,6 +325,32 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 # ceph-osd2
 ➜  systemctl start ceph-osd@9
 
-ceph-deploy osd activate  ceph-osd1:/dev/sdb1 ceph-osd1:/dev/sdb2 ceph-osd1:/dev/sdb3 ceph-osd1:/dev/sdb4 ceph-osd1:/dev/sdb5 ceph-osd2:/dev/sdb1 ceph-osd2:/dev/sdb2 ceph-osd2:/dev/sdb3 ceph-osd2:/dev/sdb4 ceph-osd2:/dev/sdb5
+➜  ceph-volume lvm activate --all
 
+# 从Ceph版本13.0.0开始，ceph-disk已弃用
+# 从搜索引擎搜索到以下激活osd的操作均已失效
+# 1、ceph-deploy osd activate  ceph-osd1:/dev/sdb1 ceph-osd1:/dev/sdb2 ceph-osd1:/dev/sdb3 ceph-osd1:/dev/sdb4 ceph-osd1:/dev/sdb5 ceph-osd2:/dev/sdb1 ceph-osd2:/dev/sdb2 ceph-osd2:/dev/sdb3 ceph-osd2:/dev/sdb4 ceph-osd2:/dev/sdb5
+# 2、ceph-disk activate-all
+```
+
+### 9、磁盘无法加入
+#### 错误信息
+``` log
+➜  ceph-deploy osd create --data /dev/sdb1 ceph-osd
+[ceph-osd][WARNIN] Running command: /bin/ceph-authtool --gen-print-key
+[ceph-osd][WARNIN] Running command: /bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring -i - osd new 08864eab-9a28-47ce-8ab7-829f6624d8c7
+[ceph-osd][WARNIN]  stderr: [errno 1] error connecting to the cluster
+[ceph-osd][WARNIN] -->  RuntimeError: Unable to create a new OSD id
+[ceph-osd][ERROR ] RuntimeError: command returned non-zero exit status: 1
+[ceph_deploy.osd][ERROR ] Failed to execute command: /usr/sbin/ceph-volume --cluster ceph lvm create --bluestore --data /dev/sdb1
+[ceph_deploy][ERROR ] GenericError: Failed to create 1 OSDs
+```
+
+#### 错误解决
+``` bash
+# 安装epel仓库
+➜  ansible k8s-node -m copy -a "src=/etc/yum.repos.d/aliyun.repo dest=/etc/yum.repos.d/aliyun.repo"
+
+# 安装ceph-common
+➜  ansible k8s-node -m shell -a "yum install -y ceph-common"
 ```
