@@ -348,9 +348,201 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 
 #### 错误解决
 ``` bash
-# 安装epel仓库
-➜  ansible k8s-node -m copy -a "src=/etc/yum.repos.d/aliyun.repo dest=/etc/yum.repos.d/aliyun.repo"
 
-# 安装ceph-common
-➜  ansible k8s-node -m shell -a "yum install -y ceph-common"
+```
+
+### 10、对象存储删除pool
+
+#### 错误信息
+
+``` bash
+# 删除错误
+➜  rados rmpool .rgw.root
+WARNING:
+  This will PERMANENTLY DESTROY an entire pool of objects with no way back.
+  To confirm, pass the pool to remove twice, followed by     # 由于删除是非常危险的操作，请确认两遍名字
+  --yes-i-really-really-mean-it                              # 并且增加确认选项，表明我真的想这样做
+
+# 确认选项增加后报错
+➜  rados rmpool .rgw.root .rgw.root --yes-i-really-really-mean-it
+pool .rgw.root could not be removed
+Check your monitor configuration - `mon allow pool delete` is set to false by default, change it to true to allow deletion of pools          # 需要在ceph配置文件，ceph-mon的配置中加入允许
+error 1: (1) Operation not permitted
+```
+
+#### 解决错误
+
+``` bash
+# 修改ceph.conf
+➜  vim /opt/ceph-cluster/ceph.conf
+mon_allow_pool_delete = true
+
+# 推送配置文件
+➜  ceph-deploy --overwrite-conf config push ceph-mon node234
+
+# 重启服务
+➜  systemctl restart ceph-mon@ceph-mon
+
+# 删除pool
+➜  rados rmpool .rgw.root .rgw.root --yes-i-really-really-mean-it
+successfully deleted pool .rgw.root
+```
+
+### 11、对象存储创建pool -- pg数量不足
+
+#### 错误信息
+
+``` bash
+➜  cat ceph-rgw-pool.sh
+#!/bin/bash
+
+PG_NUM=128
+PGP_NUM=128
+SIZE=3
+
+pool='.rgw
+.rgw.root
+.rgw.control
+.rgw.gc
+.rgw.buckets
+.rgw.buckets.index
+.rgw.buckets.extra
+.log
+.intent-log
+.usage
+.users
+.users.email
+.users.swift
+.users.uid'
+
+for i in $(echo $pool)
+do
+    ceph osd pool create $i $PG_NUM
+
+    sleep 1
+
+    ceph osd pool set $i size    $SIZE
+    ceph osd pool set $i pgp_num $PGP_NUM
+done
+
+➜  ./ceph-rgw-pool.sh
+pool '.rgw' created
+set pool 6 size to 3
+set pool 6 pgp_num to 128
+pool '.rgw.root' created
+Error ERANGE: pool id 7 pg_num 128 size 3 would mean 816 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+set pool 7 pgp_num to 128
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.rgw.control'
+Error ENOENT: unrecognized pool '.rgw.control'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.rgw.gc'
+Error ENOENT: unrecognized pool '.rgw.gc'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.rgw.buckets'
+Error ENOENT: unrecognized pool '.rgw.buckets'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.rgw.buckets.index'
+Error ENOENT: unrecognized pool '.rgw.buckets.index'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.rgw.buckets.extra'
+Error ENOENT: unrecognized pool '.rgw.buckets.extra'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.log'
+Error ENOENT: unrecognized pool '.log'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.intent-log'
+Error ENOENT: unrecognized pool '.intent-log'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.usage'
+Error ENOENT: unrecognized pool '.usage'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.users'
+Error ENOENT: unrecognized pool '.users'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.users.email'
+Error ENOENT: unrecognized pool '.users.email'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.users.swift'
+Error ENOENT: unrecognized pool '.users.swift'
+Error ERANGE:  pg_num 128 size 2 would mean 944 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+Error ENOENT: unrecognized pool '.users.uid'
+Error ENOENT: unrecognized pool '.users.uid'
+```
+
+#### 错误分析
+
+报错原因：每个osd最多只支持250个pg，有3个osd，总共有750pg。现在新建了14个池，每个池占用的pg数为(750 / 14). 
+         pool size 设置为3，我们有3个副本，pg_num = (250 * 3 / 14 / 3)
+
+处理办法：1、删除之前的池，然后修改脚本把pg数目设置小一点，再创建对象池。
+         2、为了以后的使用我们每个池创建10个pg
+
+#### 错误解决
+
+``` bash
+# 列出已经创建的pool
+➜  rados lspools
+default.rgw.control
+default.rgw.meta
+default.rgw.log
+.rgw
+.rgw.root
+
+# 删除已经创建的pool
+➜  rados rmpool .rgw.root .rgw.root --yes-i-really-really-mean-it
+➜  rados rmpool .rgw .rgw --yes-i-really-really-mean-it
+
+# 修改脚本 pg大小
+➜  vim ceph-rgw-pool.sh
+PG_NUM=10
+PGP_NUM=10
+SIZE=3
+
+# 重新创建pool
+➜  ./ceph-rgw-pool.sh
+
+# 列出pool
+➜  rados lspools
+default.rgw.control
+default.rgw.meta
+default.rgw.log
+.rgw
+.rgw.root
+.rgw.control
+.rgw.gc
+.rgw.buckets
+.rgw.buckets.index
+.rgw.buckets.extra
+.log
+.intent-log
+.usage
+.users
+.users.email
+.users.swift
+.users.uid
+```
+
+### 12、对象存储API -- s3cmd 创建 bucket
+
+#### 错误信息
+
+``` bash
+➜  s3cmd mb s3://first-bucket
+ERROR: S3 error: 400 (InvalidLocationConstraint): The specified location-constraint is not valid
+```
+
+#### 错误解决
+
+``` bash
+➜  vim /root/.s3cfg
+bucket_location = ZH    # 把ZH改成US
+
+# 创建bucket
+➜  s3cmd mb s3://first-bucket
+Bucket 's3://first-bucket/' created
+
+# 列出bucket
+➜  s3cmd ls
+2020-05-14 07:14  s3://first-bucket
 ```

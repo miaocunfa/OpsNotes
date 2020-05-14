@@ -17,6 +17,7 @@ Ceph是一个可靠地、自动重均衡、自动恢复的分布式存储系统�
 Ceph相比其它存储的优势点在于它不单单是存储，同时还充分利用了存储节点上的计算能力，在存储每一个数据时，都会通过计算得出该数据存储的位置，尽量将数据分布均衡，同时由于Ceph的良好设计，采用了CRUSH算法、HASH环等方法，使得它不存在传统的单点故障的问题，且随着规模的扩大性能并不会受到影响。
 
 ### 支持类型
+
 **对象存储**：即radosgw，兼容S3接口。通过rest api上传、下载文件。
 
 **文件系统**：posix接口。可以将ceph集群看做一个共享文件系统挂载到本地。
@@ -34,7 +35,9 @@ Ceph的核心组件包括OSD、Monitor和MDS
 **MDS**：主要保存的文件系统服务的元数据，但对象存储和块存储设备是不需要使用该服务的
 
 ## 一、环境准备
+
 ### 1.1、机器规划
+
 |       节点      |   属性   | 
 | --------------- | -------  | 
 | 192.168.100.236 |    OSD节点   | 
@@ -42,6 +45,7 @@ Ceph的核心组件包括OSD、Monitor和MDS
 | 192.168.100.238 |    管理节点、Mon节点、Mgr节点   | 
 
 ### 1.2、设置主机名
+
 ``` bash
 # 192.168.100.236
 ➜  hostnamectl set-hostname ceph-osd1
@@ -57,6 +61,7 @@ Ceph的核心组件包括OSD、Monitor和MDS
 ```
 
 ### 1.3、host文件
+
 ``` bash
 ➜  vim /etc/hosts
 192.168.100.236 ceph-osd1
@@ -65,6 +70,7 @@ Ceph的核心组件包括OSD、Monitor和MDS
 ```
 
 ### 1.4、关闭防火墙、Selinux
+
 ``` bash
 # 所有主机都执行
 # 防火墙
@@ -78,6 +84,7 @@ SELINUX=disable
 ```
 
 ### 1.5、免密认证
+
 ``` bash
 # 192.168.100.238
 ➜  ssh-keygen
@@ -86,7 +93,9 @@ SELINUX=disable
 ```
 
 ### 1.6、repo仓库
+
 为了保证速度，我们使用阿里云的yum源
+
 ``` bash
 # 所有主机都执行
 ➜  vim /etc/yum.repos.d/ceph.repo
@@ -119,7 +128,9 @@ priority=1
 ```
 
 ### 1.7、磁盘准备
+
 在每一个OSD节点上，准备一块50G的裸盘，为了使用ceph的分布式特性，这里我们将磁盘分为5分区，使每个分区激活为一个OSD
+
 ``` bash
 ➜  parted -s /dev/sdb mklabel gpt
 ➜  parted -s /dev/sdb mkpart primary 0% 20%
@@ -130,14 +141,18 @@ priority=1
 ```
 
 ## 二、配置服务
+
 ### 2.1、安装ceph-deploy
+
 ``` bash
 # 192.168.100.238
 ➜  yum install ceph-deploy -y
 ```
 
 ### 2.2、生成Monitor的配置文件
+
 Monitor可以为单节点，也可以组成集群来满足高可用，节点个数为奇数。
+
 ``` bash
 # 192.168.100.238
 ➜  mkdir /opt/ceph-cluster && cd /opt/ceph-cluster 
@@ -162,14 +177,17 @@ auth_client_required = cephx
 ```
 
 ### 2.3、修改副本数
+
 在ceph.conf文件末行添加配置
 将副本数修改为2(默认为3)，这样只需要两个osd也能达到active+clean状态
+
 ``` bash
 ➜  vim ceph.conf
 osd_pool_default_size = 2
 ```
 
 ### 2.4、在所有节点安装ceph
+
 ``` bash
 # 先将ceph repo地址导出，会避免连接超时的问题
 ➜  export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-mimic/el7/
@@ -182,6 +200,7 @@ ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
 ```
 
 ### 2.5、传送conf
+
 ``` bash
 ➜  mkdir -p /etc/ceph/    # 192.168.100.236
 ➜  mkdir -p /etc/ceph/    # 192.168.100.237
@@ -192,6 +211,7 @@ ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
 ```
 
 ### 2.6、初始化mon节点
+
 ``` bash
 ➜  ceph-deploy mon create-initial
 # 配置admin key
@@ -202,20 +222,21 @@ ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
     health: HEALTH_OK
- 
+
   services:
     mon: 1 daemons, quorum ceph-mon1     # 成功启动1个MON节点
     mgr: no daemons active
     osd: 0 osds: 0 up, 0 in
- 
+
   data:
     pools:   0 pools, 0 pgs
     objects: 0  objects, 0 B
     usage:   0 B used, 0 B / 0 B avail
-    pgs: 
+    pgs:
 ```
 
 ### 2.7、加入OSD节点
+
 ``` bash
 ➜  ceph-deploy osd create --data /dev/sdb1 ceph-osd1
 ➜  ceph-deploy osd create --data /dev/sdb2 ceph-osd1
@@ -235,12 +256,12 @@ ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
             Reduced data availability: 128 pgs inactive, 128 pgs stale
             Degraded data redundancy: 128 pgs undersized
             too few PGs per OSD (12 < min 30)
- 
+
   services:
     mon: 1 daemons, quorum ceph-mon1
     mgr: ceph-mon1(active)
     osd: 10 osds: 10 up, 10 in
- 
+
   data:
     pools:   1 pools, 128 pgs
     objects: 0  objects, 0 B
@@ -250,6 +271,7 @@ ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
 ```
 
 ### 2.8、创建存储池
+
 ``` bash
 # 创建存储池
 ➜  ceph osd pool create kube pg_num
@@ -272,6 +294,7 @@ kube
 ```
 
 ### 2.9、加入Mgr节点
+
 ``` bash
 # 使用ceph health命令查看集群健康，提示没有激活的mgr节点
 ➜  ceph health
@@ -279,7 +302,7 @@ HEALTH_WARN no active mgr
 ```
 
 ``` bash
-➜  ceph-deploy mgr create ceph-mon1 
+➜  ceph-deploy mgr create ceph-mon1
 
 ➜  ceph health
 HEALTH_WARN Degraded data redundancy: 128 pgs undersized; OSD count 2 < osd_pool_default_size 3
@@ -290,31 +313,32 @@ HEALTH_WARN Degraded data redundancy: 128 pgs undersized; OSD count 2 < osd_pool
     health: HEALTH_WARN                            # 集群状态已经处于warn状态，需要进行处理
             Degraded data redundancy: 128 pgs undersized
             OSD count 2 < osd_pool_default_size 3
- 
+
   services:
     mon: 1 daemons, quorum ceph-mon1
     mgr: ceph-mon1(active)
     osd: 2 osds: 2 up, 2 in
- 
+
   data:
     pools:   1 pools, 128 pgs                      # 存储池等信息
     objects: 0  objects, 0 B
     usage:   2.0 GiB used, 96 GiB / 98 GiB avail   # 集群状态信息
     pgs:     128 active+undersized
-    
  ```
 
 ## 三、高阶使用
+
 ### 3.1、删除osd
+
 ``` bash
 # 查看osd树
 ➜  ceph osd tree
-ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF 
--1       0.09579 root default                               
--3       0.04790     host ceph-osd1                         
- 0   hdd 0.04790         osd.0          up  1.00000 1.00000 
--5       0.04790     host ceph-osd2                         
- 1   hdd 0.04790         osd.1          up  1.00000 1.00000 
+ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
+-1       0.09579 root default
+-3       0.04790     host ceph-osd1
+ 0   hdd 0.04790         osd.0          up  1.00000 1.00000
+-5       0.04790     host ceph-osd2
+ 1   hdd 0.04790         osd.1          up  1.00000 1.00000
 
 # 将osd移出集群
 ➜  ceph osd out 0
@@ -324,12 +348,12 @@ marked out osd.1.
 
 # 再次查看osd树
 ➜  ceph osd tree
-ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF 
--1       0.09579 root default                               
--3       0.04790     host ceph-osd1                         
+ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
+-1       0.09579 root default
+-3       0.04790     host ceph-osd1
  0   hdd 0.04790         osd.0          up        0 1.00000      #发现权重变为0了
--5       0.04790     host ceph-osd2                         
- 1   hdd 0.04790         osd.1          up        0 1.00000 
+-5       0.04790     host ceph-osd2
+ 1   hdd 0.04790         osd.1          up        0 1.00000
 
 # 在ceph-osd1节点停止osd0
 ➜  systemctl stop ceph-osd@0
@@ -342,11 +366,11 @@ removed item id 0 name 'osd.0' from crush map
 ➜  ceph osd crush remove osd.1
 removed item id 1 name 'osd.1' from crush map
 ➜  ceph osd tree
-ID CLASS WEIGHT TYPE NAME          STATUS REWEIGHT PRI-AFF 
--1            0 root default                               
--3            0     host ceph-osd1                         
--5            0     host ceph-osd2                         
- 0            0 osd.0                down        0 1.00000 
+ID CLASS WEIGHT TYPE NAME          STATUS REWEIGHT PRI-AFF
+-1            0 root default
+-3            0     host ceph-osd1
+-5            0     host ceph-osd2
+ 0            0 osd.0                down        0 1.00000
  1            0 osd.1                down        0 1.00000
 
 # 最后删除osd
@@ -361,9 +385,9 @@ removed osd.1
 
 # 查看osd树，已经没有这个osd了
 ➜  ceph osd tree
-ID CLASS WEIGHT TYPE NAME          STATUS REWEIGHT PRI-AFF 
--1            0 root default                               
--3            0     host ceph-osd1                         
+ID CLASS WEIGHT TYPE NAME          STATUS REWEIGHT PRI-AFF
+-1            0 root default
+-3            0     host ceph-osd1
 -5            0     host ceph-osd2
 
 # 最后使用磁盘的清理命令，将块设备还原为裸盘
