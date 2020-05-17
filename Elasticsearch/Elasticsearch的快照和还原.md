@@ -90,8 +90,53 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
 
 ### 1.4、查看仓库
 
+查看仓库下的所有快照
+
 ``` json
 ➜  curl -X GET "localhost:9200/_snapshot/ah_backup/_all"
+
+# return
+{
+  "snapshots": [{
+    "snapshot": "prod_snapshot_20191214",
+    "uuid": "ZF69-I98QyW4L5xaNAFnQQ",
+    "version_id": 7010199,
+    "version": "7.1.1",
+    "indices": ["info_scenic_spot", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "restored2-info-ad", "restored-info-ad", "info-follow", "user-growth", "ad-label", "info-ad"],
+    "include_global_state": true,
+    "state": "SUCCESS",
+    "start_time": "2019-12-14T09:35:21.561Z",
+    "start_time_in_millis": 1576316121561,
+    "end_time": "2019-12-14T09:35:23.287Z",
+    "end_time_in_millis": 1576316123287,
+    "duration_in_millis": 1726,
+    "failures": [],
+    "shards": {
+      "total": 11,
+      "failed": 0,
+      "successful": 11
+    }
+  }, {
+    "snapshot": "snapshot_infov2_20200517",
+    "uuid": "47zRZ4t8SjGiF7Arrr8Qdw",
+    "version_id": 7010199,
+    "version": "7.1.1",
+    "indices": ["info_scenic_spot", "info-ad", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "info-ad-exchange", "user-growth", "info-follow", "ad-label"],
+    "include_global_state": false,
+    "state": "SUCCESS",
+    "start_time": "2020-05-17T09:50:31.287Z",
+    "start_time_in_millis": 1589709031287,
+    "end_time": "2020-05-17T09:50:32.879Z",
+    "end_time_in_millis": 1589709032879,
+    "duration_in_millis": 1592,
+    "failures": [],
+    "shards": {
+      "total": 10,
+      "failed": 0,
+      "successful": 10
+    }
+  }]
+}
 ```
 
 ## 二、创建快照
@@ -134,7 +179,37 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
 }
 ```
 
-指定索引备份
+### 2.2、全索引快照
+
+``` json
+➜  curl -X PUT "localhost:9200/_snapshot/ah_backup/snapshot_20200517?wait_for_completion=true"
+
+# return
+{
+  "snapshot": {
+    "snapshot": "ahprod_snapshot_20191213",
+    "uuid": "B5zo-yumRA-w4NBtlWhT8Q",
+    "version_id": 7010199,
+    "version": "7.1.1",
+    "indices": ["info_scenic_spot", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "info-follow", "user-growth", "ad-label", "info-ad"],
+    "include_global_state": true,
+    "state": "SUCCESS",
+    "start_time": "2019-12-13T06:35:10.571Z",
+    "start_time_in_millis": 1576218910571,
+    "end_time": "2019-12-13T06:35:12.461Z",
+    "end_time_in_millis": 1576218912461,
+    "duration_in_millis": 1890,
+    "failures": [],
+    "shards": {
+      "total": 9,
+      "failed": 0,
+      "successful": 9
+    }
+  }
+}
+```
+
+### 2.3、测试备份
 
 ``` bash
 ➜  curl -X PUT "localhost:9200/_snapshot/ah_backup/snapshot_ahxx_20200517?wait_for_completion=true" -H 'Content-Type: application/json' -d'
@@ -169,31 +244,36 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
 }
 ```
 
-### 2.2、全索引快照
+### 2.4、生产备份
 
-``` json
-➜  curl -X PUT "localhost:9200/_snapshot/ah_backup/snapshot_20200517?wait_for_completion=true"
+``` curl
+curl -X PUT "localhost:9200/_snapshot/ahprod_backup/snapshot_infov2_20200517?wait_for_completion=true" -H 'Content-Type: application/json' -d'
+{
+  "indices": ["info_scenic_spot", "info-ad", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "info-ad-exchange", "user-growth", "info-follow", "ad-label"],
+  "ignore_unavailable": true,
+  "include_global_state": false
+}'
 
 # return
 {
   "snapshot": {
-    "snapshot": "ahprod_snapshot_20191213",
-    "uuid": "B5zo-yumRA-w4NBtlWhT8Q",
+    "snapshot": "snapshot_infov2_20200517",
+    "uuid": "47zRZ4t8SjGiF7Arrr8Qdw",
     "version_id": 7010199,
     "version": "7.1.1",
-    "indices": ["info_scenic_spot", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "info-follow", "user-growth", "ad-label", "info-ad"],
-    "include_global_state": true,
+    "indices": ["info_scenic_spot", "info-ad", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "info-ad-exchange", "user-growth", "info-follow", "ad-label"],
+    "include_global_state": false,
     "state": "SUCCESS",
-    "start_time": "2019-12-13T06:35:10.571Z",
-    "start_time_in_millis": 1576218910571,
-    "end_time": "2019-12-13T06:35:12.461Z",
-    "end_time_in_millis": 1576218912461,
-    "duration_in_millis": 1890,
+    "start_time": "2020-05-17T09:50:31.287Z",
+    "start_time_in_millis": 1589709031287,
+    "end_time": "2020-05-17T09:50:32.879Z",
+    "end_time_in_millis": 1589709032879,
+    "duration_in_millis": 1592,
     "failures": [],
     "shards": {
-      "total": 9,
+      "total": 10,
       "failed": 0,
-      "successful": 9
+      "successful": 10
     }
   }
 }
