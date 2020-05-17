@@ -32,13 +32,13 @@ openvpn.x86_64 0:2.4.8-1.el7
 ## 一、部署 OpenVPN
 ### 1.1、关闭selinux
 ``` bash
-$ setenforce 0
-$ sed -i '/^SELINUX=/c\SELINUX=disabled' /etc/selinux/config
+➜  setenforce 0
+➜  sed -i '/^SELINUX=/c\SELINUX=disabled' /etc/selinux/config
 ```
 
 ### 1.2、添加EPEL扩展库
 ``` bash
-$ /etc/yum.repos.d/aliyun.repo
+➜  /etc/yum.repos.d/aliyun.repo
 [aliyun-epel]
 name=aliyun-epel-CentOS$releasever
 enabled=1
@@ -49,23 +49,23 @@ gpgkey=http://mirrors.aliyun.com/epel/RPM-GPG-KEY-EPEL-7
 
 ### 1.3、安装所需依赖软件包
 ``` bash
-$ yum install -y openssl openssl-devel lzo lzo-devel pam pam-devel automake pkgconfig
+➜  yum install -y openssl openssl-devel lzo lzo-devel pam pam-devel automake pkgconfig
 ```
 
 ### 1.4、安装OpenVPN和Easy-Rsa
 ``` bash
-$ yum -y install openvpn easy-rsa   
+➜  yum -y install openvpn easy-rsa   
 ```
 
 ### 1.5、将easy-rsa拷贝至openvpn下
 ``` bash
-$ cp -r /usr/share/easy-rsa/ /etc/openvpn/
+➜  cp -r /usr/share/easy-rsa/ /etc/openvpn/
 ```
 
 ## 二、配置 OpenVPN
 ### 2.1、openvpn程序树状图
 ``` bash
-$ tree openvpn
+➜  tree openvpn
 openvpn
 ├── client
 ├── easy-rsa
@@ -86,8 +86,8 @@ openvpn
 
 ### 2.2、生成CA根证书
 ``` bash
-$ cd /etc/openvpn/easy-rsa/3.0.6/
-$ vim vars
+➜  cd /etc/openvpn/easy-rsa/3.0.6/
+➜  vim vars
 export CA_EXPIRE="3650"           # 定义CA证书的有效期，默认是3650天，即10年。
 export KEY_EXPIRE="3650"          # 定义密钥的有效期，默认是3650天，即10年。
 export KEY_COUNTRY="CN"           # 定义所在的国家。
@@ -101,51 +101,51 @@ export KEY_NAME="ZAX_Server"      # 定义openvpn服务器的名称。
 
 初始化环境变量
 ``` bash
-$ source ./vars
+➜  source ./vars
 ```
 
 生成服务器端CA证书根证书ca.crt和根密钥ca.key，由于在vars文件中做过缺省设置，在出现交互界面时，直接一路回车即可
 ``` bash
-$ ./easyrsa init-pki
-$ ./easyrsa build-ca
+➜  ./easyrsa init-pki
+➜  ./easyrsa build-ca
 ```
 
 为服务端生成证书和密钥(一路按回车，直到提示需要输入y/n时，输入y再按回车，一共两次)
 ``` bash
-$ ./easyrsa build-server-full server nopass
+➜  ./easyrsa build-server-full server nopass
 ```
 
 ### 2.3、生成 Diffie-Hellman 算法需要的密钥文件, 生成过程较慢
 ``` bash
-$ ./easyrsa gen-dh
+➜  ./easyrsa gen-dh
 ```
 
 ### 2.4、生成 tls-auth key
 这个 key 主要用于防止 DoS 和 TLS 攻击，这一步其实是可选的，但为了安全还是生成一下，该文件在后面配置 open VPN 时会用到。
 ```
-$ openvpn --genkey --secret ta.key
+➜  openvpn --genkey --secret ta.key
 ```
 
 ### 2.5、证书整理
 将上面生成的相关证书文件整理到 /etc/openvpn/server/certs
 ```
-$ mkdir /etc/openvpn/server/certs && cd /etc/openvpn/server/certs/
-$ cp /etc/openvpn/easy-rsa/3/pki/dh.pem ./               # SSL 协商时 Diffie-Hellman 算法需要的 key
-$ cp /etc/openvpn/easy-rsa/3/pki/ca.crt ./               # CA 根证书
-$ cp /etc/openvpn/easy-rsa/3/pki/issued/server.crt ./    # open VPN 服务器证书
-$ cp /etc/openvpn/easy-rsa/3/pki/private/server.key ./   # open VPN 服务器证书 key
-$ cp /etc/openvpn/easy-rsa/3/ta.key ./                   # tls-auth key
+➜  mkdir /etc/openvpn/server/certs && cd /etc/openvpn/server/certs/
+➜  cp /etc/openvpn/easy-rsa/3/pki/dh.pem ./               # SSL 协商时 Diffie-Hellman 算法需要的 key
+➜  cp /etc/openvpn/easy-rsa/3/pki/ca.crt ./               # CA 根证书
+➜  cp /etc/openvpn/easy-rsa/3/pki/issued/server.crt ./    # open VPN 服务器证书
+➜  cp /etc/openvpn/easy-rsa/3/pki/private/server.key ./   # open VPN 服务器证书 key
+➜  cp /etc/openvpn/easy-rsa/3/ta.key ./                   # tls-auth key
 ```
 
 ### 2.6、创建 open VPN 日志目录
 ```
-$ mkdir -p /var/log/openvpn/
-$ chown openvpn:openvpn /var/log/openvpn
+➜  mkdir -p /var/log/openvpn/
+➜  chown openvpn:openvpn /var/log/openvpn
 ```
 
 ### 2.7、配置 OpenVPN
 ``` bash
-$ cat /etc/openvpn/server.conf
+➜  cat /etc/openvpn/server.conf
 port 57678  # 监听的端口号
 proto udp   # 服务端用的协议，udp 能快点，所以我选择 udp
 dev tun
@@ -182,26 +182,26 @@ explicit-exit-notify 1
 
 ### 2.8、清理所有防火墙规则
 ``` bash
-$ iptables -F   
+➜  iptables -F   
 ```
 
 ### 2.9、添加 SNAT
 将OpenVPN的网络流量转发到公网
 ``` bash
-$ iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE
-$ iptables-save > /etc/sysconfig/iptables   # iptables 规则持久化保存
+➜  iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE
+➜  iptables-save > /etc/sysconfig/iptables   # iptables 规则持久化保存
 ```
 
 ### 2.10、Linux 服务器启用核心转发
 ``` bash
-$ echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf
+➜  echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf
 # 刷新内核
-$ sysctl -p 
+➜  sysctl -p 
 ```
 
 ## 三、启动 OpenVPN
 ``` bash
-$ systemctl start openvpn@server
+➜  systemctl start openvpn@server
 ```
 
 ## 四、连接 OpenVPN
@@ -220,7 +220,7 @@ Windows下使用官方提供的客户端工具即可
 
 #### 4.1.1、ovpn模板文件
 ``` bash
-$ cat sample.ovpn
+➜  cat sample.ovpn
 client
 proto udp
 dev tun
@@ -239,6 +239,7 @@ mute-replay-warnings
 
 #### 4.1.2、ovpn_user.sh
 ``` bash
+➜  vim ovpn_user.sh
 # ! /bin/bash
 
 set -e
@@ -250,34 +251,46 @@ PKI_DIR=$EASY_RSA_DIR/$EASY_RSA_VERSION/pki
 
 for user in "$@"
 do
-  if [ -d "$OVPN_USER_KEYS_DIR/$user" ]; 
+
+  if [ -d "$OVPN_USER_KEYS_DIR/$user" ];
   then
     rm -rf $OVPN_USER_KEYS_DIR/$user
     rm -rf  $PKI_DIR/reqs/$user.req
     sed -i '/'"$user"'/d' $PKI_DIR/index.txt
   fi
+
   cd $EASY_RSA_DIR/$EASY_RSA_VERSION
+
   # 生成客户端 ssl 证书文件
   ./easyrsa build-client-full $user
+
   # 整理下生成的文件
   mkdir -p  $OVPN_USER_KEYS_DIR/$user
-  cp $PKI_DIR/ca.crt $OVPN_USER_KEYS_DIR/$user/   # CA 根证书
-  cp $PKI_DIR/issued/$user.crt $OVPN_USER_KEYS_DIR/$user/   # 客户端证书
-  cp $PKI_DIR/private/$user.key $OVPN_USER_KEYS_DIR/$user/  # 客户端证书密钥
-  cp /etc/openvpn/client/sample.ovpn $OVPN_USER_KEYS_DIR/$user/$user.ovpn # 客户端配置文件
+
+  cp $PKI_DIR/ca.crt $OVPN_USER_KEYS_DIR/$user/                            # CA 根证书
+  cp $PKI_DIR/issued/$user.crt $OVPN_USER_KEYS_DIR/$user/                  # 客户端证书
+  cp $PKI_DIR/private/$user.key $OVPN_USER_KEYS_DIR/$user/                 # 客户端证书密钥
+  cp /etc/openvpn/server/certs/ta.key $OVPN_USER_KEYS_DIR/$user/ta.key     # auth-tls 文件
+  cp /etc/openvpn/client/sample.ovpn $OVPN_USER_KEYS_DIR/$user/$user.ovpn  # 客户端配置文件
+  
+  # 替换模板文件中的用户
   sed -i 's/admin/'"$user"'/g' $OVPN_USER_KEYS_DIR/$user/$user.ovpn
-  cp /etc/openvpn/server/certs/ta.key $OVPN_USER_KEYS_DIR/$user/ta.key  # auth-tls 文件
+  
+  # 生成压缩包
   cd $OVPN_USER_KEYS_DIR
   zip -r $user.zip $user
+
+  # 拷贝压缩包至用户目录以下载
   cp $user.zip /home/miaocunfa
   chown miaocunfa:miaocunfa /home/miaocunfa/$user.zip
 done
+
 exit 0
 ```
 
 #### 4.1.3、脚本使用语法
 ``` bash
-$ ./ovpn_user.sh <username>
+➜  ./ovpn_user.sh <username>
 ```
 
 #### 4.1.4、生成压缩包
@@ -298,27 +311,35 @@ $ ./ovpn_user.sh <username>
 ### 4.2、删除一个用户
 上面我们知道了如何添加一个用户，那么如果公司员工离职了或者其他原因，想删除对应用户 OpenVPN 的使用权，该如何操作呢？其实很简单，OpenVPN 的客户端和服务端的认证主要通过 SSL 证书进行双向认证，所以只要吊销对应用户的 SSL 证书即可。
 
-#### 4.2.1、编辑 OpenVPN 服务端配置 server.conf 添加如下配置
-``` conf
-$ vi server.conf
-crl-verify /etc/openvpn/easy-rsa/3/pki/crl.pem
+#### 4.2.1、吊销用户证书，假设要吊销的用户名为 username
+``` bash
+
+➜  cd /etc/openvpn/easy-rsa/3/
+➜  ./easyrsa revoke username
+Revocation was successful. You must run gen-crl and upload a CRL to your     # 吊销证书后必须执行gen-crl生成crl文件
+infrastructure in order to prevent the revoked cert from being accepted.
+
+➜  ./easyrsa gen-crl
+An updated CRL has been created.
+CRL file: /etc/openvpn/easy-rsa/3/pki/crl.pem     # CRL文件路径
 ```
 
-#### 4.2.2、吊销用户证书，假设要吊销的用户名为 username
-``` bash
-$ cd /etc/openvpn/easy-rsa/3/
-$ ./easyrsa revoke username
-$ ./easyrsa gen-crl
+#### 4.2.2、编辑 OpenVPN 服务端配置 server.conf 添加如下配置
+``` conf
+➜  vim server.conf
+# 添加 crl文件
+crl-verify /etc/openvpn/easy-rsa/3/pki/crl.pem
 ```
 
 #### 4.2.3、重启 OpenVPN 服务端使其生效
 ``` bash
-$ systemctl start openvpn@server
+➜  systemctl start openvpn@server
 ```
 
 #### 4.2.4、一键删除用户
 为了方便，也将上面步骤整理成了一个脚本 `del_ovpn_user.sh`
 ``` bash
+➜  vim del_ovpn_user.sh
 # ! /bin/bash
 
 set -e
@@ -334,7 +355,7 @@ do
   ./easyrsa gen-crl
 
   # 吊销掉证书后清理客户端相关文件
-  if [ -d "$OVPN_USER_KEYS_DIR/$user" ]; 
+  if [ -d "$OVPN_USER_KEYS_DIR/$user" ];
   then
     rm -rf $OVPN_USER_KEYS_DIR/${user}*
   fi
@@ -345,7 +366,12 @@ done
 exit 0
 ```
 
-> 参考列表  
-> https://qhh.me/2019/06/16/Cenos7-%E4%B8%8B%E6%90%AD%E5%BB%BA-OpenVPN-%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/  
-> https://www.hi-linux.com/posts/43594.html  
+#### 4.2.5、脚本使用语法
+``` bash
+➜  ./del_ovpn_user.sh <username>
+```
+
+> 参考列表：  
+> 1、<https://qhh.me/2019/06/16/Cenos7-%E4%B8%8B%E6%90%AD%E5%BB%BA-OpenVPN-%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/>
+> 2、<https://www.hi-linux.com/posts/43594.html>
 >
