@@ -38,11 +38,11 @@ Ceph的核心组件包括OSD、Monitor和MDS
 
 ### 1.1、机器规划
 
-|       节点      |   属性   | 
-| --------------- | -------  | 
-| 192.168.100.236 |    OSD节点   | 
-| 192.168.100.237 |    OSD节点   |
-| 192.168.100.238 |    管理节点、Mon节点、Mgr节点   | 
+| 节点            | 属性                       |
+| --------------- | -------------------------- |
+| 192.168.100.236 | OSD节点                    |
+| 192.168.100.237 | OSD节点                    |
+| 192.168.100.238 | 管理节点、Mon节点、Mgr节点 |
 
 ### 1.2、设置主机名
 
@@ -165,7 +165,7 @@ total 12
 -rw-r--r--. 1 root root 2975 Mar  6 01:38 ceph-deploy-ceph.log
 -rw-------. 1 root root   73 Mar  6 01:38 ceph.mon.keyring
 
-➜  cat ceph.conf 
+➜  cat ceph.conf
 [global]
 fsid = 243f3ae6-326a-4af6-9adb-6538defbacb7
 mon_initial_members = ceph-mon1
@@ -342,9 +342,9 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 
 # 将osd移出集群
 ➜  ceph osd out 0
-marked out osd.0. 
+marked out osd.0.
 ➜  ceph osd out 1
-marked out osd.1. 
+marked out osd.1.
 
 # 再次查看osd树
 ➜  ceph osd tree
