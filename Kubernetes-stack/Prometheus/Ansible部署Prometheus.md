@@ -15,12 +15,14 @@ original: true
 prometheus架构图，讲解
 
 ## 一、exporter
+
 exporter讲解
-https://prometheus.io/docs/instrumenting/exporters/
+<https://prometheus.io/docs/instrumenting/exporters/>
 
 ### 1.1、node_exporter
 
 #### 1.1.1、ansible 配置 node_exporter节点
+
 ``` bash
 $ cat /etc/ansible/hosts
 [21]
@@ -28,6 +30,7 @@ $ cat /etc/ansible/hosts
 ```
 
 #### 1.1.2、下载 node_exporter
+
 ``` bash
 # github仓库
 https://github.com/prometheus/node_exporter
@@ -37,6 +40,7 @@ wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_
 ```
 
 #### 1.1.3、安装 node_exporter
+
 ``` bash
 # 将node_exporter拷贝至所有节点的/opt下
 $ ansible all -m copy -a "src=/root/node_exporter-0.18.1.linux-amd64.tar.gz dest=/opt/"
@@ -48,6 +52,7 @@ $ ansible all -m shell -a "cd /opt; tar -zxvf node_exporter-0.18.1.linux-amd64.t
 ### 1.2、redis_exporter
 
 #### 1.2.1、ansible 配置 redis_exporter节点
+
 ``` bash
 $ cat /etc/ansible/hosts
 [redis]
@@ -55,6 +60,7 @@ $ cat /etc/ansible/hosts
 ```
 
 #### 1.2.2、下载 redis_exporter
+
 ``` bash
 # github仓库
 https://github.com/oliver006/redis_exporter
@@ -64,6 +70,7 @@ wget https://github.com/oliver006/redis_exporter/releases/download/v1.3.4/redis_
 ```
 
 #### 1.2.3、启动 redis_exporter
+
 ``` bash
 # 将redis_exporter拷贝至所有节点的/opt下
 $ ansible redis -m copy -a "src=/root/redis_exporter-v1.3.4.linux-amd64.tar.gz dest=/opt"
@@ -75,6 +82,7 @@ $ ansible redis -m shell -a "cd /opt; tar -zxvf redis_exporter-v1.3.4.linux-amd6
 ### 1.3、mysqld_exporter
 
 #### 1.3.1、ansible 配置 mysqld_exporter节点
+
 ``` bash
 $ cat /etc/ansible/hosts
 [mysql]
@@ -82,6 +90,7 @@ $ cat /etc/ansible/hosts
 ```
 
 #### 1.3.1、下载 mysqld_exporter
+
 ``` bash
 # github仓库
 https://github.com/prometheus/mysqld_exporter
@@ -91,6 +100,7 @@ wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mys
 ```
 
 #### 1.3.2、启动 mysqld_exporter
+
 ``` bash
 # 将mysqld_exporter拷贝至所有节点的/opt下
 $ ansible mysql -m copy -a "src=/root/mysqld_exporter-0.12.1.linux-amd64.tar.gz dest=/opt"
@@ -102,6 +112,7 @@ $ ansible mysql -m shell -a "cd /opt; tar -zxvf mysqld_exporter-0.12.1.linux-amd
 ### 1.4、elasticsearch_exporter
 
 #### 1.4.1、ansible 配置 elasticsearch_exporter节点
+
 ``` bash
 $ cat /etc/ansible/hosts
 [es]
@@ -109,6 +120,7 @@ $ cat /etc/ansible/hosts
 ```
 
 #### 1.4.2、下载 elasticsearch_exporter
+
 ``` bash
 # github仓库
 https://github.com/justwatchcom/elasticsearch_exporter
@@ -118,6 +130,7 @@ wget https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v1
 ```
 
 #### 1.4.3、启动 elasticsearch_exporter
+
 ```
 # 将elasticsearch_exporter拷贝至所有节点的/opt下
 $ ansible es -m copy -a "src=/root/elasticsearch_exporter-1.1.0.linux-amd64.tar.gz dest=/opt/elasticsearch_exporter-1.1.0.linux-amd64.tar.gz"
@@ -129,6 +142,7 @@ $ ansible es -m shell -a "cd /opt; tar -zxvf elasticsearch_exporter-1.1.0.linux-
 ## 二、alert_manager
 
 ### 2.1、下载 alert_manager
+
 ``` bash
 # github仓库
 https://github.com/prometheus/alertmanager
@@ -137,13 +151,16 @@ https://github.com/prometheus/alertmanager
 wget https://github.com/prometheus/alertmanager/releases/download/v0.19.0/alertmanager-0.19.0.linux-amd64.tar.gz
 ```
 
-### 2.2、安装 alert_manager 
+### 2.2、安装 alert_manager
+
 将alertmanager部署在/usr/local下
+
 ``` bash
 $ tar -zxvf alertmanager-0.19.0.linux-amd64.tar.gz -C /usr/local/
 ```
 
 ### 2.3、配置 alert_manager 
+
 ``` yaml
 $ cd /usr/local/alertmanager-0.19.0.linux-amd64/
 $ cat alertmanager.yml
@@ -168,12 +185,15 @@ receivers:
 ```
 
 ### 2.4、启动 alert_manager
+
 ``` bash
 $ nohup ./alertmanager &
 ```
 
 ## 三、prometheus
+
 ### 3.1、下载 prometheus
+
 ``` bash
 # github仓库
 https://github.com/prometheus/prometheus
@@ -183,14 +203,17 @@ wget https://github.com/prometheus/prometheus/releases/download/v2.13.1/promethe
 ```
 
 ### 3.2、安装 prometheus
+
 将alertmanager部署在/usr/local下
+
 ```
 $ tar -zxvf prometheus-2.13.1.linux-amd64.tar.gz -C /usr/local/
 ```
 
 ### 3.3、配置 alertrules.yml
+
 ``` yaml
-$ cat alertrules.yml 
+$ cat alertrules.yml
 groups:
 - name: example
   rules:
@@ -242,6 +265,7 @@ groups:
 ```
 
 ### 3.4、配置 prometheus
+
 ``` yaml
 $ cat prometheus.yml
 global:
@@ -330,13 +354,17 @@ scrape_configs:
 ```
 
 ### 3.5、启动 prometheus
+
 ``` bash
 $ nohup ./prometheus --storage.tsdb.retention=180d --web.enable-admin-api &
 ```
+
 启动admin讲解
 
 ### 3.6 prometheus API
+
 API讲解
+
 ``` bash
 $ curl -X POST -g 'http://localhost:9090/api/v1/admin/tsdb/clean_tombstones'
 
