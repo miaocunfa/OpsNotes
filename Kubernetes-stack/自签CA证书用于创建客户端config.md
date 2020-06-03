@@ -1,21 +1,34 @@
-# 自签CA证书用于创建客户端config
+---
+title: "自签CA证书用于创建客户端config"
+date: "2019-10-30"
+categories:
+    - "技术"
+tags:
+    - "Kubernetes"
+    - "CA"
+    - "kubeadm"
+toc: false
+indent: false
+original: true
+---
 
 ## 1、自签CA证书
-``` bash
+
+``` zsh
 # 使用kubeadm创建的kubernetes集群CA证书默认位置
-[root@master ~]# cd /etc/kubernetes/pki/
+➜  cd /etc/kubernetes/pki/
 
 生成秘钥miao.key, 为了安全打开子shell
-[root@master pki]# (umask 077; openssl genrsa -out miao.key 2048)
+➜  (umask 077; openssl genrsa -out miao.key 2048)
 
 基于私钥生成证书miao.csr, -subj 指明用户名, 证书持有者必须跟用户名保持一致
-[root@master pki]# openssl req -new -key miao.key -out miao.csr -subj "/CN=miao"
+➜  openssl req -new -key miao.key -out miao.csr -subj "/CN=miao"
 
 证书miao.csr由ca.crt签署, 生成miao.crt
-[root@master pki]# openssl x509 -req -in miao.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out miao.crt -days 365
+➜  openssl x509 -req -in miao.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out miao.crt -days 365
 
 查看证书信息
-[root@master pki]# openssl x509 -in miao.crt -text -noout
+➜  openssl x509 -in miao.crt -text -noout
 Certificate:
     Data:
         Version: 1 (0x0)
@@ -30,25 +43,27 @@ Certificate:
 ```
 
 ## 2、创建客户端config
-```
-# kubectl config --kubeconfig=/tmp.test.conf 用于指明新增在/tmp/miao.config
+
+``` zsh
+➜  kubectl config --kubeconfig=/tmp/miao.config 用于指明新增在/tmp/miao.config
 
 # config文件创建k8s集群
-[root@master ~]# kubectl config set-cluster mycluster --kubeconfig=/tmp/miao.config --server="https://172.31.194.108:6443" --certificate-authority=/etc/kubernetes/pki/ca.crt --embed-certs=true
+➜  kubectl config set-cluster mycluster --kubeconfig=/tmp/miao.config --server="https://172.31.194.108:6443" --certificate-authority=/etc/kubernetes/pki/ca.crt --embed-certs=true
 
 # config文件新增用户miao
-[root@master ~]# kubectl config set-credentials miao --kubeconfig=/tmp/miao.config --client-certificate=/etc/kubernetes/pki/miao.crt --client-key=/etc/kubernetes/pki/miao.key --embed-certs=true 
+➜  kubectl config set-credentials miao --kubeconfig=/tmp/miao.config --client-certificate=/etc/kubernetes/pki/miao.crt --client-key=/etc/kubernetes/pki/miao.key --embed-certs=true 
 
 # config文件新增上下文
-[root@master ~]# kubectl config set-context miao@mycluster --kubeconfig=/tmp/miao.config --cluster=mycluster --user=miao
+➜  kubectl config set-context miao@mycluster --kubeconfig=/tmp/miao.config --cluster=mycluster --user=miao
 
 # 指定当前用户
-kubectl config --kubeconfig=/tmp/miao.config use-context miao@mycluster
+➜  kubectl config --kubeconfig=/tmp/miao.config use-context miao@mycluster
 ```
 
-### /tmp/miao.config文件
-```
-[root@master ~]# cat /tmp/miao.config 
+### kubeadm-config文件
+
+``` zsh
+➜  cat /tmp/miao.config
 apiVersion: v1
 clusters:
 - cluster:
@@ -70,5 +85,6 @@ users:
     client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBeGt3dFBPeXRuMU9jTjZiMytSVVNlcXA3Mis2MkZhQVBlRHdJZ3Q3TnQrbElDZXVFCnQ4TjdCWTVteXAzdzMrSVRiNURTc1RTSkVjSVZQSjNiNXFCTkh3Z3JLZTQ2b0ZiMTEzZ2lOMGhsZTV0SUVlTEwKTnJWZHpkQ21rcjdvZnpFSEJRY2x5N2wxMUhlbVVmQmV1aE9VS3MyelJFeS9jR2ZoVExueTFYRU5UUFZ5SWRQNApxNlNqTzlhTjE3a1BuMy9Jc1JWYTlLcXU1Q2FaMG1adFFzdStSbjRaVnhSRVVDZFBlaEZEU01wdGR6RmRXaE5FCjlMU3BrODROTE1hZU5kRXlXaDk2aFFHd0Nmdms0MXZmc3hWb29UazJYd1dlTTZoS2xwdTJDbmdRbzAxUkRzeWMKbjBYeFpsc3gyb1ZlUkd2enA0OUVVdXFYeE1PQ3Y0Uk1KVkpHc1FJREFRQUJBb0lCQVFDMW9vVTFieDNCK1JYNApyQW9ycjYrVGlLR1hYTnFRaUdKaklhb3lKZCtOZkRNdVV2cm9VRGhaYUl5alAzU3B2aTFMWGY1L3JyMTI5SzM3CkxpV0U1SVIvemoyclZMbUNzT1RURHdsWVZnb081TGRwR3JKRlZHK3QzRmNYeDZLekRyZDlWWVM3VFErdkpFSEcKZ0VSa2NSYWc5bllrTTZDUFY3ZTVUZ0l1bkRVd3JXMXRrY0l0L2JyNUF1NkVFazBkRnE1bzBQVU9wWU5IeklRSQo2VFZzakk1TVMycnVqRzY4UmZ0VnR3dkRVQlo0STFsblV0R2F6Wi8xVEpmK09OT0hzTGNhZ2xPNnpZcFgxQ2dSCjd3ZXNMZk9zSzZveUZYVFI1UHY5aFltZUdDYm9VbkJYWVBMbzloOWVVTXRVdHd3Z3FsWFZqRmxTOXcza3VqQTQKYi9LUThVZUJBb0dCQU9tRWtyaVJkeElLdWF1ajNBSjhKZGRObUJ4QmVkS3RNT2pOTUYvelljNDE0N3FuMzZsVwp1YTZWemp0Mm5VUnAvY0FneDA1bDZ4VWpzbjhqeXlRdHRvcDhQNVN1RzB3a3gwc2IrNHVqNEowUTBvVTZTdHo2CmpqeWZaTWp6VHhDRlluSkdkYnJPMGE4cHRxU1pUaXJzM3lmQ1B4Z2JhZzBteDZyRm9FMTluMmY1QW9HQkFObGoKaXNvQ2hNeGhZMFI2a09QazVOTHFtZFc4QWVxaHVqeHVNSzFnVTdsMVNBWm1jQ3pwaHVrS1UxQ1V1YUJqcTRzWQp2N1VIMFhVYlVWdjFHeW5KdUxJc1VhSEZ6V0w2RlI3T2FxWjBIWUMvSGlBRnZyRDhpYVk5MUNlWHlid3A2NityCk5RVThZcFhKS0pNaUpJS0FZcHdNVlRmY3BodTllelJHYWFaRjU3SjVBb0dBTE9DNG5kWCs3eTIyZnlFUG9ENmgKdXg0RGRMSzBxZU4wK2RpdFNsTm80WXVEeDVTSnJHNnBZcjhSa21YNlZYS1ZQTDVQNzJZdzVyQWtsc0NYUXMyeQpQaTBndnY4eTZkQkxxTWlvOEM0L2RaQU5GV09kalpodGk0TUtpSUFTR3RlM2tzU3R6WWYvemswUzk5RXFyNTgwClI5elI2VjBqWllHbGI5RnBQRnMvTG1rQ2dZRUFoMDFUVnNRV2ozYVY2RXM0M3Y3YUJRU0xWdUk3ZHlQTjNFcmcKOVNnZE5ETHc3enJXMnIxR2dNa3liZGNEYWZaZkVLWUl1ODN2Nmlsa2pBMlVLSUFxK29wbkRIOG1oRklPenl1KwphWGVmM1VBV3FldXBjbExjQWFJOTU1NnJxdmVVZjdQWnZqYUZUYUQwSmc5OEZkVitpbzJLaE1oS2dyMStiMXpiCjZPZGRmRkVDZ1lCMFAyWkdoWHpaWHc4RFoyQnpBS1pkSEZPNEZQTXFiMmoveEExRGJibnFwRU16cElUQWNCSFMKTVNhdyt2RUI2WmhROU9mbmxpejlweXVSc0J3SzhzSCtIL3F2VHBIYUtic1NjWC9KcFdlSUg0QXM3cGVoRHBCTwoyZmVJMmNSRHZiRVM4TWRRZzdtNmpqNUV4ZUczNk96TXg1aVdSNWp2WktKajNPbWluQ1cyK0E9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
 ```
 
-## 3、如果是新增用户，不是新建config呢？
+## 3、如果是新增用户，不是新建config呢
+
 通过以上步骤我们创建了一个新的用于连接 kubernetes 集群的 config 文件，如果我们在执行`kubectl config`命令时不指明`--kubeconfig`的路径，那么以上创建的用户会配置在默认 config 文件中，那么设想一下如果 config 文件中有多个 kubernetes 集群以及用户，我们使用 kubectl 命令连接的是哪个 kubernetes 集群呢？kubernetes 使用了上下文这个设置非常巧妙的解决了我们管理多个集群的问题。上下文我理解为使用哪个用户登录哪个集群，又设置了一个选项 current-context 用来确定当前使用哪个上下文，在我们需要切换用户的时候只需要执行`kubectl config use-context miao@mycluster`来切换用户即可。
