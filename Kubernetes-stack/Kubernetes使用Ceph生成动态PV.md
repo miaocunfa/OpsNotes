@@ -16,15 +16,16 @@ original: true
 ### 1.1、Ceph版本
 
 ceph mimic(13.2.8)
+
 ``` bash
-$ ceph version
+➜  ceph version
 ceph version 13.2.8 (5579a94fafbc1f9cc913a0f5d362953a5d9c3ae0) mimic (stable)
 ```
 
 ### 1.2、存储池
 
 ``` bash
-$ ceph osd pool ls
+➜  ceph osd pool ls
 kube
 ```
 
@@ -32,10 +33,10 @@ kube
 
 ``` bash
 # 生成k8s专用账号秘钥
-$ ceph auth get-or-create client.k8s mon 'allow r' osd 'allow rwx pool=kube' -o ceph.client.k8s.keyring
-$ cat ceph.client.k8s.keyring
+➜  ceph auth get-or-create client.k8s mon 'allow r' osd 'allow rwx pool=kube' -o ceph.client.k8s.keyring
+➜  cat ceph.client.k8s.keyring
 [client.k8s]
-	key = AQCNVmheCOVAFRAA9Vc36VQumqpeWbgY9dEjNw==
+  key = AQCNVmheCOVAFRAA9Vc36VQumqpeWbgY9dEjNw==
 ```
 
 ## 二、K8S准备
@@ -45,10 +46,10 @@ $ cat ceph.client.k8s.keyring
 如果使用kubeadm部署的k8s集群需要进行这些额外的步骤  
 由于使用动态存储时controller-manager需要使用rbd命令创建image  
 所以controller-manager需要使用rbd命令，由于官方controller-manager镜像里没有rbd命令，请执行下列yaml  
-若不配置会无法创建pvc，相关 issue https://github.com/kubernetes/kubernetes/issues/38923  
+若不配置会无法创建pvc，相关 issue <https://github.com/kubernetes/kubernetes/issues/38923>
 
-``` yaml
-$ cat >rbd-provisioner.yaml << EOF
+``` zsh
+➜  cat >rbd-provisioner-v16.yaml << EOF
 kind: ClusterRole 
 apiVersion: rbac.authorization.k8s.io/v1 
 metadata: 
@@ -112,11 +113,16 @@ subjects:
     name: rbd-provisioner 
     namespace: default 
 --- 
-apiVersion: extensions/v1beta1 
+apiVersion: apps/v1
 kind: Deployment 
 metadata: 
   name: rbd-provisioner 
+  labels:
+    app: rbd-provisioner 
 spec: 
+  selector:
+    matchLabels:
+      app: rbd-provisioner
   replicas: 1 
   strategy: 
     type: Recreate 
@@ -127,8 +133,7 @@ spec:
     spec: 
       containers: 
       - name: rbd-provisioner 
-        image: quay.mirrors.ustc.edu.cn/external_storage/rbd-provisioner:latest
-        #image: quay.io/external_storage/rbd-provisioner:latest
+        image: quay-mirror.qiniu.com/external_storage/rbd-provisioner:latest
         env: 
         - name: PROVISIONER_NAME 
           value: ceph.com/rbd 
@@ -140,14 +145,15 @@ metadata:
   name: rbd-provisioner
 EOF
 
-$ kubectl apply -f rbd-provisioner.yaml
+➜  kubectl apply -f rbd-provisioner.yaml
 ```
 
 ### 2.2、为kubelet提供rbd命令
 
 创建pod时，kubelet需要使用rbd命令去检测和挂载pv对应的ceph image，所以要在所有的worker节点安装ceph客户端ceph-common-13.2.8。
+
 ``` bash
-$ yum install -y ceph-common-13.2.8
+➜  yum install -y ceph-common-13.2.8
 ```
 
 ## 三、K8S使用
@@ -155,39 +161,45 @@ $ yum install -y ceph-common-13.2.8
 ### 3.1、secret
 
 #### 3.1.1、创建admin secret
+
 在kube-system名称空间创建
+
 ``` bash
 # 在ceph Mon节点获取admin key
-$ ceph auth get-key client.admin
+➜  ceph auth get-key client.admin
 
-$ export CEPH_ADMIN_SECRET='AQCzDGJeEcGGLhAAut/m7RPgV7ZYlLHGhO8sfw=='
-$ kubectl create secret generic ceph-secret --type="kubernetes.io/rbd" --from-literal=key=$CEPH_ADMIN_SECRET --namespace=kube-system
+➜  export CEPH_ADMIN_SECRET='AQCzDGJeEcGGLhAAut/m7RPgV7ZYlLHGhO8sfw=='
+➜  kubectl create secret generic ceph-secret --type="kubernetes.io/rbd" --from-literal=key=$CEPH_ADMIN_SECRET --namespace=kube-system
 ```
 
 #### 3.1.2、创建用户secret
+
 在default名称空间创建
+
 ``` bash
 # 在ceph Mon节点获取user key
-$ ceph auth get-key client.k8s
+➜  ceph auth get-key client.k8s
 
-$ export CEPH_KUBE_SECRET='AQCNVmheCOVAFRAA9Vc36VQumqpeWbgY9dEjNw=='
-$ kubectl create secret generic ceph-user-secret --type="kubernetes.io/rbd" --from-literal=key=$CEPH_KUBE_SECRET --namespace=default
+➜  export CEPH_KUBE_SECRET='AQCNVmheCOVAFRAA9Vc36VQumqpeWbgY9dEjNw=='
+➜  kubectl create secret generic ceph-user-secret --type="kubernetes.io/rbd" --from-literal=key=$CEPH_KUBE_SECRET --namespace=default
 ```
 
 #### 3.1.3、查看secret
+
 ``` bash
-$ kubectl get secret ceph-user-secret -o yaml
-$ kubectl get secret ceph-secret -n kube-system -o yaml
+➜  kubectl get secret ceph-user-secret -o yaml
+➜  kubectl get secret ceph-secret -n kube-system -o yaml
 ```
 
 ### 3.2、StorageClass
 
 配置 StorageClass
-``` yaml
+
+``` zsh
 # 如果使用kubeadm创建的集群 provisioner 使用如下方式
 # provisioner: ceph.com/rbd
 
-$ cat >storageclass-ceph-rdb.yaml << EOF
+➜  cat >storageclass-ceph-rdb.yaml << EOF
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -207,14 +219,15 @@ parameters:
   imageFeatures: "layering"
 EOF
 
-$ kubectl apply -f storageclass-ceph-rdb.yaml
+➜  kubectl apply -f storageclass-ceph-rdb.yaml
 ```
 
 ### 3.3、PVC
 
 创建pvc测试
-``` yaml
-$ cat >ceph-rdb-pvc-test.yaml<<EOF
+
+``` zsh
+➜  cat >ceph-rdb-pvc-test.yaml<<EOF
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -228,16 +241,17 @@ spec:
       storage: 2Gi
 EOF
 
-$ kubectl apply -f ceph-rdb-pvc-test.yaml
+➜  kubectl apply -f ceph-rdb-pvc-test.yaml
 
 # 查看
-$ kubectl get pvc
-$ kubectl get pv
+➜  kubectl get pvc
+➜  kubectl get pv
 ```
 
 ### 3.4、创建 nginx pod 挂载测试
-``` yaml
-cat >nginx-pod.yaml<<EOF
+
+``` zsh
+➜  cat >nginx-pod.yaml<<EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -260,25 +274,25 @@ spec:
       claimName: ceph-rdb-claim
 EOF
 
-$ kubectl apply -f nginx-pod.yaml
+➜  kubectl apply -f nginx-pod.yaml
 
 # 查看pod
-$ kubectl get pods -o wide
- 
+➜  kubectl get pods -o wide
+
 # 修改主页内容
-$ kubectl exec -ti nginx-pod1 -- /bin/sh -c 'echo Hello World from Ceph RBD!!! > /usr/share/nginx/html/index.html'
- 
+➜  kubectl exec -ti nginx-pod1 -- /bin/sh -c 'echo Hello World from Ceph RBD!!! > /usr/share/nginx/html/index.html'
+
 # 访问测试
-$ POD_IP=$(kubectl get pods -o wide | grep nginx-pod1 | awk '{print $6}')
-$ curl http://$POD_IP
+➜  POD_IP=$(kubectl get pods -o wide | grep nginx-pod1 | awk '{print $6}')
+➜  curl http://$POD_IP
 
 # 清理
-$ kubectl delete -f nginx-pod.yaml
-$ kubectl delete -f ceph-rdb-pvc-test.yaml
+➜  kubectl delete -f nginx-pod.yaml
+➜  kubectl delete -f ceph-rdb-pvc-test.yaml
 ```
 
 > 参考链接：  
-> 1、https://www.jianshu.com/p/750a8fde377b?tdsourcetag=s_pctim_aiomsg  
-> 2、https://blog.51cto.com/fengjicheng/2401702  
-> 3、https://blog.csdn.net/ygqygq2/article/details/82011235  
-> 
+> 1、<https://www.jianshu.com/p/750a8fde377b?tdsourcetag=s_pctim_aiomsg>
+> 2、<https://blog.51cto.com/fengjicheng/2401702>  
+> 3、<https://blog.csdn.net/ygqygq2/article/details/82011235>
+>
