@@ -1,7 +1,22 @@
+---
+title: "Ceph错误汇总"
+date: "2020-05-14"
+categories:
+    - "技术"
+tags:
+    - "Ceph"
+    - "错误汇总"
+toc: false
+original: true
+---
+
 ## Ceph错误汇总
+
 ### 1、执行ceph-deploy报错
+
 #### 错误信息
-``` bash
+
+``` zsh
 ➜  ceph-deploy
 Traceback (most recent call last):
   File "/usr/bin/ceph-deploy", line 18, in <module>
@@ -12,12 +27,15 @@ ImportError: No module named pkg_resources
 ```
 
 #### 解决办法
-``` bash
+
+``` zsh
 ➜  yum install python-setuptools -y
 ```
 
 ### 2、安装ceph连接超时
+
 #### 错误信息
+
 ``` log
 [node1][DEBUG ] Downloading packages:
 [node1][WARNIN] No data was received after 300 seconds, disconnecting...
@@ -43,7 +61,8 @@ ImportError: No module named pkg_resources
 ```
 
 #### 解决方法
-``` bash
+
+``` zsh
 ➜  export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-mimic/el7/
 ➜  export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 
@@ -51,15 +70,18 @@ ImportError: No module named pkg_resources
 ```
 
 ### 3、ceph -s 执行失败
+
 #### 错误信息
-``` bash
+
+``` zsh
 ➜  ceph -s
 2020-03-06 03:41:43.104 7f5aedc74700 -1 auth: unable to find a keyring on /etc/ceph/ceph.client.admin.keyring,/etc/ceph/ceph.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,: (2) No such file or directory
 2020-03-06 03:41:43.104 7f5aedc74700 -1 monclient: ERROR: missing keyring, cannot use cephx for authentication
 ```
 
 #### 解决方法
-``` bash
+
+``` zsh
 ➜  cd /opt/ceph-cluster
 
 # 添加admin key至/etc/ceph
@@ -69,15 +91,18 @@ ImportError: No module named pkg_resources
 ```
 
 ### 4、硬盘无法格式化
+
 #### 错误信息
-``` bash
+
+``` zsh
 # 磁盘无法进行格式化
 ➜  mkfs.xfs /dev/sdb
 mkfs.xfs: cannot open /dev/sdb: Device or resource busy
 ```
 
 #### 错误解决
-``` bash
+
+``` zsh
 # 查看磁盘状态
 ➜  lsblk
 NAME                                                                                                  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
@@ -127,8 +152,10 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 ```
 
 ### 5、too few PGs per OSD
+
 #### 错误信息
-``` bash
+
+``` zsh
 ➜  ceph -s
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
@@ -139,6 +166,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 ```
 
 #### 关于创建存储池  
+
 确定 pg_num 取值是强制性的，因为不能自动计算。下面是几个常用的值：  
 　　*少于 5 个 OSD 时可把 pg_num 设置为 128  
 　　*OSD 数量在 5 到 10 个时，可把 pg_num 设置为 512  
@@ -148,7 +176,8 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 随着 OSD 数量的增加，正确的 pg_num 取值变得更加重要，因为它显著地影响着集群的行为、以及出错时的数据持久性（即灾难性事件导致数据丢失的概率）。
 
 #### 解决办法
-``` bash
+
+``` zsh
 # 删除pool重建
 ➜  ceph osd pool delete kube kube --yes-i-really-really-mean-it
 Error EPERM: pool deletion is disabled; you must first set the mon_allow_pool_delete config option to true before you can destroy a pool
@@ -181,12 +210,12 @@ pool 'kube' created
   cluster:
     id:     243f3ae6-326a-4af6-9adb-6538defbacb7
     health: HEALTH_OK               # 集群状态ok
- 
+
   services:
     mon: 1 daemons, quorum ceph-mon1
     mgr: ceph-mon1(active)
     osd: 10 osds: 10 up, 10 in
- 
+
   data:
     pools:   1 pools, 512 pgs
     objects: 0  objects, 0 B
@@ -196,14 +225,17 @@ pool 'kube' created
 ```
 
 ### 6、application not enabled on 1 pool
+
 #### 错误信息
-``` bash
+
+``` zsh
 ➜  ceph health
 HEALTH_WARN application not enabled on 1 pool(s)
 ```
 
 #### 错误解决
-``` bash
+
+``` zsh
 ➜  ceph health detail
 HEALTH_WARN application not enabled on 1 pool(s)
 POOL_APP_NOT_ENABLED application not enabled on 1 pool(s)
@@ -216,7 +248,9 @@ HEALTH_OK
 ```
 
 ### 7、安装ceph-common报错
+
 #### 错误信息
+
 ``` log
 --> Finished Dependency Resolution
 Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
@@ -244,7 +278,8 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
 ```
 
 #### 错误解决
-``` bash
+
+``` zsh
 # 安装epel仓库
 ➜  ansible k8s-node -m copy -a "src=/etc/yum.repos.d/aliyun.repo dest=/etc/yum.repos.d/aliyun.repo"
 
@@ -253,7 +288,9 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
 ```
 
 ### 8、修复down掉的ceph osd
+
 #### 错误信息
+
 ``` zsh
 ➜  ceph -s
   cluster:
@@ -265,12 +302,12 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
             Degraded data redundancy: 4/198 objects degraded (2.020%), 2 pgs degraded
             16 slow ops, oldest one blocked for 47468 sec, daemons [osd.4,osd.8] have slow ops.
             mon ceph-mon1 is low on available space
- 
+
   services:
     mon: 1 daemons, quorum ceph-mon1
     mgr: ceph-mon1(active)
     osd: 10 osds: 7 up, 7 in      # 10个OSD，有三个不在集群内，已经down掉了。
- 
+
   data:
     pools:   1 pools, 512 pgs
     objects: 99  objects, 140 MiB
@@ -281,28 +318,29 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
              509 active+clean
              2   active+recovery_unfound+degraded
              1   stale+peering
- 
+
   io:
     client:   28 KiB/s wr, 0 op/s rd, 2 op/s wr
 ➜  ceph osd tree
-ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF 
--1       0.08789 root default                               
--3       0.04395     host ceph-osd1                         
- 0   hdd 0.00879         osd.0          up  1.00000 1.00000 
- 1   hdd 0.00879         osd.1          up  1.00000 1.00000 
- 2   hdd 0.00879         osd.2        down        0 1.00000 
- 3   hdd 0.00879         osd.3        down        0 1.00000 
- 4   hdd 0.00879         osd.4          up  1.00000 1.00000 
--5       0.04395     host ceph-osd2                         
- 5   hdd 0.00879         osd.5          up  1.00000 1.00000 
- 6   hdd 0.00879         osd.6          up  1.00000 1.00000 
- 7   hdd 0.00879         osd.7          up  1.00000 1.00000 
- 8   hdd 0.00879         osd.8          up  1.00000 1.00000 
+ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
+-1       0.08789 root default
+-3       0.04395     host ceph-osd1
+ 0   hdd 0.00879         osd.0          up  1.00000 1.00000
+ 1   hdd 0.00879         osd.1          up  1.00000 1.00000
+ 2   hdd 0.00879         osd.2        down        0 1.00000
+ 3   hdd 0.00879         osd.3        down        0 1.00000
+ 4   hdd 0.00879         osd.4          up  1.00000 1.00000
+-5       0.04395     host ceph-osd2
+ 5   hdd 0.00879         osd.5          up  1.00000 1.00000
+ 6   hdd 0.00879         osd.6          up  1.00000 1.00000
+ 7   hdd 0.00879         osd.7          up  1.00000 1.00000
+ 8   hdd 0.00879         osd.8          up  1.00000 1.00000
  9   hdd 0.00879         osd.9        down        0 1.00000
 ```
 
 #### 错误分析
-```
+
+``` log
   状态说明：
     集群内(in)
     集群外(out)
@@ -316,6 +354,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 ```
 
 #### 错误解决
+
 ``` zsh
 # 先拉起所有osd
 # ceph-osd1
@@ -334,7 +373,9 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 ```
 
 ### 9、磁盘无法加入
+
 #### 错误信息
+
 ``` log
 ➜  ceph-deploy osd create --data /dev/sdb1 ceph-osd
 [ceph-osd][WARNIN] Running command: /bin/ceph-authtool --gen-print-key
@@ -347,7 +388,8 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 ```
 
 #### 错误解决
-``` bash
+
+``` zsh
 
 ```
 
@@ -355,7 +397,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 
 #### 错误信息
 
-``` bash
+``` zsh
 # 删除错误
 ➜  rados rmpool .rgw.root
 WARNING:
@@ -372,7 +414,7 @@ error 1: (1) Operation not permitted
 
 #### 解决错误
 
-``` bash
+``` zsh
 # 修改ceph.conf
 ➜  vim /opt/ceph-cluster/ceph.conf
 mon_allow_pool_delete = true
@@ -392,7 +434,7 @@ successfully deleted pool .rgw.root
 
 #### 错误信息
 
-``` bash
+``` zsh
 ➜  cat ceph-rgw-pool.sh
 #!/bin/bash
 
@@ -480,7 +522,7 @@ Error ENOENT: unrecognized pool '.users.uid'
 
 #### 错误解决
 
-``` bash
+``` zsh
 # 列出已经创建的pool
 ➜  rados lspools
 default.rgw.control
@@ -527,14 +569,14 @@ default.rgw.log
 
 #### 错误信息
 
-``` bash
+``` zsh
 ➜  s3cmd mb s3://first-bucket
 ERROR: S3 error: 400 (InvalidLocationConstraint): The specified location-constraint is not valid
 ```
 
 #### 错误解决
 
-``` bash
+``` zsh
 ➜  vim /root/.s3cfg
 bucket_location = ZH    # 把ZH改成US
 
