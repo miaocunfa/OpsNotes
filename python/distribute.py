@@ -11,7 +11,7 @@ Create Time:        16:44
 import os
 import paramiko
 
-deploy={
+deploy = {
     'info-gateway.jar':           ['s2'],
     'info-cms.jar':               ['ng1'],
     'info-org-hotel.jar':         ['ng2'],
