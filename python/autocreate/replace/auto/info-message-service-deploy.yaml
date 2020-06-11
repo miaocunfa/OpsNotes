@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-message-service
+  labels:
+    name: info-message-service
+    version: v1
+spec:
+  ports:
+    - port: 9666
+      targetPort: 9666
+  selector:
+    name: info-message-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-message-service
+  labels:
+    name: info-message-service
+spec:
+  selector:
+    matchLabels:
+      name: info-message-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-message-service
+    spec:
+      containers:
+      - name: info-message-service
+        image: reg.test.local/library/info-message-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+        - name: registry-secret

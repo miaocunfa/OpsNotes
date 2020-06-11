@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-config
+  labels:
+    name: info-config
+spec:
+  selector:
+    matchLabels:
+      name: info-config
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-config
+    spec:
+      containers:
+      - name: info-config
+        image: reg.test.local/library/info-config:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

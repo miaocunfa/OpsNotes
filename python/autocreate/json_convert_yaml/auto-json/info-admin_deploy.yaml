@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-admin
+  labels:
+    name: info-admin
+spec:
+  selector:
+    matchLabels:
+      name: info-admin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-admin
+    spec:
+      containers:
+      - name: info-admin
+        image: reg.test.local/library/info-admin:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

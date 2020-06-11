@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-nearby-service
+  labels:
+    name: info-nearby-service
+spec:
+  selector:
+    matchLabels:
+      name: info-nearby-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-nearby-service
+    spec:
+      containers:
+      - name: info-nearby-service
+        image: reg.test.local/library/info-nearby-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

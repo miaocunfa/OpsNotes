@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-scheduler-service
+  labels:
+    name: info-scheduler-service
+    version: v1
+spec:
+  ports:
+  - port: 8777
+    targetPort: 8777
+  selector:
+    name: info-scheduler-service

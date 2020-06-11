@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-news-service
+  labels:
+    name: info-news-service
+    version: v1
+spec:
+  ports:
+  - port: 8806
+    targetPort: 8806
+  selector:
+    name: info-news-service

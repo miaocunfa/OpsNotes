@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-agent-service
+  labels:
+    name: info-agent-service
+spec:
+  selector:
+    matchLabels:
+      name: info-agent-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-agent-service
+    spec:
+      containers:
+      - name: info-agent-service
+        image: reg.test.local/library/info-agent-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-uc-service
+  labels:
+    name: info-uc-service
+    version: v1
+spec:
+  ports:
+    - port: 8800
+      targetPort: 8800
+  selector:
+    name: info-uc-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-uc-service
+  labels:
+    name: info-uc-service
+spec:
+  selector:
+    matchLabels:
+      name: info-uc-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-uc-service
+    spec:
+      containers:
+      - name: info-uc-service
+        image: reg.test.local/library/info-uc-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+        - name: registry-secret

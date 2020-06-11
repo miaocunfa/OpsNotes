@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-hotel-service
+  labels:
+    name: info-hotel-service
+spec:
+  selector:
+    matchLabels:
+      name: info-hotel-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-hotel-service
+    spec:
+      containers:
+      - name: info-hotel-service
+        image: reg.test.local/library/info-hotel-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

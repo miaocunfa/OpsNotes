@@ -1,64 +1,3 @@
----
-title: "自动生成部署yaml"
-date: "2020-06-10"
-categories:
-    - "技术"
-tags:
-    - "Kubernetes"
-    - "容器化"
-    - "yaml"
-toc: false
-indent: false
-original: true
----
-
-## 1、模板
-
-``` bash
-➜ vim info-mould-deploy.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${jarName}
-  labels:
-    name: ${jarName}
-    version: v1
-spec:
-  ports:
-    - port: ${port}
-      targetPort: ${port}
-  selector:
-    name: ${jarName}
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${jarName}
-  labels:
-    name: ${jarName}
-spec:
-  selector:
-    matchLabels:
-      name: ${jarName}
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        name: ${jarName}
-    spec:
-      containers:
-      - name: ${jarName}
-        image: reg.test.local/library/${jarName}:${tag}
-      imagePullSecrets:
-        - name: registry-secret
-```
-
-## 2、生成脚本
-
-``` shell
-➜  vim auto_create_deploy_yaml.py
 #!/usr/bin/python
 # encoding: utf-8
 
@@ -101,7 +40,7 @@ isMould = os.path.isfile(mould_file)
 if isMould:
     for service_name, service_ports in services.items():
         for port in service_ports:
-            save_file = 'auto-json/' + service_name + '-deploy.yaml'
+            save_file = 'auto/' + service_name + '-deploy.yaml'
             outfile = open(save_file, 'w', encoding='utf-8')
 
             # 对文件的每一行进行遍历，同时进行替换操作
@@ -115,4 +54,3 @@ if isMould:
             outfile.close()
 else:
     print("Mould File is Not Exist!")
-```

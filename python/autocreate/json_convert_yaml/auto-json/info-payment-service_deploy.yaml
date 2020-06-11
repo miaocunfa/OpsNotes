@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-payment-service
+  labels:
+    name: info-payment-service
+spec:
+  selector:
+    matchLabels:
+      name: info-payment-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-payment-service
+    spec:
+      containers:
+      - name: info-payment-service
+        image: reg.test.local/library/info-payment-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

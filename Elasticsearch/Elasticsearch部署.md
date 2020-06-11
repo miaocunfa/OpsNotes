@@ -14,10 +14,12 @@ original: true
 ## 一、环境准备
 
 在elastic官网下载最新版的elasticsearch安装包
-> https://www.elastic.co/cn/downloads/past-releases
+> <https://www.elastic.co/cn/downloads/past-releases>
 
 ### 1.1、创建用户
+
 自elasticsearch x.x版本开始，为了安全已经不能使用root用户启动
+
 ``` bash
 $ useradd es
 ```
@@ -25,12 +27,14 @@ $ useradd es
 ## 二、部署配置
 
 ### 2.1、软件包准备
+
 ``` bash
 $ tar -zxvf elasticsearch-7.5.1-linux-x86_64.tar.gz
 $ chown -R es:es elasticsearch-7.5.1 # 将目录属主属组修改给es用户
 ```
 
 ### 2.2、目录结构介绍
+
 ``` bash
 $ cd elasticsearch-7.5.1
 $ ll
@@ -49,6 +53,7 @@ drwxr-xr-x.  2 es es      6 Dec 16 18:01 plugins        # 插件
 ```
 
 ### 2.3、配置文件
+
 ``` conf
 $ cat elasticsearch.yml | grep -v ^# | grep -v ^$
 cluster.name: mytest
@@ -63,6 +68,7 @@ cluster.initial_master_nodes: ["mytest-1"]
 ```
 
 ## 三、启动验证
+
 ``` bash
 $ ./elasticsearch -d
 $ curl localhost:9200

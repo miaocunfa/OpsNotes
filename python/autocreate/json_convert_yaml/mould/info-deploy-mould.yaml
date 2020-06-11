@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${jarName}
+  labels:
+    name: ${jarName}
+spec:
+  selector:
+    matchLabels:
+      name: ${jarName}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: ${jarName}
+    spec:
+      containers:
+      - name: ${jarName}
+        image: reg.test.local/library/${jarName}:${tag}
+      imagePullSecrets:
+        - name: registry-secret

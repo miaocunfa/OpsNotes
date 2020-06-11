@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-store-service
+  labels:
+    name: info-store-service
+    version: v1
+spec:
+  ports:
+    - port: 8807
+      targetPort: 8807
+  selector:
+    name: info-store-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-store-service
+  labels:
+    name: info-store-service
+spec:
+  selector:
+    matchLabels:
+      name: info-store-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-store-service
+    spec:
+      containers:
+      - name: info-store-service
+        image: reg.test.local/library/info-store-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+        - name: registry-secret

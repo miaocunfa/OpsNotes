@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-gateway
+  labels:
+    name: info-gateway
+    version: v1
+spec:
+  ports:
+    - port: 9999
+      targetPort: 9999
+  selector:
+    name: info-gateway
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-gateway
+  labels:
+    name: info-gateway
+spec:
+  selector:
+    matchLabels:
+      name: info-gateway
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-gateway
+    spec:
+      containers:
+      - name: info-gateway
+        image: reg.test.local/library/info-gateway:0.0.1-SNAPSHOT
+      imagePullSecrets:
+        - name: registry-secret

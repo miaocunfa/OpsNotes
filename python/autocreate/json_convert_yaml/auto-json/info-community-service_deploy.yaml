@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-community-service
+  labels:
+    name: info-community-service
+spec:
+  selector:
+    matchLabels:
+      name: info-community-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-community-service
+    spec:
+      containers:
+      - name: info-community-service
+        image: reg.test.local/library/info-community-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

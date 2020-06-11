@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-ad-service
+  labels:
+    name: info-ad-service
+spec:
+  selector:
+    matchLabels:
+      name: info-ad-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-ad-service
+    spec:
+      containers:
+      - name: info-ad-service
+        image: reg.test.local/library/info-ad-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

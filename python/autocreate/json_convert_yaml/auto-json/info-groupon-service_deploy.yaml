@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-groupon-service
+  labels:
+    name: info-groupon-service
+spec:
+  selector:
+    matchLabels:
+      name: info-groupon-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-groupon-service
+    spec:
+      containers:
+      - name: info-groupon-service
+        image: reg.test.local/library/info-groupon-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

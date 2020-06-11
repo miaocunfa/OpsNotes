@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-news-service
+  labels:
+    name: info-news-service
+spec:
+  selector:
+    matchLabels:
+      name: info-news-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-news-service
+    spec:
+      containers:
+      - name: info-news-service
+        image: reg.test.local/library/info-news-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

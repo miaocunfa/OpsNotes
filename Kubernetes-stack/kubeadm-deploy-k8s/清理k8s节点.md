@@ -136,3 +136,38 @@ Chain cali-from-endpoint-mark (0 references)
 # 删除所有自定义链
 ➜  iptables -vnL | grep cali | awk '{print $2}' | xargs -i[] iptables -X
 ```
+
+## 四、清理脚本
+
+由于一步步执行太繁杂，我将上述过程整理为脚本，一键清理。
+
+``` sh
+➜  vim clean_k8s_node.sh
+yum list installed | grep kube | awk '{print $1}' | xargs yum remove -y
+
+# 删除kubernetes遗留目录
+rm -rf /etc/kubernetes/
+rm -rf /usr/bin/kube*
+rm -rf /etc/cni
+rm -rf /opt/cni
+rm -rf /etc/systemd/system/kubelet.service*
+
+# 卸载所有docker服务
+yum list installed | grep docker | awk '{print $1}' | xargs yum remove -y
+
+# 删除docker遗留目录
+rm -rf /var/lib/docker
+rm -rf /var/run/docker
+rm -rf /etc/docker
+rm -rf /opt/containerd
+
+# 删除 docker0桥及kube-ipvs0桥
+ip link delete kube-ipvs0
+ip link delete docker0
+
+# 删除所有自定义链
+iptables -vnL | grep cali | awk '{print $2}' | xargs -i[] iptables -X
+
+➜  chmod u+x clean_k8s_node.sh
+➜  ./clean_k8s_node.sh
+```

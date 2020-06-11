@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-scheduler-service
+  labels:
+    name: info-scheduler-service
+spec:
+  selector:
+    matchLabels:
+      name: info-scheduler-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-scheduler-service
+    spec:
+      containers:
+      - name: info-scheduler-service
+        image: reg.test.local/library/info-scheduler-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+      - name: registry-secret

@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: info-scheduler-service
+  labels:
+    name: info-scheduler-service
+    version: v1
+spec:
+  ports:
+    - port: 8777
+      targetPort: 8777
+  selector:
+    name: info-scheduler-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-scheduler-service
+  labels:
+    name: info-scheduler-service
+spec:
+  selector:
+    matchLabels:
+      name: info-scheduler-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: info-scheduler-service
+    spec:
+      containers:
+      - name: info-scheduler-service
+        image: reg.test.local/library/info-scheduler-service:0.0.1-SNAPSHOT
+      imagePullSecrets:
+        - name: registry-secret
