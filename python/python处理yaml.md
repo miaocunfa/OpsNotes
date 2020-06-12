@@ -1,132 +1,57 @@
-``` yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${jarName}
-  labels:
-    name: ${jarName}
-    version: v1
-spec:
-  ports:
-    - port: ${port}
-      targetPort: ${port}
-  selector:
-    name: ${jarName}
-```
+---
+title: "python处理yaml"
+date: "2020-06-12"
+categories:
+    - "技术"
+tags:
+    - "python"
+    - "json"
+    - "yaml"
+toc: false
+indent: false
+original: false
+---
 
-``` json
-{
-  "apiVersion": "v1",
-  "kind": "Service",
-  "metadata": {
-    "name": "${jarName}",
-    "labels": {
-      "name": "${jarName}",
-      "version": "v1"
-    }
-  },
-  "spec": {
-    "ports": [
-      {
-        "port": "${port}",
-        "targetPort": "${port}"
-      }
-    ],
-    "selector": {
-      "name": "${jarName}"
-    }
-  }
-}
-```
+> 作者：可优  
+> 链接：<https://www.cnblogs.com/keyou1/p/11510975.html>
 
-``` yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${jarName}
-  labels:
-    name: ${jarName}
-spec:
-  selector:
-    matchLabels:
-      name: ${jarName}
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        name: ${jarName}
-    spec:
-      containers:
-      - name: ${jarName}
-        image: reg.test.local/library/${jarName}:${tag}
-      imagePullSecrets:
-        - name: registry-secret
-```
+## 一、python模块
 
-``` json
-{
-  "apiVersion": "apps/v1",
-  "kind": "Deployment",
-  "metadata": {
-    "name": "${jarName}",
-    "labels": {
-      "name": "${jarName}"
-    }
-  },
-  "spec": {
-    "selector": {
-      "matchLabels": {
-        "name": "${jarName}"
-      }
-    },
-    "replicas": 1,
-    "template": {
-      "metadata": {
-        "labels": {
-          "name": "${jarName}"
-        }
-      },
-      "spec": {
-        "containers": [
-          {
-            "name": "${jarName}",
-            "image": "reg.test.local/library/${jarName}:${tag}"
-          }
-        ],
-        "imagePullSecrets": [
-          {
-            "name": "registry-secret"
-          }
-        ]
-      }
-    }
-  }
-}
-```
+pyyaml
+
+- 应用最广泛
+- 封装的api不够简单
+- 不支持YAML 1.2最新版
 
 ruamel.yaml
 
-1.安装ruamel.yaml
+- 是pyyaml的衍生版
+- 封装的api简单
+- 支持YAML 1.2最新版
+
+## 二、安装ruamel.yaml
 
 使用官方pypi源来安装
 
-```
-pip install ruamel.yaml
+``` zsh
+➜  pip install ruamel.yaml
 ```
 
 使用豆瓣pypi源来安装（推荐）
 
-```
-pip install -i https://pypi.douban.com/simple ruamel.yaml
+``` zsh
+➜  pip install -i https://pypi.douban.com/simple ruamel.yaml
 ```
 
-2.基本用法
+## 三、基本用法
 
-在项目根目录下创建user_info.yaml文件
+### 3.1、yaml转JSON
+
+原始yaml
 
 ``` yaml
+➜  vim user_info.yaml
 # 外号
----
 user:
   - 可优
   - keyou
@@ -139,9 +64,10 @@ lovers:
   - 橘子小姐姐
 ```
 
-将yaml格式的数据转化为python中的数据类型
+使用python进行处理
 
-``` py
+``` zsh
+➜  vim yaml_json.py
 from ruamel.yaml import YAML
 
 # 第一步: 创建YAML对象
@@ -155,14 +81,25 @@ yaml = YAML(typ='safe')
 
 # 第二步: 读取yaml格式的文件
 with open('user_info.yaml', encoding='utf-8') as file:
-    data = yaml.load(file)  # 为列表类型
+    data = yaml.load(file)  # 为JSON
 
 print(f"data:\n{data}")
 ```
 
+输出结果
+
+``` zsh
+➜  python3 yaml_json.py
+data:
+{'user': ['可优', 'keyou', '小可可', '小优优'], 'lovers': ['柠檬小姐姐', '橘子小姐姐']}
+```
+
+### 3.2、JSON转yaml
+
 将Python中的字典或者列表转化为yaml格式的数据
 
-``` py
+``` zsh
+➜  vim json_yaml.py
 from ruamel.yaml import YAML
 
 # 第一步: 创建YAML对象
@@ -180,7 +117,8 @@ with open('new_user_info.yaml', mode='w', encoding='utf-8') as file:
 
 生成的new_user_info.yaml文件:
 
-``` yaml
+``` zsh
+➜  cat new_user_info.yaml
 user:
   name: 可优
   age: 17
@@ -192,9 +130,12 @@ lovers:
 - 小可可
 ```
 
+### 3.3、对象转yaml
+
 1.将Python中的对象转化为yaml格式数据
 
-``` py
+``` zsh
+➜  vim object_yaml.yaml
 from ruamel.yaml import YAML
 
 # 第一步: 创建需要保存的User类
@@ -203,9 +144,7 @@ class User:
     定义用户类
     """
     def __init__(self, name, age, gender):
-        self.name,
-        self.age,
-        self.gender = name, age, gender
+        self.name, self.age, self.gender = name, age, gender
         self.lovers = []
 
     def loved(self, user):
@@ -231,7 +170,8 @@ with open('lovers.yaml', mode='w', encoding='utf-8') as file:
 
 生成的lovers.yaml文件:
 
-``` yaml
+``` zsh
+➜  cat lovers.yaml
 - !User
   name: 可优
   age: 17

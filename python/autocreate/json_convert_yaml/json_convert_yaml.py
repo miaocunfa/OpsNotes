@@ -13,16 +13,18 @@ Create Time:        10:30
 import os
 from ruamel.yaml import YAML
 
+yaml = YAML()
+
 def create_service_yaml(service_name, ports):
 
     service_mould_file = "mould/info-service-mould.yaml"
     isServiceMould = os.path.isfile(service_mould_file)
 
     if isServiceMould:
-        yaml = YAML(typ='safe')
+
         # read Service-mould yaml convert json
         with open(service_mould_file, encoding='utf-8') as yaml_obj:
-            service_data = yaml.load(yaml_obj)  # ä¸ºJSON
+            service_data = yaml.load(yaml_obj)
 
         # Update jarName
         service_data['metadata']['name'] = service_name
@@ -38,7 +40,6 @@ def create_service_yaml(service_name, ports):
         service_data['spec']['ports'] = new_spec_ports
 
         # json To service yaml
-        yaml = YAML(typ='rt')
         save_file = 'auto-json/' + service_name + '_svc.yaml'
         with open(save_file, mode='w', encoding='utf-8') as yaml_obj:
             yaml.dump(service_data, yaml_obj)
@@ -52,15 +53,16 @@ def create_deploy_yaml(service_name, tag):
     isDeployMould = os.path.isfile(deploy_mould_file)
 
     if isDeployMould:
-        yaml = YAML(typ='safe')
+
+        # read deploy-mould yaml convert json
         with open(deploy_mould_file, encoding='utf-8') as yaml_obj:
-            deploy_data = yaml.load(yaml_obj)  # ä¸ºJSON
-        
+            deploy_data = yaml.load(yaml_obj)
+
         # Update jarName
         deploy_data['metadata']['name'] = service_name
-        deploy_data['metadata']['labels']['name'] = service_name                                                                                               
-        deploy_data['spec']['selector']['matchLabels']['name'] = service_name                                                                                   
-        deploy_data['spec']['template']['metadata']['labels']['name'] = service_name  
+        deploy_data['metadata']['labels']['name'] = service_name
+        deploy_data['spec']['selector']['matchLabels']['name'] = service_name
+        deploy_data['spec']['template']['metadata']['labels']['name'] = service_name
 
         # Update containers
         image = "reg.test.local/library/" + service_name + ":" + tag
@@ -68,7 +70,6 @@ def create_deploy_yaml(service_name, tag):
         deploy_data['spec']['template']['spec']['containers'] = new_containers
 
         # json To service yaml
-        yaml = YAML(typ='rt')
         save_file = 'auto-json/' + service_name + '_deploy.yaml'
         with open(save_file, mode='w', encoding='utf-8') as yaml_obj:
             yaml.dump(deploy_data, yaml_obj)

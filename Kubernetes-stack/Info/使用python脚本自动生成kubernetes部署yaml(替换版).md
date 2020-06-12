@@ -1,9 +1,10 @@
 ---
-title: "自动生成部署yaml"
+title: "使用python脚本自动生成kubernetes部署yaml(替换版)"
 date: "2020-06-10"
 categories:
     - "技术"
 tags:
+    - "python"
     - "Kubernetes"
     - "容器化"
     - "yaml"
@@ -101,7 +102,7 @@ isMould = os.path.isfile(mould_file)
 if isMould:
     for service_name, service_ports in services.items():
         for port in service_ports:
-            save_file = 'auto-json/' + service_name + '-deploy.yaml'
+            save_file = 'auto/' + service_name + '-deploy.yaml'
             outfile = open(save_file, 'w', encoding='utf-8')
 
             # 对文件的每一行进行遍历，同时进行替换操作
@@ -116,3 +117,5 @@ if isMould:
 else:
     print("Mould File is Not Exist!")
 ```
+
+后来发现替换这种方法有缺陷，最后使用的方法是通过编辑json来生成yaml。
