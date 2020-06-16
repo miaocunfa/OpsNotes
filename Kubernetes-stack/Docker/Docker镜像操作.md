@@ -42,10 +42,12 @@ Run 'docker COMMAND --help' for more information on a command.
 ```
 
 ``` zsh
+Usage:  docker [OPTIONS] COMMAND
+
 ➜  docker build     # 通过Dockerfile构建镜像
 ➜  docker commit    # 通过对正在运行的容器的改变创建镜像
 ➜  docker history   # 查看镜像历史
-➜  docker images    # 列出镜像
+➜  docker images    # 查看镜像列表
 ➜  docker import    # 导入镜像
 ➜  docker load      # 导入镜像
 ➜  docker pull      # 拉取镜像
@@ -56,7 +58,7 @@ Run 'docker COMMAND --help' for more information on a command.
 ➜  docker tag       # 打tag标签
 ```
 
-### 1.2、列出镜像
+### 1.2、查看镜像列表
 
 ``` zsh
 Usage:  docker images [OPTIONS] [REPOSITORY[:TAG]]
@@ -117,7 +119,7 @@ armhf/busybox             Busybox base image.                             6
 odise/busybox-curl                                                        4                                       [OK]
 ```
 
-### 1.5、拉取
+### 1.5、拉取镜像
 
 #### 1.5.1、Usage
 
@@ -186,25 +188,35 @@ Status: Image is up to date for nginx@sha256:159aedcc6acb8147c524ec2d11f02112bc2
 docker.io/library/nginx@sha256:159aedcc6acb8147c524ec2d11f02112bc21f9e8eb33e328fb7c04b05fc44e1c
 ```
 
-### 1.6、推送
+### 1.6、推送镜像
 
 要推送的镜像的名称必须跟要推送到的仓库一致
 
 ``` zsh
 Usage:  docker push [OPTIONS] NAME[:TAG]
 
-# 例如我们要推送k8s镜像
-➜  docker images k8s.gcr.io/*
-REPOSITORY                           TAG                 IMAGE ID            CREATED             SIZE
-k8s.gcr.io/kube-proxy                v1.16.10            495a36f501e1        3 weeks ago         116MB
-k8s.gcr.io/kube-apiserver            v1.16.10            d925057c2fa5        3 weeks ago         170MB
-k8s.gcr.io/kube-controller-manager   v1.16.10            95b2e4f548f1        3 weeks ago         162MB
-k8s.gcr.io/kube-scheduler            v1.16.10            e81d6df90318        3 weeks ago         93.6MB
-k8s.gcr.io/etcd                      3.3.15-0            b2756210eeab        9 months ago        247MB
-k8s.gcr.io/coredns                   1.6.2               bf261d157914        10 months ago       44.1MB
-k8s.gcr.io/pause                     3.1                 da86e6ba6ca1        2 years ago         742kB
 
-# 先修改tag
+# 推送 nginx
+➜  docker images nginx
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               1.18.0              9fc56f7e4c11        6 days ago          132MB
+nginx               1.16.1              dfcfd8e9a5d3        7 weeks ago         127MB
+➜  docker tag nginx:1.16.1 reg.test.local/library/nginx:1.16.1
+➜  docker images
+REPOSITORY                                            TAG                 IMAGE ID            CREATED             SIZE
+nginx                                                 1.18.0              9fc56f7e4c11        6 days ago          132MB
+nginx                                                 1.16.1              dfcfd8e9a5d3        7 weeks ago         127MB
+reg.test.local/library/nginx                          1.16.1              dfcfd8e9a5d3        7 weeks ago         127MB
+➜  docker push reg.test.local/library/nginx:1.16.1
+The push refers to repository [reg.test.local/library/nginx]
+c23548ea0b99: Pushed
+82068c842707: Pushed
+c2adabaecedb: Pushed
+1.16.1: digest: sha256:2963fc49cc50883ba9af25f977a9997ff9af06b45c12d968b7985dc1e9254e4b size: 948
+
+
+# 批量推送
+# 例如我们要批量推送k8s镜像
 ➜  kubeadm config images list
 I0615 18:19:23.043038 2946627 version.go:251] remote version is much newer: v1.18.3; falling back to: stable-1.16
 k8s.gcr.io/kube-apiserver:v1.16.10
@@ -222,34 +234,140 @@ do
     imageName=${i#k8s.gcr.io/}  
     docker tag  k8s.gcr.io/$imageName reg.test.local/google_containers/$imageName
     docker push reg.test.local/google_containers/$imageName
+    docker rmi  reg.test.local/google_containers/$imageName
 done
 ```
 
-### 1.7、历史
+### 1.7、镜像历史
 
 ``` zsh
 Usage:  docker history [OPTIONS] IMAGE
 
-# 查看镜像历史
-➜  docker history
+# 查看镜像历史，每一层命令都会记录
+➜  docker history nginx:1.16.1
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+dfcfd8e9a5d3        7 weeks ago         /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  STOPSIGNAL SIGTERM           0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  EXPOSE 80                    0B
+<missing>           7 weeks ago         /bin/sh -c ln -sf /dev/stdout /var/log/nginx…   22B
+<missing>           7 weeks ago         /bin/sh -c set -x     && addgroup --system -…   57.5MB
+<missing>           7 weeks ago         /bin/sh -c #(nop)  ENV PKG_RELEASE=1~buster     0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  ENV NJS_VERSION=0.3.8        0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  ENV NGINX_VERSION=1.16.1     0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  LABEL maintainer=NGINX Do…   0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  CMD ["bash"]                 0B
+<missing>           7 weeks ago         /bin/sh -c #(nop) ADD file:9b8be2b52ee0fa31d…   69.2MB
 ```
 
-### 1.8、构建
+### 1.8、镜像提交
+
+通过对正在运行的容器的改变创建镜像
+
+``` zsh
+Usage:  docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+
+# 没修改部分
+# 先run一个容器
+➜  docker run --name mynginx -d nginx:1.16.1
+522225bbf8293397789cae9c9a7150ed51927874cce74a8b14722ea57de578be
+➜  docker ps
+CONTAINER ID        IMAGE                                             COMMAND                  CREATED             STATUS              PORTS               NAMES
+522225bbf829        nginx:1.16.1                                      "nginx -g 'daemon of…"   20 seconds ago      Up 15 seconds       80/tcp              mynginx
+# 获取容器IP地址
+➜  docker inspect mynginx -f '{{ .NetworkSettings.IPAddress }}'
+172.17.0.2
+# 没修改前返回的内容
+➜  curl 172.17.0.2
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+
+# 修改部分
+# 开始进入容器修改主页面
+➜  docker exec -it mynginx /bin/bash
+root@522225bbf829:/# cd /usr/share/nginx/html
+root@522225bbf829:/usr/share/nginx/html# ls
+50x.html  index.html
+root@522225bbf829:/usr/share/nginx/html# > index.html
+root@522225bbf829:/usr/share/nginx/html# echo "Hello, Nginx!" >> index.html    # 修改主页
+root@522225bbf829:/usr/share/nginx/html# exit
+exit
+# 修改成功，返回的内容
+➜  curl 172.17.0.2
+Hello, Nginx!
+# 将修改提交为一个新镜像，hello_nginx:v0.0.1
+➜  docker commit mynginx hello_nginx:v0.0.1
+sha256:c52790c78338e68e6fe9e25b074dbed9af85ab49e176a8802e2e63cb2240933f
+➜  docker images hello_nginx
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello_nginx         v0.0.1              c52790c78338        15 seconds ago      127MB
+# 修改成功后的镜像层
+➜  docker history hello_nginx:v0.0.1
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+c52790c78338        45 seconds ago      nginx -g daemon off;                            358B                           # 显示这一层为45秒前创建
+dfcfd8e9a5d3        7 weeks ago         /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  STOPSIGNAL SIGTERM           0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  EXPOSE 80                    0B
+<missing>           7 weeks ago         /bin/sh -c ln -sf /dev/stdout /var/log/nginx…   22B
+<missing>           7 weeks ago         /bin/sh -c set -x     && addgroup --system -…   57.5MB
+<missing>           7 weeks ago         /bin/sh -c #(nop)  ENV PKG_RELEASE=1~buster     0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  ENV NJS_VERSION=0.3.8        0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  ENV NGINX_VERSION=1.16.1     0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  LABEL maintainer=NGINX Do…   0B
+<missing>           7 weeks ago         /bin/sh -c #(nop)  CMD ["bash"]                 0B
+<missing>           7 weeks ago         /bin/sh -c #(nop) ADD file:9b8be2b52ee0fa31d…   69.2MB
+
+
+# 验证部分
+# 使用新镜像拉起容器
+➜  docker run --name hello_nginx -d hello_nginx:v0.0.1
+b8120e67551de54037d01238ec6684e833be351b5b27fc8fdeae5f36911823b0
+# 获取IP地址
+➜  docker inspect hello_nginx -f '{{ .NetworkSettings.IPAddress }}'
+172.17.0.4
+# 验证内容
+➜  curl 172.17.0.4
+Hello, Nginx!
+```
+
+### 1.9、镜像的导出
+
+docker的导出命令有两个save、export
+
+``` zsh
+
+```
+
+### 1.10、镜像构建
 
 ``` zsh
 Usage:  docker build [OPTIONS] PATH | URL | -
 
 # 通过Dockerfile构建镜像
 ➜  docker build
-```
-
-### 1.9、提交
-
-``` zsh
-Usage:  docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
-
-# 通过对正在运行的容器的改变创建镜像
-➜  docker commit  
 ```
 
 ## 二、docker image
