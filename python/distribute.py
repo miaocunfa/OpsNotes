@@ -10,6 +10,8 @@ Create Time:        16:44
 
 import os
 import paramiko
+import scpclient
+from contextlib import closing
 
 deploy = {
     'info-gateway.jar':           ['s2'],
@@ -29,6 +31,7 @@ deploy = {
     'info-scheduler-service.jar': ['s2', 's3'],
     'info-uc-service.jar':        ['s2', 's3'],
     'info-store-service.jar':     ['s2', 's3'],
+    'info-test-service.jar':      ['192.168.100.237'],
 }
 
 deploy_dir = "/home/wangchaochao/"
@@ -41,7 +44,7 @@ ssh.load_system_host_keys()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())   
 
 if deploy_jars:
-    for jar, hosts in deploy:
+    for jar, hosts in deploy.items():
         if jar in deploy_jars:
             for host in hosts:
                 remote_path="/home/miaocunfa/"
@@ -49,8 +52,8 @@ if deploy_jars:
                 local_filename=deploy_dir + jar
 
                 # 远程访问的服务器信息
-                ssh.connect(host, port=22, username=root, password=test123) 
+                ssh.connect(host, port=22, username='root', password='test123') 
    
                 #创建scp
                 with closing(scpclient.Write(ssh.get_transport(), remote_path=remote_path)) as scp:
-                    scp.send_file(local_filename, preserve_times=True, remote_filename=remote_filename) 
+                    scp.send_file(local_filename, preserve_times=True, remote_filename=remote_filename)
