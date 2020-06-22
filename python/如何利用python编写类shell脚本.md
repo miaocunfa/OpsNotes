@@ -11,7 +11,7 @@ toc: false
 original: true
 ---
 
-## 一、python shell && python源
+## 一、python 命令行解释器 && python源
 
 ### 1.1、iPython
 
@@ -184,6 +184,6 @@ with SCPClient(ssh.get_transport(), progress4=progress4) as scp:
 ### 4.1、安装
 
 ``` zsh
-yum install -y nmap
-pip3 install python-nmap -i https://pypi.douban.com/simple
+➜  yum install -y nmap
+➜  pip3 install python-nmap -i https://pypi.douban.com/simple
 ```
