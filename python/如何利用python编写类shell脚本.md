@@ -187,3 +187,6 @@ with SCPClient(ssh.get_transport(), progress4=progress4) as scp:
 ➜  yum install -y nmap
 ➜  pip3 install python-nmap -i https://pypi.douban.com/simple
 ```
+
+## 五、psutil模块
+
