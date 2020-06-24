@@ -58,6 +58,7 @@ postgres=# ALTER ROLE my_role WITH login;
 ```
 
 ### 2.2、查询角色
+
 ``` SQL
 postgres=# SELECT rolname FROM pg_roles;
 
@@ -76,7 +77,7 @@ postgres=# grant select on myt to my_role;
 GRANT
 postgres=# \dp+
                                 Access privileges
- Schema |  Name   | Type  |     Access privileges     | Column access privileges 
+ Schema |  Name   | Type  |     Access privileges     | Column access privileges
 --------+---------+-------+---------------------------+--------------------------
  public | company | table |                           |
  public | myt     | table | postgres=arwdDxt/postgres+|
@@ -107,7 +108,7 @@ SELECT pu.usename, pc.tbl, pc.privilege_type
        ) pc ON pc.grantee=pu.usesysid;
 
 # return
- usename  | tbl | privilege_type 
+ usename  | tbl | privilege_type
 ----------+-----+----------------
  postgres | myt | INSERT
  postgres | myt | SELECT
@@ -239,6 +240,38 @@ postgres=# \dt;
  mynewschema | myt  | table | postgres
  mynewschema | myt1 | table | postgres
 (2 rows)
+```
+
+## 四、数据库
+
+### 4.1、查看数据库列表
+
+``` SQL
+postgres=# \l
+                                  List of databases
+   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+-----------+----------+----------+-------------+-------------+-----------------------
+ bench     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ info      | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ pgpool    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ pms       | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ postgres  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+(7 rows)
+```
+
+### 4.2、切换数据库
+
+``` SQL
+postgres=# \c info
+psql (9.2.24, server 10.10)
+WARNING: psql version 9.2, server version 10.0.
+         Some psql features might not work.
+You are now connected to database "info" as user "postgres".
+info=#
 ```
 
 > 参考列表：  

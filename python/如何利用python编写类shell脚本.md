@@ -190,3 +190,17 @@ with SCPClient(ssh.get_transport(), progress4=progress4) as scp:
 
 ## 五、psutil模块
 
+### 5.1、安装
+
+``` zsh
+➜  pip3 install psutil -i https://pypi.douban.com/simple
+```
+
+### 5.2、pid获取
+
+``` py
+import os
+
+pid_stdout = os.popen("ps -ef | grep " + jar + " | grep -v grep | awk '{print $2}' ")
+pid = pid_stdout.read().rstrip()
+```
