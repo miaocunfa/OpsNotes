@@ -35,7 +35,7 @@ deploy_info = {
     'info-message-service.jar':   ['192.168.100.222'],
     'info-scheduler-service.jar': ['s3'],
     'info-agent-service.jar':     ['s2', 's3'],
-    'info-ad-service.jar':        ['s2', 's3'],
+    'info-ad-service.jar':        ['192.168.100.222'],
     'info-auth-service.jar':      ['s2', 's3'],
     'info-community-service.jar': ['s2', 's3'],
     'info-groupon-service.jar':   ['s2', 's3'],
@@ -43,7 +43,7 @@ deploy_info = {
     'info-nearby-service.jar':    ['s2', 's3'],
     'info-news-service.jar':      ['s2', 's3'],
     'info-payment-service.jar':   ['s2', 's3'],
-    'info-uc-service.jar':        ['s2', 's3'],
+    'info-uc-service.jar':        ['192.168.100.222'],
 }
 
 #version_hosts = ['s1', 's2', 's3', 's4', 'ng1', 'ng2']
@@ -52,7 +52,7 @@ version_hosts = ['192.168.100.218', '192.168.100.222']
 deploy_dir = "/home/wangchaochao/deployJar/"
 deploy_jars = os.listdir(deploy_dir)
 version_time = time.strftime('%Y%m%d%H%M',time.localtime(time.time()))
-version_file = "/home/miaocunfa/bin/version.json"
+distribute_file = "/home/miaocunfa/bin/distribute.json"
 
 remote_path="/home/miaocunfa/deployJar/"
 remote_port="22"
@@ -66,7 +66,7 @@ ssh = paramiko.SSHClient()
 ssh.load_system_host_keys()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())   # 允许连接不在know_hosts文件中的主机
 
-if deploy_jars: 
+if deploy_jars:
     print("")
     print("Version: " + version_time)
     print("")
@@ -74,37 +74,54 @@ if deploy_jars:
     print(json.dumps(deploy_jars, indent=4))
     print("")
 
-    # 声明一个空的版本信息
+    # 声明一个空的分发信息
+    distribute_info = {}
     version_info = {}
-    version_info['version'] = version_time
+    deployJar = []
 
+    distribute_info['last-state'] = "Not distributed"
+    
     for jar in deploy_jars:
         if jar in deploy_info:
+
             hosts = deploy_info[ jar ]
             remote_filename = remote_path + jar
             local_filename = deploy_dir + jar
 
-            # 版本信息更新
+            # 分发信息更新
             jarInfo = {}
             jarInfo['version'] = version_time
             jarInfo['hosts'] = hosts
+            jarInfo['state'] = "Not distributed"
             version_info[jar] = jarInfo
-
+            
             # 发送部署文件至部署主机
             print(jar + ': ', end='')
             print(hosts)
             sendfile(local_filename, remote_filename, hosts)
+
+            # 发送Jar成功, 更新Jar的分发信息
+            distribute_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+            version_info[jar]['distribute-time'] = distribute_time
+            version_info[jar]['state'] = "distribute"
+            distribute_info[version_time] = version_info
+            deployJar.append(jar)
         else:
             raise SystemExit(jar + ': is Not In deploy_info{}')
 
-    # 写入版本信息至文件
-    with open(version_file, mode='w', encoding='utf-8') as json_obj:
-        json.dump(version_info, json_obj)
+    # 所有Jar发送成功, 更新分发版本信息
+    distribute_info[version_time]['jars'] = deployJar
+    distribute_info['last-distribute'] = version_time
+    distribute_info['last-state'] = "distribute"
+
+    # 写入分发信息至文件
+    with open(distribute_file, mode='w', encoding='utf-8') as json_obj:
+        json.dump(distribute_info, json_obj)
 
     print("")
     print("Send Version Info: ")
 
-    # 发送版本信息至主机
-    sendfile(version_file, version_file, version_hosts)
+    # 发送分发信息至主机
+    sendfile(distribute_file, distribute_file, version_hosts)
 else:
     print(deploy_dir + ": is Empty!")
