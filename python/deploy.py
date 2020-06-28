@@ -15,71 +15,126 @@ import time
 import socket
 
 
-# -------------------------------------------------------------------------
-def check_ip_port(IP, Port):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(3)
-    result = s.connect_ex((IP, Port))
-    if result == 0:
-        print("The Server IP: {} , Port {} has been used".format(IP, Port))
-    elif result == 10061:
-        print("The Server IP: {} , Port {} not enabled".format(IP, Port))
-    elif result == 10035:
-        print("The Server IP: {} , no response".format(IP, Port))
-    else:
-        print(result)
-    s.close()
-    return result
-
-
-def get_host_ip(): 
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-    finally:
-        s.close()
-    return ip
-
-
-def check_message_service()
-    if 'info-message-service.jar' in deploy_jars:
-        Active = 0
-
-        while Active:
-            return8 = check_ip_port(IP, 8555)
-            #print(return8)
-            return9 = check_ip_port(IP, 9666)
-            #print(return9)
-
-            if ( return8 == '0' ) and ( return9 == '0'):
-                print("Port in Use!")
-            else:
-                Active = 1
-
-
-# --------------------------------------------------------
+# Set Parameter
+workDir = "/opt/aihangxunxi/"
+ahanglib = workDir + "lib/"
+ahangbin = workDir + "bin/"
 deploy_dir = "/home/miaocunfa/deployJar"
 deploy_jars = os.listdir(deploy_dir)
-version_file = "/home/miaocunfa/bin/version.json"
-IP = get_host_ip()
+Not_distributed = 0                                                       # 0: 默认经过分发服务器, 1: 直接部署
+version_time = time.strftime('%Y%m%d%H%M',time.localtime(time.time()))    # 直接部署的版本号
+distributed_file = "/home/miaocunfa/bin/distributed.json"
+repository_file = "/opt/aihangxunxi/bin/Repository.json"
+hostname = socket.gethostname()
 
-# --------------------------------------------------------
-# 读取版本信息至文件
-with open(version_file) as json_obj:
-    version_info = json.load(json_obj)
 
-version = version_info['version']
-print(version)
-print(IP)
+def deploy(jar):
+    stop_stdout = os.popen(ahangbin + "stop.sh " + jar)
+    stop_contents = stop_stdout.read()
+    print(stop_contents.rstrip())
 
-if deploy_jars: 
-    print("deploy jars: ")
-    print(json.dumps(deploy_jars, indent=4))
-    print("")
+    # 备份原程序包
+    #os.chdir(ahanglib)
+    #os.rename(jar, jar + '.rollback')
+    #os.rename(jar + "." + version, jar)
 
-    for jar in deploy_jars:
-        check_message_service()
-        
+    if jar == 'info-message-service.jar':
+        checkMessagePort()
+
+    start_stdout = os.popen(ahangbin + "start.sh " + jar)
+    start_contents = start_stdout.read()
+    print(start_contents.rstrip())
+
+
+def checkMessagePort():
+    print("\nWaiting for MessageService Port Connection Close!")
+    Active = True
+    while Active:
+        sconn_list = psutil.net_connections(kind='tcp')
+        message_8555_conn = len([sconn for sconn in sconn_list if sconn.status == 'ESTABLISHED' and sconn.laddr.port == 8555])
+        message_9666_conn = len([sconn for sconn in sconn_list if sconn.status == 'ESTABLISHED' and sconn.laddr.port == 9666])
+
+        print('Port 8555 connection num: ' + str(message_8555_conn))
+        print('Port 9666 connection num: ' + str(message_9666_conn))
+
+        if message_8555_conn == 0 and message_9666_conn == 0:
+            Active = False
+        else:
+            time.sleep(3)
+
+
+# 读取版本库
+if os.path.isfile(repository_file):
+    with open(repository_file) as json_obj:
+        Repository = json.load(json_obj)
 else:
-    print(deploy_dir + ": is Empty!")
+    print('Repository File: ' + repository_file + ': No such file or directory')
+    Repository = {}
+
+# 读取分发信息
+if os.path.isfile(distributed_file):
+    with open(distributed_file) as json_obj:
+        distributed_info = json.load(json_obj)
+
+    distributed_version = distributed_info['last-distributed']
+else:
+    Not_distributed = 1
+
+
+deployed_Jars = []       # 声明一个空的列表, 用来存储当前主机部署了哪些Jar
+
+for jar in deploy_jars:
+    if Not_distributed:
+        print("不经过分发")
+
+        deployed_version = {}    # 声明一个空的部署版本, 用来存储部署版本的信息
+        
+        #Repository['last-state'] = "Not-deployed"    # 更新初始状态
+        #Repository['last-deployed'] = ""             # 更新初始状态
+        
+        print(jar)
+        #deploy(jar)
+
+    else:
+        print("经过分发")
+        deploy_version = distributed_version
+
+        #print('distributed_version: ' + distributed_version)
+        #print('deploy_version: ' + deploy_version)
+
+        if distributed_version not in Repository:
+            print("未部署")
+
+            del distributed_info['last-state']
+            del distributed_info['last-distributed']
+            
+            Repository.update(distributed_info)
+            
+            print(jar)
+            #deploy(jar)
+
+            # 部署成功
+            deployed_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+            Repository[distributed_version][jar]['state'] = "deployed"
+            Repository[distributed_version][jar]['deployed-time'] = deployed_time
+            Repository['last-distributed'] = distributed_version
+            deployed_Jars.append(jar)
+
+        else:
+            print("部分部署")
+
+            if Repository[deploy_version][jar][state] != "deployed": 
+                print("部分部署-未部署")
+                print(jar)
+                #deploy(jar)
+            else:
+                print(jar + ": is already deployed!")
+
+# 版本更细结束, 更新版本库
+Repository[distributed_version][hostname] = deployed_Jars
+Repository['last-deployed'] = deploy_version
+Repository['last-state'] = "deployed"
+
+# 更新版本库
+with open(repository_file, mode='w', encoding='utf-8') as json_obj:
+    json.dump(repository_file, json_obj)

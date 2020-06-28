@@ -49,16 +49,16 @@ deploy_info = {
 #version_hosts = ['s1', 's2', 's3', 's4', 'ng1', 'ng2']
 version_hosts = ['192.168.100.218', '192.168.100.222']
 
-deploy_dir = "/home/wangchaochao/deployJar/"
-deploy_jars = os.listdir(deploy_dir)
+distribute_dir = "/home/wangchaochao/distributeJar/"
+distribute_jars = os.listdir(distribute_dir)
 version_time = time.strftime('%Y%m%d%H%M',time.localtime(time.time()))
-distribute_file = "/home/miaocunfa/bin/distribute.json"
+distributed_file = "/home/miaocunfa/bin/distributed.json"
 
 remote_path="/home/miaocunfa/deployJar/"
 remote_port="22"
 #remote_user="miaocunfa"
-remote_user="root"
 #remote_pass="@WSX#EDC"
+remote_user="root"
 remote_pass="test123"
 
 # 创建ssh访问
@@ -66,63 +66,63 @@ ssh = paramiko.SSHClient()
 ssh.load_system_host_keys()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())   # 允许连接不在know_hosts文件中的主机
 
-if deploy_jars:
+if distribute_jars:
     print("")
     print("Version: " + version_time)
     print("")
     print("Deploy Jars: ")
-    print(json.dumps(deploy_jars, indent=4))
+    print(json.dumps(distribute_jars, indent=4))
     print("")
-
-    # 声明一个空的分发信息
-    distribute_info = {}
-    version_info = {}
-    deployJar = []
-
-    distribute_info['last-state'] = "Not distributed"
-    distribute_info['last-distribute'] = ""
     
-    for jar in deploy_jars:
+    distributed_info = {}       # 声明一个空的分发信息, 用来存储所有的分发版本
+    distributed_version = {}    # 声明一个空的分发版本, 用来存储分发版本的信息
+    distributed_Jars = []       # 声明一个空的列表, 用来存储当前版本分发了哪些Jar
+
+    distributed_info['last-state'] = "Not distributed"    # 更新初始状态
+    distributed_info['last-distributed'] = ""             # 更新初始状态
+    
+    for jar in distribute_jars:
         if jar in deploy_info:
 
             hosts = deploy_info[ jar ]
             remote_filename = remote_path + jar
-            local_filename = deploy_dir + jar
+            local_filename = distribute_dir + jar
 
-            # 分发信息更新
-            jarInfo = {}
+            # 分发版本信息更新
+            jarInfo = {}        # 用于存储分发版本中的Jar信息
             jarInfo['version'] = version_time
             jarInfo['hosts'] = hosts
             jarInfo['state'] = "Not distributed"
-            version_info[jar] = jarInfo
+            distributed_version[jar] = jarInfo
             
             # 发送部署文件至部署主机
+            # 发送信息及状态展示
             print(jar + ': ', end='')
             print(hosts)
             sendfile(local_filename, remote_filename, hosts)
 
             # 发送Jar成功, 更新Jar的分发信息
-            distribute_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-            version_info[jar]['distribute-time'] = distribute_time
-            version_info[jar]['state'] = "distribute"
-            distribute_info[version_time] = version_info
-            deployJar.append(jar)
+            distributed_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+            distributed_version[jar]['distributed-time'] = distributed_time
+            distributed_version[jar]['state'] = "distributed"
+            distributed_info[version_time] = distributed_version
+            distributed_Jars.append(jar)
         else:
             raise SystemExit(jar + ': is Not In deploy_info{}')
 
     # 所有Jar发送成功, 更新分发版本信息
-    distribute_info[version_time]['jars'] = deployJar
-    distribute_info['last-distribute'] = version_time
-    distribute_info['last-state'] = "distribute"
+    distributed_info[version_time]['distributed-Jars'] = distributed_Jars
+    distributed_info['last-distributed'] = version_time
+    distributed_info['last-state'] = "distributed"
 
     # 写入分发信息至文件
-    with open(distribute_file, mode='w', encoding='utf-8') as json_obj:
-        json.dump(distribute_info, json_obj)
+    with open(distributed_file, mode='w', encoding='utf-8') as json_obj:
+        json.dump(distributed_info, json_obj)
 
     print("")
     print("Send Version Info: ")
 
     # 发送分发信息至主机
-    sendfile(distribute_file, distribute_file, version_hosts)
+    sendfile(distributed_file, distributed_file, version_hosts)
 else:
-    print(deploy_dir + ": is Empty!")
+    print(distribute_dir + ": is Empty!")
