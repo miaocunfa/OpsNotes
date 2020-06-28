@@ -80,6 +80,7 @@ if deploy_jars:
     deployJar = []
 
     distribute_info['last-state'] = "Not distributed"
+    distribute_info['last-distribute'] = ""
     
     for jar in deploy_jars:
         if jar in deploy_info:
