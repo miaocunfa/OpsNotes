@@ -28,17 +28,14 @@ def rollback(jar):
     version_jar = ahanglib + jar  + "." + version
 
     if os.path.isfile(version_jar):
-        #pid_stdout = os.popen("ps -ef | grep " + jar + " | grep -v grep | awk '{print $2}' ")
-        #pid = pid_stdout.read()
-
         stop_stdout = os.popen(ahangbin + "stop.sh " + jar)
         stop_contents = stop_stdout.read()
         print(stop_contents.rstrip())
 
         # 回退版本
-        #os.chdir(ahanglib)
-        #os.rename(jar, jar + '.rollback')
-        #os.rename(version_jar, jar)
+        os.chdir(ahanglib)
+        os.rename(jar, jar + '.rollback')
+        os.rename(jar + "." + version, jar)
 
         if jar == 'info-message-service.jar':
             checkMessagePort()

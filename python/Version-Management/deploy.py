@@ -81,35 +81,31 @@ else:
     Not_distributed = 1
 
 
-deployed_Jars = []       # 声明一个空的列表, 用来存储当前主机部署了哪些Jar
+if Not_distributed:
+    print("不经过分发")
 
-for jar in deploy_jars:
-    if Not_distributed:
-        print("不经过分发")
-
-        deployed_version = {}    # 声明一个空的部署版本, 用来存储部署版本的信息
+    deployed_version = {}    # 声明一个空的部署版本, 用来存储部署版本的信息
         
-        #Repository['last-state'] = "Not-deployed"    # 更新初始状态
-        #Repository['last-deployed'] = ""             # 更新初始状态
+    #Repository['last-state'] = "Not-deployed"    # 更新初始状态
+    #Repository['last-deployed'] = ""             # 更新初始状态
         
-        print(jar)
-        #deploy(jar)
+    print(jar)
+    #deploy(jar)
 
-    else:
-        print("经过分发")
-        deploy_version = distributed_version
+else:
+    print("经过分发")
+    deploy_version = distributed_version
 
-        #print('distributed_version: ' + distributed_version)
-        #print('deploy_version: ' + deploy_version)
+    if distributed_version not in Repository:
+        print("未部署")
 
-        if distributed_version not in Repository:
-            print("未部署")
-
-            del distributed_info['last-state']
-            del distributed_info['last-distributed']
+        del distributed_info['last-state']
+        del distributed_info['last-distributed']
             
-            Repository.update(distributed_info)
+        Repository.update(distributed_info)
+        deployed_Jars = []       # 声明一个空的列表, 用来存储当前主机部署了哪些Jar
             
+        for jar in deploy_jars:
             print(jar)
             #deploy(jar)
 
@@ -120,21 +116,22 @@ for jar in deploy_jars:
             Repository['last-distributed'] = distributed_version
             deployed_Jars.append(jar)
 
-        else:
-            print("部分部署")
+        # 版本更细结束, 更新版本库
+        Repository[distributed_version][hostname] = deployed_Jars
+        Repository['last-deployed'] = deploy_version
+        Repository['last-state'] = "deployed"
 
-            if Repository[deploy_version][jar][state] != "deployed": 
+        # 更新版本库
+        with open(repository_file, mode='w', encoding='utf-8') as json_obj:
+            json.dump(Repository, json_obj)
+
+    else:
+        print("部分部署")
+
+        for jar in deploy_jars:
+            if Repository[deploy_version][jar]['state'] != "deployed": 
                 print("部分部署-未部署")
                 print(jar)
                 #deploy(jar)
             else:
                 print(jar + ": is already deployed!")
-
-# 版本更细结束, 更新版本库
-Repository[distributed_version][hostname] = deployed_Jars
-Repository['last-deployed'] = deploy_version
-Repository['last-state'] = "deployed"
-
-# 更新版本库
-with open(repository_file, mode='w', encoding='utf-8') as json_obj:
-    json.dump(repository_file, json_obj)
