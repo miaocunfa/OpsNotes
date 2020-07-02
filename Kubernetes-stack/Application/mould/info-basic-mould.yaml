@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${jarName}
+  labels:
+    serviceName: ${jarName}
+spec:
+  selector:
+    matchLabels:
+      serviceName: ${jarName}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        serviceName: ${jarName}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                - key: serviceName
+                  operator: In
+                  values:
+                  - ${jarName}
+      containers:
+      - name: ${jarName}
+        image: reg.test.local/library/${jarName}:${tag}
+        resources:
+          limits:
+            cpu: ${cpuLimits} 
+            memory: ${memoryLimits}
+      imagePullSecrets:
+        - name: registry-secret

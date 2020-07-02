@@ -23,7 +23,7 @@ CPU：
 1颗逻辑CPU = 1000微核
 500m=0.5CPU
 
-### Usage
+## 二、yaml Usage
 
 ``` zsh
 kubectl explain deploy.spec.template.spec.containers.resources
@@ -39,12 +39,12 @@ DESCRIPTION:
      ResourceRequirements describes the compute resource requirements.
 
 FIELDS:
-   limits	<map[string]string>
+   limits   <map[string]string>
      Limits describes the maximum amount of compute resources allowed. More
      info:
      https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
 
-   requests	<map[string]string>
+   requests <map[string]string>
      Requests describes the minimum amount of compute resources required. If
      Requests is omitted for a container, it defaults to Limits if that is
      explicitly specified, otherwise to an implementation-defined value. More
@@ -52,3 +52,15 @@ FIELDS:
      https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
 
 ```
+
+### 2.1、yaml
+
+``` yaml
+
+```
+
+## 三、QoS等级
+
+### 3.1、定义QoS等级
+
+### 3.2、内存不足时哪个进程会被杀死
