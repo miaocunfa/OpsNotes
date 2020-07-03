@@ -29,9 +29,9 @@ hostname = socket.gethostname()
 
 
 def deploy(jar):
-    stop_stdout = os.popen(ahangbin + "stop.sh " + jar)
-    stop_contents = stop_stdout.read()
-    print(stop_contents.rstrip())
+    #stop_stdout = os.popen(ahangbin + "stop.sh " + jar)
+    #stop_contents = stop_stdout.read()
+    #print(stop_contents.rstrip())
 
     # 备份原程序包
     #os.chdir(ahanglib)
@@ -41,9 +41,9 @@ def deploy(jar):
     if jar == 'info-message-service.jar':
         checkMessagePort()
 
-    start_stdout = os.popen(ahangbin + "start.sh " + jar)
-    start_contents = start_stdout.read()
-    print(start_contents.rstrip())
+    #start_stdout = os.popen(ahangbin + "start.sh " + jar)
+    #start_contents = start_stdout.read()
+    #print(start_contents.rstrip())
 
 
 def checkMessagePort():
@@ -86,8 +86,8 @@ if Not_distributed:
 
     deployed_version = {}    # 声明一个空的部署版本, 用来存储部署版本的信息
         
-    #Repository['last-state'] = "Not-deployed"    # 更新初始状态
-    #Repository['last-deployed'] = ""             # 更新初始状态
+    #Repository['last-state'] = ""    # 更新初始状态
+    Repository['last-deployed'] = "Undistributed" +             # 更新初始状态
         
     print(jar)
     #deploy(jar)
@@ -97,12 +97,14 @@ else:
     deploy_version = distributed_version
 
     if distributed_version not in Repository:
+        
         print("未部署")
 
         del distributed_info['last-state']
         del distributed_info['last-distributed']
             
         Repository.update(distributed_info)
+        Repository['last-deployed'] = deploy_version + '-start'
         deployed_Jars = []       # 声明一个空的列表, 用来存储当前主机部署了哪些Jar
             
         for jar in deploy_jars:
@@ -111,14 +113,14 @@ else:
 
             # 部署成功
             deployed_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-            Repository[distributed_version][jar]['state'] = "deployed"
-            Repository[distributed_version][jar]['deployed-time'] = deployed_time
-            Repository['last-distributed'] = distributed_version
+            Repository[deploy_version][jar]['state'] = "deployed"
+            Repository[deploy_version][jar]['deployed-time'] = deployed_time
+            #Repository['last-distributed'] = deploy_version
             deployed_Jars.append(jar)
 
         # 版本更细结束, 更新版本库
-        Repository[distributed_version][hostname] = deployed_Jars
-        Repository['last-deployed'] = deploy_version
+        Repository[deploy_version][hostname] = deployed_Jars
+        Repository['last-deployed'] = deploy_version + '-success!'
         Repository['last-state'] = "deployed"
 
         # 更新版本库
@@ -130,8 +132,21 @@ else:
 
         for jar in deploy_jars:
             if Repository[deploy_version][jar]['state'] != "deployed": 
-                print("部分部署-未部署")
-                print(jar)
+                print("部分部署-未部署: " + jar)
                 #deploy(jar)
+
+                # 部署成功
+                deployed_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                Repository[deploy_version][jar]['state'] = "deployed"
+                Repository[deploy_version][jar]['deployed-time'] = deployed_time
+
+                # 版本更细结束, 更新版本库
+                Repository[deploy_version][hostname].append(jar)
+
+                print("部分部署-成功: " + jar)
             else:
                 print(jar + ": is already deployed!")
+
+        # 更新版本库
+        with open(repository_file, mode='w', encoding='utf-8') as json_obj:
+            json.dump(Repository, json_obj)
