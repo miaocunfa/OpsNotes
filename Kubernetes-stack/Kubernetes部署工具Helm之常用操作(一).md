@@ -923,6 +923,8 @@ REVISION    UPDATED                     STATUS        CHART           APP VERSIO
 
 ### 2.10、helm rollback
 
+#### 2.10.1、升级
+
 ``` zsh
 # 使用myweb这个Release
 ➜  helm list
@@ -932,13 +934,16 @@ myweb    default      2           2020-07-07 20:03:23.647690834 +0800 CST    dep
 ➜  kubectl get pods
 myweb-tomcat-5957c766b4-qdgmf               1/1     Running   0          7m22s
 
+# myweb现在的service类型为LoadBalancer
 ➜  kubectl get svc
 myweb-tomcat             LoadBalancer   10.96.147.119   <pending>     80:31148/TCP                                                                       6m41s
 
 
-# 升级
+# 升级版本
+# service类型为NodePort
 ➜  helm upgrade myweb stable/tomcat --set service.type=NodePort
 
+# REVISION修订为3
 ➜  helm list
 NAME     NAMESPACE    REVISION    UPDATED                                    STATUS      CHART           APP VERSION
 myweb    default      3           2020-07-07 20:14:20.112163954 +0800 CST    deployed    tomcat-0.4.1    7.0
@@ -946,9 +951,11 @@ myweb    default      3           2020-07-07 20:14:20.112163954 +0800 CST    dep
 ➜  kubectl get pods
 myweb-tomcat-5957c766b4-qdgmf               1/1     Running   0          11m
 
+# service类型已修改为NodePort
 ➜  kubectl get svc
 myweb-tomcat             NodePort    10.96.147.119   <none>        80:31148/TCP                                                                       11m
 
+# 查看helm Release历史
 ➜  helm history myweb
 REVISION    UPDATED                     STATUS        CHART           APP VERSION    DESCRIPTION
 1           Tue Jul  7 19:59:00 2020    superseded    tomcat-0.4.1    7.0            superseded by new release
@@ -956,46 +963,75 @@ REVISION    UPDATED                     STATUS        CHART           APP VERSIO
 3           Tue Jul  7 20:14:20 2020    deployed      tomcat-0.4.1    7.0            Upgrade complete
 ```
 
-#### 2.10.1、回滚
+#### 2.10.2、默认回滚
 
 ``` zsh
 # 回滚
 # 回滚Release，没有指定修订版本，则回滚到上一个修订版本。
-
-helm rollback myweb-2
-
-# 可以看出回滚是重新安装，会生成新的修订版本。
-helm history myweb-2
-REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
-1               Tue Feb 11 19:43:27 2020        superseded      tomcat-6.1.6    9.0.30          superseded by new release
-2               Tue Feb 11 20:18:49 2020        superseded      tomcat-6.1.6    9.0.30          Install complete
-3               Tue Feb 11 20:25:55 2020        deployed        tomcat-6.1.6    9.0.30          Rollback to 1
-
-# 看Service，类型为NodePort,确实回滚到前一个修订版本。
-kubectl get service
-NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-myweb-2-tomcat   NodePort    10.1.218.184   <none>        80:15153/TCP   15m
-```
-
-#### 2.10.2、回滚到指定版本
-
-``` zsh
-helm rollback myweb-2 1
+➜  helm rollback myweb
 Rollback was a success! Happy Helming!
 
-helm history myweb-2
-REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
-1               Tue Feb 11 19:43:27 2020        superseded      tomcat-6.1.6    9.0.30          superseded by new release
-2               Tue Feb 11 20:18:49 2020        superseded      tomcat-6.1.6    9.0.30          Install complete
-3               Tue Feb 11 20:25:55 2020        superseded      tomcat-6.1.6    9.0.30          Rollback to 1
-4               Tue Feb 11 20:35:52 2020        deployed        tomcat-6.1.6    9.0.30          Rollback to 1
+# helm Release列表REVISION修订为4
+➜  helm list
+NAME     NAMESPACE    REVISION    UPDATED                                    STATUS      CHART           APP VERSION
+myweb    default      4           2020-07-08 09:06:06.639584596 +0800 CST    deployed    tomcat-0.4.1    7.0
+
+# 可以看出回滚是按照Release重新安装，会生成新的修订版本。
+➜  helm history myweb
+REVISION    UPDATED                     STATUS        CHART           APP VERSION    DESCRIPTION
+1           Tue Jul  7 19:59:00 2020    superseded    tomcat-0.4.1    7.0            superseded by new release
+2           Tue Jul  7 20:03:23 2020    superseded    tomcat-0.4.1    7.0            Install complete
+3           Tue Jul  7 20:14:20 2020    superseded    tomcat-0.4.1    7.0            Upgrade complete
+4           Wed Jul  8 09:06:06 2020    deployed      tomcat-0.4.1    7.0            Rollback to 2
+
+# 看Service，类型为LoadBalancer,确实回滚到前一个修订版本。
+➜  kubectl get svc
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                                            AGE
+myweb-tomcat             LoadBalancer   10.96.147.119   <pending>     80:31148/TCP                                                                       13h
 ```
 
-#### 2.10.3、模拟回滚操作
+#### 2.10.3、回滚到指定版本
 
 ``` zsh
-helm rollback myweb-2 --dry-run
+# REVISION3 是service 为NodePort的版本, 咱们指定回退到这个版本
+➜  helm rollback myweb 3
 Rollback was a success! Happy Helming!
+
+# helm Release列表REVISION修订为5
+➜  helm list
+NAME     NAMESPACE    REVISION    UPDATED                                    STATUS      CHART           APP VERSION
+myweb    default      5           2020-07-08 09:10:37.633028452 +0800 CST    deployed    tomcat-0.4.1    7.0
+
+# 查看myweb的helm Release历史
+➜  helm history myweb
+REVISION    UPDATED                     STATUS        CHART           APP VERSION    DESCRIPTION
+1           Tue Jul  7 19:59:00 2020    superseded    tomcat-0.4.1    7.0            superseded by new release
+2           Tue Jul  7 20:03:23 2020    superseded    tomcat-0.4.1    7.0            Install complete
+3           Tue Jul  7 20:14:20 2020    superseded    tomcat-0.4.1    7.0            Upgrade complete
+4           Wed Jul  8 09:06:06 2020    superseded    tomcat-0.4.1    7.0            Rollback to 2
+5           Wed Jul  8 09:10:37 2020    deployed      tomcat-0.4.1    7.0            Rollback to 3
+
+# 查看service, 类型为NodePort, 确实回退到REVISION3了
+➜  kubectl get svc
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                                            AGE
+myweb-tomcat             NodePort    10.96.147.119   <none>        80:31148/TCP                                                                       13h
+```
+
+#### 2.10.4、模拟回滚操作
+
+``` zsh
+# 模拟回滚是否成功
+➜  helm rollback myweb --dry-run
+Rollback was a success! Happy Helming!
+
+# 版本并没有发生变化
+➜  helm history myweb
+REVISION    UPDATED                     STATUS        CHART           APP VERSION    DESCRIPTION
+1           Tue Jul  7 19:59:00 2020    superseded    tomcat-0.4.1    7.0            superseded by new release
+2           Tue Jul  7 20:03:23 2020    superseded    tomcat-0.4.1    7.0            Install complete
+3           Tue Jul  7 20:14:20 2020    superseded    tomcat-0.4.1    7.0            Upgrade complete
+4           Wed Jul  8 09:06:06 2020    superseded    tomcat-0.4.1    7.0            Rollback to 2
+5           Wed Jul  8 09:10:37 2020    deployed      tomcat-0.4.1    7.0            Rollback to 3
 ```
 
 > 参考链接:  
