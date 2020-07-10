@@ -37,19 +37,45 @@ Grafana 是一个用于监控和可视化观测的开源平台，支持非常丰
 
 为了方便部署 Loki 技术栈，我们这里使用更加方便的 Helm Chart 包进行安装，根据自己的需求修改对应的 Values 值。
 
+### 3.1、默认安装
+
 ``` zsh
 # 首先添加loki的仓库地址
 ➜  helm repo add loki https://grafana.github.io/loki/charts
-"loki" has been added to your repositories
 
 # 更新仓库
 ➜  helm repo update
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "loki" chart repository
-Update Complete. ⎈ Happy Helming!⎈
 
-# 由于我们之前已经安装了Grafana、Prometheus等组件
+# 创建名称空间
+➜  kubectl create namespace loki-stack
+
 # 所以我们分别下载Promtail、Loki两个组件即可
+➜  helm upgrade --install loki loki/loki -n loki-stack
+➜  helm upgrade --install promtail loki/promtail --set "loki.serviceName=loki" -n loki-stack
+
+➜  kubectl get pods
+NAME                                        READY   STATUS    RESTARTS   AGE
+loki-0                                      1/1     Running   0          5m19s
+promtail-5gn94                              1/1     Running   0          4m27s
+promtail-f46g6                              1/1     Running   0          4m27s
+promtail-l6427                              1/1     Running   0          4m29s
+promtail-vgltf                              1/1     Running   0          4m27s
+
+➜  kubectl get svc
+loki                     ClusterIP   10.96.15.119    <none>        3100/TCP                                                                           9m24s
+loki-headless            ClusterIP   None            <none>        3100/TCP                                                                           9m24s
+
+# 试着访问一下loki
+➜  curl 10.96.15.119:3100/api/prom/label
+{"values":["__name__","app","app_kubernetes_io_name","app_kubernetes_io_part_of","component","container","controller_revision_hash","filename","job","k8s_app","name","namespace","pod","pod_template_generation","pod_template_hash","release","serviceName","statefulset_kubernetes_io_pod_name","stream","tier","version"]}
+```
+
+### 3.2、Custom安装
+
+将Chart拉取到本地, 修改好values.yaml后再安装
+
+``` zsh
+# 拉取Chart
 ➜ mkdir loki
 ➜ helm pull loki/loki -d loki
 ➜ helm pull loki/promtail -d loki
@@ -58,9 +84,33 @@ Update Complete. ⎈ Happy Helming!⎈
 total 16
 -rw-r--r--. 1 root root 6383 Jul  6 17:41 loki-0.30.1.tgz
 -rw-r--r--. 1 root root 6569 Jul  6 17:53 promtail-0.23.2.tgz
+
+# 修改values
+
 ```
 
-### 配置values
+## 四、Grafana
+
+``` zsh
+# 安装Grafana
+➜  helm upgrade --install grafana stable/grafana -n loki-stack --set service.type=NodePort
+
+# 获取Grafana 用户admin的密码
+➜  kubectl get secret --namespace loki-stack grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+WThii82n500dblUiYArin6Oo6ErZusyviMIJpdxv
+
+# 获取Grafana 的svc
+➜  kubectl get svc -n loki-stack
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+grafana         NodePort    10.96.158.184   <none>        80:31067/TCP   15h
+loki            ClusterIP   10.96.115.99    <none>        3100/TCP       15h
+loki-headless   ClusterIP   None            <none>        3100/TCP       15h
+
+# 浏览器访问
+http://192.168.100.231:31067/
+User: admin
+Pass: 获取到的密码
+```
 
 > 参考文章：
 > 1、<https://hub.helm.sh/charts/loki/loki>  
