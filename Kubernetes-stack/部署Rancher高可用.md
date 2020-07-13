@@ -105,29 +105,48 @@ rancher-stable/rancher    2.4.5            v2.4.5         Install Rancher Server
 # 查看升级状态
 ➜  kubectl -n cattle-system rollout status deploy/rancher
 Waiting for deployment "rancher" rollout to finish: 0 of 3 updated replicas are available...
+Waiting for deployment "rancher" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "rancher" rollout to finish: 2 of 3 updated replicas are available...
+deployment "rancher" successfully rolled out
 
 # 查看 deployment 的状态
 ➜  kubectl -n cattle-system get deploy rancher
 NAME      READY   UP-TO-DATE   AVAILABLE   AGE
-rancher   0/3     3            0           80s
+rancher   3/3     3            3           121m
 
 # 获取pods
 ➜  kubectl get pods -n cattle-system
 NAME                      READY   STATUS              RESTARTS   AGE
-rancher-8b6574f7f-857qn   0/1     ContainerCreating   0          107s
-rancher-8b6574f7f-zgvwk   0/1     ContainerCreating   0          107s
-rancher-8b6574f7f-zj2xc   0/1     ContainerCreating   0          107s
-
-# 镜像还没拉完
-➜  kubectl describe pods -n cattle-system rancher-8b6574f7f-857qn
-Events:
-  Type    Reason     Age        From               Message
-  ----    ------     ----       ----               -------
-  Normal  Scheduled  <unknown>  default-scheduler  Successfully assigned cattle-system/rancher-8b6574f7f-857qn to node237
-  Normal  Pulling    2m8s       kubelet, node237   Pulling image "rancher/rancher:v2.4.5"
+rancher-8b6574f7f-j22d2                1/1     Running            3          122m
+rancher-8b6574f7f-jgm7p                1/1     Running            2          122m
+rancher-8b6574f7f-zqvr8                1/1     Running            3          122m
 ```
 
-## 7、关于镜像问题
+## 7、访问
+
+### 7.1、域名访问
+
+修改windows下的hosts文件
+
+``` win
+C:\Windows\System32\drivers\etc
+192.168.100.231    rancher.my.org
+```
+
+浏览器访问 <http://rancher.my.org>
+
+### 7.2、修改域名
+
+``` zsh
+# 升级
+➜  helm upgrade rancher rancher-stable/rancher \
+  --namespace cattle-system \
+  --set hostname=localhost \
+  --set ingress.tls.source=secret \
+  --set privateCA=true
+```
+
+## 8、关于镜像拉取慢
 
 镜像下载太费劲了
 
@@ -137,12 +156,13 @@ Events:
 ➜  docker push reg.test.local/library/rancher:v2.4.5
 
 # 使用 helm 时命令
-➜  helm install rancher rancher-stable/rancher \
+➜  helm install rancher-harbor rancher-stable/rancher \
   --namespace cattle-system \
   --set hostname=rancher.my.org \
   --set ingress.tls.source=secret \
   --set privateCA=true \
-  --set rancherImage=reg.test.local/library/rancher:v2.4.5
+  --set rancherImage=reg.test.local/library/rancher \
+  #--set imagePullSecret.secretName=registry-secret
 ```
 
 > 参考链接:  
