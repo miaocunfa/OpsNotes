@@ -103,3 +103,68 @@ Installing collected packages: psutil
   Running setup.py install for psutil ... done
 Successfully installed psutil-5.7.0
 ```
+
+## 二、文件名与主程序冲突
+
+### 2.1、问题描述
+
+``` zsh
+# 主程序部分
+➜  cat jinja2.py
+def create_deploy_yaml(service_name, service):
+
+    # 变量赋值
+    cpuRequest = "50m"
+    memoryRequest = "100Mi"
+    cpuLimit = "500m"
+    memoryLimit = "1000Mi"
+
+    replicas = int(service['replicas'])
+
+    deploy_mould_file = "jinja2/info-deploy-mould.yaml"
+    isDeployMould = os.path.isfile(deploy_mould_file)
+
+    if isDeployMould:
+
+        path, filename = os.path.split(deploy_mould_file)
+        template = jinja2.environment.Environment( loader=jinja2.FileSystemLoader(path or './') ).get_template(filename)
+
+        result = template.render(jarName=service_name, replicas=replicas, tag=tag, cpuRequest=cpuRequest, memoryRequest=memoryRequest, cpuLimit=cpuLimit, memoryLimit=memoryLimit)
+        print(result)
+
+    else:
+        print("Deploy Mould File is Not Exist!")
+
+
+# 执行报错
+➜  python3 jinja2.py
+Traceback (most recent call last):
+  File "jinja2.py", line 15, in <module>
+    import jinja2
+  File "/root/iKubernetes/ahang/info/jinja2.py", line 241, in <module>
+    create_deploy_yaml('info-message-service', services['info-message-service'])
+  File "/root/iKubernetes/ahang/info/jinja2.py", line 74, in create_deploy_yaml
+    template = jinja2.environment.Environment( loader=jinja2.FileSystemLoader(path or './') ).get_template(filename)
+AttributeError: module 'jinja2' has no attribute 'environment'
+
+
+```
+
+### 2.2、问题解决
+
+``` zsh
+# 观察发现，犯了一个弱智问题，程序名写的跟import的模块一样了，所以导入的是脚本，当然找不到定义的函数。
+➜  ll
+total 28
+drwxr-xr-x. 2 root root   96 Jul  3 11:21 jinja2
+-rw-r--r--. 1 root root 6953 Jul  3 12:32 jinja2.py
+drwxr-xr-x. 2 root root   35 Jul  3 12:32 __pycache__
+
+# 修改程序名
+# 再执行就成功了
+➜  mv jinja2.py templating-k8s-with-jinja2.py
+➜  ll
+total 28
+drwxr-xr-x. 2 root root   96 Jul  3 14:30 jinja2
+-rw-r--r--. 1 root root 6436 Jul  3 14:28 templating-k8s-with-jinja2.py
+```

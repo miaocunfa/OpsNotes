@@ -94,7 +94,7 @@ rancher-stable/rancher    2.4.5            v2.4.5         Install Rancher Server
 ``` zsh
 ➜  helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
-  --set hostname=rancher.my.org \
+  --set hostname=rancher.test.local \
   --set ingress.tls.source=secret \
   --set privateCA=true
 ```
@@ -124,48 +124,77 @@ rancher-8b6574f7f-zqvr8                1/1     Running            3          122
 
 ## 7、访问
 
-### 7.1、域名访问
-
 修改windows下的hosts文件
 
 ``` win
 C:\Windows\System32\drivers\etc
-192.168.100.231    rancher.my.org
+192.168.100.231    rancher.test.local
 ```
 
-浏览器访问 <http://rancher.my.org>
-
-### 7.2、修改域名
-
-``` zsh
-# 升级
-➜  helm upgrade rancher rancher-stable/rancher \
-  --namespace cattle-system \
-  --set hostname=localhost \
-  --set ingress.tls.source=secret \
-  --set privateCA=true
-```
+浏览器访问 <http://rancher.test.local>
 
 ## 8、关于镜像拉取慢
 
 镜像下载太费劲了
 
 ``` zsh
+# 将rancher的镜像推送到本地Harbor上
 ➜  docker pull rancher/rancher:v2.4.5
 ➜  docker tag rancher/rancher:v2.4.5 reg.test.local/library/rancher:v2.4.5
 ➜  docker push reg.test.local/library/rancher:v2.4.5
 
+# 修改values文件
+# 使用Harbor的镜像
+cat > values.yaml << EOF
+additionalTrustedCAs: false
+antiAffinity: preferred
+auditLog:
+  destination: sidecar
+  hostPath: /var/log/rancher/audit/
+  level: 0
+  maxAge: 1
+  maxBackup: 1
+  maxSize: 100
+addLocal: "auto"
+busyboxImage: busybox
+debug: false
+hostname: rancher.test.local
+imagePullSecrets: [{'name': 'registry-secret'}] # Harbor Secret, 这个选项经过无数次的实验无法通过命令行设置
+ingress:
+  extraAnnotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+  tls:
+    source: secret
+letsEncrypt:
+  environment: production
+  ingress:
+    class: ""
+privateCA: true
+noProxy: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+rancherImage: reg.test.local/library/rancher    # harbor仓库
+rancherImageTag: v2.4.5                         # 镜像Tag
+replicas: 3
+resources: {}
+tls: ingress
+systemDefaultRegistry: ""
+useBundledSystemChart: false
+certmanager:
+  version: ""
+EOF
+
 # 使用 helm 时命令
+# 使用 dry-run 模式查看渲染的yaml没有问题
 ➜  helm install rancher-harbor rancher-stable/rancher \
+  --dry-run \
   --namespace cattle-system \
-  --set hostname=rancher.my.org \
-  --set ingress.tls.source=secret \
-  --set privateCA=true \
-  --set rancherImage=reg.test.local/library/rancher \
-  #--set imagePullSecret.secretName=registry-secret
+  -f ./values.yaml
 ```
 
 > 参考链接:  
 > 1、<https://rancher2.docs.rancher.cn/docs/installation/k8s-install/helm-rancher/_index>  
 > 2、<https://rancher2.docs.rancher.cn/docs/installation/options/tls-secrets/_index/>  
+> 3、<https://hub.helm.sh/charts/gabibbo97/imagepullsecrets>  
+> 4、<https://hub.helm.sh/charts/rancher-stable/rancher>  
 >

@@ -33,6 +33,7 @@ hostnamectl set-hostname note04
 ```
 
 #### 1.2、ssh免密互通
+
 每个节点做`ssh-keygen -t rsa -P ''`
 并将每个节点生成的`/root/.ssh/id_rsa.pub`追加至某一节点的`/root/.ssh/authorized_keys`中，
 将这个`authorized_keys`文件`scp`至每一个节点，最后`scp /etc/hosts`文件至每一个节点。
@@ -50,6 +51,7 @@ systemctl disable firewalld.service  禁止firewall开机自启
 #### 2.2、时间同步
 
 配置从阿里云ntp服务器同步时间
+
 ```bash
 vi /etc/chrony.conf
 #设置阿里云时间服务器
@@ -62,6 +64,7 @@ server ntp2.aliyun.com iburst
 ```
 
 启动chrony服务，并检查时间同步状态
+
 ``` bash
 [root@master ~]# systemctl start chronyd.service
 [root@master ~]# chronyc sources -v
@@ -151,7 +154,7 @@ systemctl enable kubelet
 [root@master ~]# cat pull.sh
 for i in `kubeadm config images list`; do   
 	imageName=${i#k8s.gcr.io/}  
-	docker pull registry.aliyuncs.com/google_containers/$imageName  	
+	docker pull registry.aliyuncs.com/google_containers/$imageName
 	docker tag registry.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName  
 	docker rmi registry.aliyuncs.com/google_containers/$imageName
 done;
