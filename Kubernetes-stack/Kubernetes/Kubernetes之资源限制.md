@@ -56,7 +56,16 @@ FIELDS:
 ### 2.1、yaml
 
 ``` yaml
+# $.spec.template.spec.containers.resources
 
+    containers:
+      - name: info-uc-service
+        image: reg.test.local/library/info-uc-service:0.0.2
+        resources:
+          requests:
+            memory: 100Mi
+          limits:
+            memory: 1000Mi
 ```
 
 ## 三、QoS等级
