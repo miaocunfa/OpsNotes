@@ -61,7 +61,7 @@ etcdhelper.go:17:2: cannot find package "go.etcd.io/etcd/pkg/transport" in any o
 etcdhelper.go:13:2: cannot find package "k8s.io/apimachinery/pkg/runtime/serializer/json" in any of:
     /usr/local/go/src/k8s.io/apimachinery/pkg/runtime/serializer/json (from $GOROOT)
     /root/go/src/k8s.io/apimachinery/pkg/runtime/serializer/json (from $GOPATH)
-etcdhelper.go:14:2: cannot find package "k8s.io/kubectl/pkg/scheme" in any of:
+etcdhelper.go:14:2: cannot find package "k8s.io/kubectl/pkg/scheme" in any of:d
     /usr/local/go/src/k8s.io/kubectl/pkg/scheme (from $GOROOT)
     /root/go/src/k8s.io/kubectl/pkg/scheme (from $GOPATH)
 ```
@@ -124,17 +124,23 @@ etcdhelper.go:14:2: cannot find module providing package k8s.io/kubectl/pkg/sche
 ### 5.3.2、错误解决
 
 ``` zsh
+# 初始化模块etcdhelper
 ➜  go mod init etcdhelper
 go: creating new go.mod: module etcdhelper
+
 ➜  ll
 total 16
 -rw-r--r--. 1 root root 4988 Jul 16 17:00 etcdhelper.go
 -rwxr--r--. 1 root root  706 Jul 16 16:45 etcd_ls.sh
 -rw-r--r--. 1 root root   27 Jul 16 20:01 go.mod
+
+# 查看go.mod
 ➜  cat go.mod
 module etcdhelper
 
 go 1.14
+
+# 执行go test
 ➜  go test
 go: finding module for package go.etcd.io/etcd/clientv3
 go: finding module for package k8s.io/kubectl/pkg/scheme
@@ -179,15 +185,91 @@ go: found go.uber.org/zap in go.uber.org/zap v1.15.0
 go: finding module for package github.com/coreos/go-systemd/journal
 /root/go/pkg/mod/github.com/coreos/etcd@v3.3.22+incompatible/pkg/logutil/zap_journal.go:29:2: no matching versions for query "latest"
 
+# 会根据go test的内容生成依赖内容
+➜  cat go.mod
+module etcdhelper
+
+go 1.14
+
+require (
+    github.com/coreos/etcd v3.3.22+incompatible // indirect
+    github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
+    github.com/openshift/api v0.0.0-20200714125145-93040c6967eb
+    go.etcd.io/etcd v3.3.22+incompatible
+    go.uber.org/zap v1.15.0 // indirect
+    k8s.io/apimachinery v0.18.6
+    k8s.io/kubectl v0.18.6
+)
+
 ➜  go test
 go: finding module for package github.com/coreos/go-systemd/journal
 /root/go/pkg/mod/github.com/coreos/etcd@v3.3.22+incompatible/pkg/logutil/zap_journal.go:29:2: no matching versions for query "latest"
+
 ➜  go build etcdhelper.go
 go: finding module for package github.com/coreos/go-systemd/journal
 /root/go/pkg/mod/github.com/coreos/etcd@v3.3.22+incompatible/pkg/logutil/zap_journal.go:29:2: no matching versions for query "latest"
+```
+
+### 5.4、cannot find module providing package github.com/coreos/go-systemd/journal
+
+#### 5.4.1、错误信息
+
+``` zsh
+➜  go test
+go: finding module for package github.com/coreos/go-systemd/journal
+/root/go/pkg/mod/github.com/coreos/etcd@v3.3.22+incompatible/pkg/logutil/zap_journal.go:29:2: no matching versions for query "latest"
+
+➜  go build etcdhelper.go
+go: finding module for package github.com/coreos/go-systemd/journal
+/root/go/pkg/mod/github.com/coreos/etcd@v3.3.22+incompatible/pkg/logutil/zap_journal.go:29:2: no matching versions for query "latest"
+```
+
+#### 5.4.2、错误解决
+
+``` zsh
+➜  mkdir -p $GOPATH/src/github.com/coreos/go-systemd/
+➜  git clone https://github.com/coreos/go-systemd.git $GOPATH/src/github.com/coreos/go-systemd/
+➜  cd $myproject
+➜  vim go.mod
+replace (
+  github.com/coreos/go-systemd => github.com/coreos/go-systemd/v22 latest
+)
+➜  go test
+go: downloading github.com/coreos/go-systemd/v22 v22.1.0
+go: found github.com/coreos/go-systemd/journal in github.com/coreos/go-systemd v0.0.0-00010101000000-000000000000
+# runtime/cgo
+exec: "gcc": executable file not found in $PATH
+➜  cat go.mod
+module etcdhelper
+
+go 1.14
+
+require (
+    github.com/coreos/etcd v3.3.22+incompatible // indirect
+    github.com/coreos/go-systemd v0.0.0-00010101000000-000000000000 // indirect
+    github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
+    github.com/openshift/api v0.0.0-20200714125145-93040c6967eb
+    go.etcd.io/etcd v3.3.22+incompatible
+    go.uber.org/zap v1.15.0 // indirect
+    k8s.io/apimachinery v0.18.6
+    k8s.io/kubectl v0.18.6
+)
+
+replace github.com/coreos/go-systemd => github.com/coreos/go-systemd/v22 v22.1.0
+➜  go build etcdhelper.go
+➜  ll
+total 46668
+-rwxr-xr-x. 1 root root 47737965 Jul 20 15:59 etcdhelper
+-rw-r--r--. 1 root root     4988 Jul 16 17:00 etcdhelper.go
+-rwxr--r--. 1 root root      706 Jul 16 16:45 etcd_ls.sh
+-rw-r--r--. 1 root root      515 Jul 20 15:54 go.mod
+-rw-r--r--. 1 root root    32493 Jul 20 15:54 go.sum
 ```
 
 > 参考链接：  
 > 1、<https://www.cnblogs.com/qf-dd/p/10594882.html>  
 > 2、[Go 技巧分享：Go 国内加速镜像](https://learnku.com/go/wikis/38122)  
 > 3、[go modules初探及踩坑（GO11包管理工具）](https://studygolang.com/articles/19236)
+> 4、[gopm解决golang国内无法go get获取第三方包的问题](https://blog.csdn.net/weixin_36162966/article/details/90605065)
+> 5、[cannot find module providing package github.com/coreos/go-systemd/journal](https://github.com/etcd-io/etcd/issues/11345)
+>
