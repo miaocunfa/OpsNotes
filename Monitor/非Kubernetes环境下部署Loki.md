@@ -1,5 +1,5 @@
 ---
-title: "单主机无依赖模式下部署Loki"
+title: "非Kubernetes环境下部署Loki"
 date: "2020-07-20"
 categories:
     - "技术"
@@ -169,7 +169,114 @@ scrape_configs:
 ➜  nohup ./promtail-linux-amd64 -config.file=./promtail-local-config.yaml &
 ```
 
-> 参考链接：
+## 四、grafana
+
+由于我们已经装过grafana，在 [官网](https://grafana.com/grafana/download) 找到最新的安装包升级即可
+
+### 4.1、下载安装包
+
+``` zsh
+➜  wget -b https://dl.grafana.com/oss/release/grafana-7.1.0-1.x86_64.rpm
+```
+
+### 4.2、升级
+
+``` zsh
+➜  yum upgrade grafana-7.1.0-1.x86_64.rpm -y
+
+➜  rpm -ql grafana.x86_64
+/etc/grafana
+/etc/init.d/grafana-server
+/etc/sysconfig/grafana-server
+/usr/lib/systemd/system/grafana-server.service
+/usr/sbin/grafana-cli
+/usr/sbin/grafana-server
+```
+
+### 4.3、启动
+
+``` zsh
+➜  systemctl start grafana-server
+```
+
+## 五、使用
+
+### 5.1、配置data source
+
+在grafana中添加Loki数据源
+
+![图床配置04](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/loki_not_k8s_20200722_04.png)
+
+### 5.2、日志查询
+
+![loki使用](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/loki_not_k8s_20200722_05.png)
+![日志查询](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/loki_20200723_03.png)
+
+### 5.3、日志过滤
+
+日志过滤语法，更多详细内容请查看 [LogQL](https://github.com/grafana/loki/blob/master/docs/logql.md#filter-expression)
+
+``` zsh
+|=: Log line contains string.
+!=: Log line does not contain string.
+|~: Log line matches regular expression.
+!~: Log line does not match regular expression.
+```
+
+使用示例
+
+![日志过滤](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/loki_20200723_04.png)
+
+### 5.4、journal
+
+添加查询系统日志
+
+``` yaml
+# promtail 配置文件
+➜  vim /opt/promtail/promtail-local-config.yaml
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /ahdata/promtail/positions.yaml
+
+clients:
+  - url: http://192.168.100.235:3100/loki/api/v1/push
+
+scrape_configs:
+- job_name: system
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job: varlogs  
+      __path__: /var/log/*log
+
+- job_name: ahxx
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job: ahxx-3.0-logs
+      host: n231
+      __path__: /opt/aihangxunxi/logs/*.log
+
+- job_name: journal
+  journal:
+    max_age: 12h
+    labels:
+      job: systemd-journal
+  relabel_configs:
+    - source_labels: ['__journal__systemd_unit']
+      target_label: 'unit'
+```
+
+增加了后journal，查看日志
+
+![journal](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/loki_20200723_05.png)
+
+> 参考链接：  
 > 1、[loki github](https://github.com/grafana/loki)  
 > 2、[loki LogQL](https://github.com/grafana/loki/blob/master/docs/logql.md#filter-expression)  
 > 3、[promtail config](https://github.com/grafana/loki/blob/v1.5.0/docs/clients/promtail/configuration.md)  

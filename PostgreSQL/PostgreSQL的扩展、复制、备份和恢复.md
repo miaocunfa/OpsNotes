@@ -94,4 +94,3 @@ host    bench           bench           192.168.100.0/24        trust
 standby_mode = 'on'
 primary_conninfo = 'user=rep password=rep123 host=192.168.100.213 port=5432 sslmode=prefer sslcompression=1 krbsrvname=postgres target_session_attrs=any'
 ```
-

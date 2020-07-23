@@ -5,6 +5,7 @@ categories:
     - "技术"
 tags:
     - "Golang"
+    - "错误汇总"
 toc: false
 indent: false
 original: true
@@ -108,7 +109,9 @@ total 11092
 [GOPM] 07-21 10:24:19 [ERROR] github.com/grafana/loki: fail to make request: Get "https://gopm.io/api/v1/revision?pkgname=github.com/grafana/loki": dial tcp: lookup gopm.io on 192.168.100.1:53: no such host
 ```
 
-!img[]()
+查看发现因为gomod的出现，gopm已经下线了
+
+![gopm关闭](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/go_err_20200721_01.png)
 
 ## 4、working directory is not part of a module
 
@@ -286,7 +289,7 @@ total 46668
 ### 6.1、错误信息
 
 ``` zsh
-go get github.com/grafana/loki
+➜  go get github.com/grafana/loki
 # cd .; git clone -- https://github.com/grafana/loki /root/go/src/github.com/grafana/loki
 error: RPC failed; result=18, HTTP code = 200
 fatal: The remote end hung up unexpectedly
@@ -295,7 +298,14 @@ fatal: index-pack failed
 package github.com/grafana/loki: exit status 128
 ```
 
-> 参考链接：
+### 6.2、解决方法
+
+``` zsh
+➜  mkdir -p /root/go/src/github.com/grafana/loki
+➜  git clone -- https://github.com/grafana/loki /root/go/src/github.com/grafana/loki
+```
+
+> 参考链接：  
 > 1、[go modules初探及踩坑（GO11包管理工具）](https://studygolang.com/articles/19236)  
 > 2、[Go 技巧分享：Go 国内加速镜像](https://learnku.com/go/wikis/38122)  
 > 3、[cannot find module providing package github.com/coreos/go-systemd/journal](https://github.com/etcd-io/etcd/issues/11345)  
