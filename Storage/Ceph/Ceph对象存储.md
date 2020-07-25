@@ -140,9 +140,9 @@ http://192.168.100.238:7480
 ➜  ceph auth get client.rgw.ceph-mon
 exported keyring for client.rgw.ceph-mon
 [client.rgw.ceph-mon]
-	key = AQDco7xeCwtIFRAAR5HOnozguXEO1LhKnjY+Zg==
-	caps mon = "allow rw"
-	caps osd = "allow rwx"
+    key = AQDco7xeCwtIFRAAR5HOnozguXEO1LhKnjY+Zg==
+    caps mon = "allow rw"
+    caps osd = "allow rwx"
 
 # 将秘钥重定向至文件
 ➜  ceph auth get client.rgw.ceph-mon > /etc/ceph/ceph.client.radosgw.keyring
@@ -306,10 +306,10 @@ New settings:
   Default Region: ZH
   S3 Endpoint: 192.168.100.238:8899
   DNS-style bucket+hostname:port template for accessing a bucket: 192.168.100.238:8899/%(bucket)
-  Encryption password: 
+  Encryption password:
   Path to GPG program: /usr/bin/gpg
   Use HTTPS protocol: False
-  HTTP Proxy server name: 
+  HTTP Proxy server name:
   HTTP Proxy server port: 0
 
 Test access with supplied credentials? [Y/n] n           # 是否测试 no

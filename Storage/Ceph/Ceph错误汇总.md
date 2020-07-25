@@ -14,7 +14,7 @@ original: true
 
 ### 1、执行ceph-deploy报错
 
-#### 错误信息
+#### 1.1、错误信息
 
 ``` zsh
 ➜  ceph-deploy
@@ -26,7 +26,7 @@ Traceback (most recent call last):
 ImportError: No module named pkg_resources
 ```
 
-#### 解决办法
+#### 1.2、解决办法
 
 ``` zsh
 ➜  yum install python-setuptools -y
@@ -34,7 +34,7 @@ ImportError: No module named pkg_resources
 
 ### 2、安装ceph连接超时
 
-#### 错误信息
+#### 2.1、错误信息
 
 ``` log
 [node1][DEBUG ] Downloading packages:
@@ -55,12 +55,12 @@ ImportError: No module named pkg_resources
 [node1][ERROR ]   File "/usr/lib64/python2.7/subprocess.py", line 1327, in _execute_child
 [node1][ERROR ]     raise child_exception
 [node1][ERROR ] OSError: [Errno 2] No such file or directory
-[node1][ERROR ] 
-[node1][ERROR ] 
+[node1][ERROR ]
+[node1][ERROR ]
 [ceph_deploy][ERROR ] RuntimeError: Failed to execute command: ceph --version
 ```
 
-#### 解决方法
+#### 2.2、解决方法
 
 ``` zsh
 ➜  export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-mimic/el7/
@@ -71,7 +71,7 @@ ImportError: No module named pkg_resources
 
 ### 3、ceph -s 执行失败
 
-#### 错误信息
+#### 3.1、错误信息
 
 ``` zsh
 ➜  ceph -s
@@ -79,7 +79,7 @@ ImportError: No module named pkg_resources
 2020-03-06 03:41:43.104 7f5aedc74700 -1 monclient: ERROR: missing keyring, cannot use cephx for authentication
 ```
 
-#### 解决方法
+#### 3.2、解决方法
 
 ``` zsh
 ➜  cd /opt/ceph-cluster
@@ -87,12 +87,12 @@ ImportError: No module named pkg_resources
 # 添加admin key至/etc/ceph
 ➜  ceph-deploy admin ceph-mon1 ceph-osd1 ceph-osd2
 或
-➜  cp ceph.client.admin.keyring /etc/ceph 
+➜  cp ceph.client.admin.keyring /etc/ceph
 ```
 
 ### 4、硬盘无法格式化
 
-#### 错误信息
+#### 4.1、错误信息
 
 ``` zsh
 # 磁盘无法进行格式化
@@ -100,28 +100,28 @@ ImportError: No module named pkg_resources
 mkfs.xfs: cannot open /dev/sdb: Device or resource busy
 ```
 
-#### 错误解决
+#### 4.2、错误解决
 
 ``` zsh
 # 查看磁盘状态
 ➜  lsblk
 NAME                                                                                                  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-sda                                                                                                     8:0    0   80G  0 disk 
+sda                                                                                                     8:0    0   80G  0 disk
 ├─sda1                                                                                                  8:1    0    1G  0 part /boot
-└─sda2                                                                                                  8:2    0   79G  0 part 
+└─sda2                                                                                                  8:2    0   79G  0 part
   ├─centos-root                                                                                       253:0    0   50G  0 lvm  /
   ├─centos-swap                                                                                       253:1    0    2G  0 lvm  
   └─centos-home                                                                                       253:2    0   27G  0 lvm  /home
-sdb                                                                                                     8:16   0   50G  0 disk 
+sdb                                                                                                     8:16   0   50G  0 disk
 └─ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad 253:3    0   49G  0 lvm      # 发现ceph的一些服务占用着磁盘
 sr0
 
 # 列出占用
 ➜  dmsetup ls
-ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad	(253:3)
-centos-home	(253:2)
-centos-swap	(253:1)
-centos-root	(253:0)
+ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad (253:3)
+centos-home (253:2)
+centos-swap (253:1)
+centos-root (253:0)
 
 # 移除占用
 ➜  dmsetup remove ceph--f5aefc82--f489--4a94--abcd--87934fcbb457-osd--block--41ba649f--f99e--40f6--b2f9--afda1251c0ad
@@ -129,14 +129,14 @@ centos-root	(253:0)
 # 查看状态
 ➜  lsblk
 NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-sda               8:0    0   80G  0 disk 
+sda               8:0    0   80G  0 disk
 ├─sda1            8:1    0    1G  0 part /boot
-└─sda2            8:2    0   79G  0 part 
+└─sda2            8:2    0   79G  0 part
   ├─centos-root 253:0    0   50G  0 lvm  /
   ├─centos-swap 253:1    0    2G  0 lvm  
   └─centos-home 253:2    0   27G  0 lvm  /home
-sdb               8:16   0   50G  0 disk 
-sr0              11:0    1 1024M  0 rom 
+sdb               8:16   0   50G  0 disk
+sr0              11:0    1 1024M  0 rom
 
 # 格式化硬盘
 ➜  mkfs.xfs -f /dev/sdb
@@ -153,7 +153,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 
 ### 5、too few PGs per OSD
 
-#### 错误信息
+#### 5.1、错误信息
 
 ``` zsh
 ➜  ceph -s
@@ -165,7 +165,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
             too few PGs per OSD (12 < min 30)
 ```
 
-#### 关于创建存储池  
+#### 5.2、关于创建存储池  
 
 确定 pg_num 取值是强制性的，因为不能自动计算。下面是几个常用的值：  
 　　*少于 5 个 OSD 时可把 pg_num 设置为 128  
@@ -175,7 +175,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 　　*自己计算 pg_num 取值时可借助 pgcalc 工具  
 随着 OSD 数量的增加，正确的 pg_num 取值变得更加重要，因为它显著地影响着集群的行为、以及出错时的数据持久性（即灾难性事件导致数据丢失的概率）。
 
-#### 解决办法
+#### 5.3、解决办法
 
 ``` zsh
 # 删除pool重建
@@ -226,14 +226,14 @@ pool 'kube' created
 
 ### 6、application not enabled on 1 pool
 
-#### 错误信息
+#### 6.1、错误信息
 
 ``` zsh
 ➜  ceph health
 HEALTH_WARN application not enabled on 1 pool(s)
 ```
 
-#### 错误解决
+#### 6.2、错误解决
 
 ``` zsh
 ➜  ceph health detail
@@ -249,7 +249,7 @@ HEALTH_OK
 
 ### 7、安装ceph-common报错
 
-#### 错误信息
+#### 7.1、错误信息
 
 ``` log
 --> Finished Dependency Resolution
@@ -277,7 +277,7 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
  You could try running: rpm -Va --nofiles --nodigest
 ```
 
-#### 错误解决
+#### 7.2、错误解决
 
 ``` zsh
 # 安装epel仓库
@@ -289,7 +289,7 @@ Error: Package: 2:ceph-common-13.2.8-0.el7.x86_64 (ceph)
 
 ### 8、修复down掉的ceph osd
 
-#### 错误信息
+#### 8.1、错误信息
 
 ``` zsh
 ➜  ceph -s
@@ -338,7 +338,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
  9   hdd 0.00879         osd.9        down        0 1.00000
 ```
 
-#### 错误分析
+#### 8.2、错误分析
 
 ``` log
   状态说明：
@@ -353,7 +353,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
     如果OSD 状态为 down 且 in ，必定有问题，而且集群处于非健康状态。
 ```
 
-#### 错误解决
+#### 8.3、错误解决
 
 ``` zsh
 # 先拉起所有osd
@@ -374,7 +374,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 
 ### 9、磁盘无法加入
 
-#### 错误信息
+#### 9.1、错误信息
 
 ``` log
 ➜  ceph-deploy osd create --data /dev/sdb1 ceph-osd
@@ -387,7 +387,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 [ceph_deploy][ERROR ] GenericError: Failed to create 1 OSDs
 ```
 
-#### 错误解决
+#### 9.2、错误解决
 
 ``` zsh
 
@@ -395,7 +395,7 @@ ID CLASS WEIGHT  TYPE NAME          STATUS REWEIGHT PRI-AFF
 
 ### 10、对象存储删除pool
 
-#### 错误信息
+#### 10.1、错误信息
 
 ``` zsh
 # 删除错误
@@ -412,7 +412,7 @@ Check your monitor configuration - `mon allow pool delete` is set to false by de
 error 1: (1) Operation not permitted
 ```
 
-#### 解决错误
+#### 10.2、解决错误
 
 ``` zsh
 # 修改ceph.conf
@@ -432,7 +432,7 @@ successfully deleted pool .rgw.root
 
 ### 11、对象存储创建pool -- pg数量不足
 
-#### 错误信息
+#### 11.1、错误信息
 
 ``` zsh
 ➜  cat ceph-rgw-pool.sh
@@ -512,15 +512,15 @@ Error ENOENT: unrecognized pool '.users.uid'
 Error ENOENT: unrecognized pool '.users.uid'
 ```
 
-#### 错误分析
+#### 11.2、错误分析
 
-报错原因：每个osd最多只支持250个pg，有3个osd，总共有750pg。现在新建了14个池，每个池占用的pg数为(750 / 14). 
+报错原因：每个osd最多只支持250个pg，有3个osd，总共有750pg。现在新建了14个池，每个池占用的pg数为(750 / 14).
          pool size 设置为3，我们有3个副本，pg_num = (250 * 3 / 14 / 3)
 
 处理办法：1、删除之前的池，然后修改脚本把pg数目设置小一点，再创建对象池。
          2、为了以后的使用我们每个池创建10个pg
 
-#### 错误解决
+#### 11.3、错误解决
 
 ``` zsh
 # 列出已经创建的pool
@@ -567,14 +567,14 @@ default.rgw.log
 
 ### 12、对象存储API -- s3cmd 创建 bucket
 
-#### 错误信息
+#### 12.1、错误信息
 
 ``` zsh
 ➜  s3cmd mb s3://first-bucket
 ERROR: S3 error: 400 (InvalidLocationConstraint): The specified location-constraint is not valid
 ```
 
-#### 错误解决
+#### 12.2、错误解决
 
 ``` zsh
 ➜  vim /root/.s3cfg

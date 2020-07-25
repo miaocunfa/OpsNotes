@@ -247,12 +247,16 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
 ### 2.4、生产备份
 
 ``` curl
-curl -X PUT "localhost:9200/_snapshot/ahprod_backup/snapshot_infov2_20200517?wait_for_completion=true" -H 'Content-Type: application/json' -d'
+# 指定索引备份
+➜  curl -X PUT "localhost:9200/_snapshot/ahprod_backup/snapshot_infov2_20200517?wait_for_completion=true" -H 'Content-Type: application/json' -d'
 {
   "indices": ["info_scenic_spot", "info-ad", "info_group_purchase", "info-history", "info-favorite", "info-history-label", "info-ad-exchange", "user-growth", "info-follow", "ad-label"],
   "ignore_unavailable": true,
   "include_global_state": false
 }'
+
+# 全库备份
+➜  curl -X PUT "localhost:9200/_snapshot/ahprod_backup/snapshot_infov2_20200724?wait_for_completion=true"
 
 # return
 {

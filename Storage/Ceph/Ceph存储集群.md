@@ -155,7 +155,7 @@ Monitor可以为单节点，也可以组成集群来满足高可用，节点个�
 
 ``` bash
 # 192.168.100.238
-➜  mkdir /opt/ceph-cluster && cd /opt/ceph-cluster 
+➜  mkdir /opt/ceph-cluster && cd /opt/ceph-cluster
 
 # 单节点mon
 ➜  ceph-deploy new ceph-mon1
