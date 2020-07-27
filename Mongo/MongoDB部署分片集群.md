@@ -13,38 +13,39 @@ original: true
 
 ## 一、环境准备
 
-> 官网地址  
-> https://www.mongodb.com/download-center/community  
+> [官网地址](https://www.mongodb.com/download-center/community)  
 >
 
 ### 1.1、安装包准备(V4.2.2)
-``` bash
+
+``` zsh
 # 下载安装包并解压
-$ wget https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.2.tgz
-$ tar -zxvf mongodb-linux-x86_64-rhel70-4.2.2.tgz -C /opt
+➜  wget https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.2.tgz
+➜  tar -zxvf mongodb-linux-x86_64-rhel70-4.2.2.tgz -C /opt
 
 # 验证版本信息
-$ cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
-$ ./mongo --version
+➜  cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
+➜  ./mongo --version
 MongoDB shell version v4.2.2
 
 # 创建mongodb配置文件目录
-$ mkdir -p /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf   
+➜  mkdir -p /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf
 ```
 
 ### 1.2、机器规划
 
-| 192.168.100.226 | 192.168.100.227 | 192.168.100.228 | 端口 |
-| --------------- | --------------- | --------------- | ---- |
-| config servers | config servers | config servers | 20000 |
-| mongos | mongos | mongos | 21000 |
-| shard1 | shard1 | shard1 | 27001 |
-| shard2 | shard2 | shard2 | 27002 |
+| 192.168.100.226 | 192.168.100.227 | 192.168.100.228 | 端口  |
+| --------------- | --------------- | --------------- | ----- |
+| config servers  | config servers  | config servers  | 20000 |
+| mongos          | mongos          | mongos          | 21000 |
+| shard1          | shard1          | shard1          | 27001 |
+| shard2          | shard2          | shard2          | 27002 |
 
 ### 1.3、hosts文件
-``` bash
+
+``` zsh
 # 在每个节点都执行
-$ vi /etc/hosts
+➜  vi /etc/hosts
 192.168.100.226    mongo1
 192.168.100.227    mongo2
 192.168.100.228    mongo3
@@ -53,13 +54,14 @@ $ vi /etc/hosts
 ## 二、配置服务器(config-server)
 
 ### 2.1、config-server配置文件
-``` bash
+
+``` zsh
 # 在每个节点都执行，按节点配置bindIp
 
 # 创建config-server数据目录
-$ mkdir -p /ahdata/mongodb/config/
-# 创建config-server配置文件                     
-$ cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/config.yaml << EOF
+➜  mkdir -p /ahdata/mongodb/config/
+# 创建config-server配置文件
+➜  cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/config.yaml << EOF
 sharding:
   clusterRole: configsvr
 replication:
@@ -74,14 +76,14 @@ storage:
   journal:
     enabled: true
   # 数据文件存储位置
-  dbPath: "/ahdata/mongodb/config/"   
+  dbPath: "/ahdata/mongodb/config/"
   #是否一个库一个文件夹
-  directoryPerDB: true 
+  directoryPerDB: true
   # WT引擎配置
   wiredTiger:
     engineConfig:
       #WT最大使用cache (根据服务器实际情况调节)
-      cacheSizeGB: 1           
+      cacheSizeGB: 1
       #是否将索引也按数据库名单独存储
       directoryForIndexes: true
     #表压缩配置
@@ -101,17 +103,19 @@ EOF
 ```
 
 ### 2.2、启动config-server副本集的每个成员
-``` bash
+
+``` zsh
 # 在每个节点都执行
-$ cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
-$ bin/mongod -f conf/config.yaml
+➜  cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
+➜  bin/mongod -f conf/config.yaml
 ```
 
 ### 2.3、启动config-server副本集
 
 连接到其中一台配置服务器
-``` bash
-$ bin/mongo --host mongo1 --port 20000
+
+``` zsh
+➜  bin/mongo --host mongo1 --port 20000
 
 # 启动副本集
 rs.initiate(
@@ -128,33 +132,34 @@ rs.initiate(
 
 # 返回信息
 {
-	"ok" : 1,
-	"$gleStats" : {
-		"lastOpTime" : Timestamp(1578628539, 1),
-		"electionId" : ObjectId("000000000000000000000000")
-	},
-	"lastCommittedOpTime" : Timestamp(0, 0),
-	"$clusterTime" : {
-		"clusterTime" : Timestamp(1578628539, 1),
-		"signature" : {
-			"hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
-			"keyId" : NumberLong(0)
-		}
-	},
-	"operationTime" : Timestamp(1578628539, 1)
+  "ok" : 1,
+  "$gleStats" : {
+    "lastOpTime" : Timestamp(1578628539, 1),
+    "electionId" : ObjectId("000000000000000000000000")
+  },
+  "lastCommittedOpTime" : Timestamp(0, 0),
+  "$clusterTime" : {
+    "clusterTime" : Timestamp(1578628539, 1),
+    "signature" : {
+      "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      "keyId" : NumberLong(0)
+    }
+  },
+  "operationTime" : Timestamp(1578628539, 1)
 }
 ```
 
 ## 三、分片shard1
 
 ### 3.1、shard1 配置文件
-``` bash
+
+``` zsh
 # 在每个节点都执行，按节点配置bindIp
 
 # 创建shard1数据目录
-$ mkdir -p /ahdata/mongodb/shard1
+➜  mkdir -p /ahdata/mongodb/shard1
 # 创建shard1配置文件
-$ cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/shard1.yaml <<EOF
+➜  cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/shard1.yaml <<EOF
 sharding:
    clusterRole: shardsvr
 replication:
@@ -179,16 +184,18 @@ EOF
 ```
 
 ### 3.2、启动shard1副本集的每个成员
-``` bash
+
+``` zsh
 # 在每个节点都执行
-$ cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
-$ bin/mongod -f conf/shard1.yaml
+➜  cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
+➜  bin/mongod -f conf/shard1.yaml
 ```
 
 ### 3.3、启动shard1副本集
-``` bash
+
+``` zsh
 连接到分片副本集中的一个成员
-$ bin/mongo --host mongo1 --port 27001
+➜  bin/mongo --host mongo1 --port 27001
 
 # 启动副本集
 rs.initiate(
@@ -204,28 +211,29 @@ rs.initiate(
 
 # 返回信息
 {
-	"ok" : 1,
-	"$clusterTime" : {
-		"clusterTime" : Timestamp(1578628705, 1),
-		"signature" : {
-			"hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
-			"keyId" : NumberLong(0)
-		}
-	},
-	"operationTime" : Timestamp(1578628705, 1)
+  "ok" : 1,
+  "$clusterTime" : {
+    "clusterTime" : Timestamp(1578628705, 1),
+    "signature" : {
+      "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      "keyId" : NumberLong(0)
+    }
+  },
+  "operationTime" : Timestamp(1578628705, 1)
 }
 ```
 
 ## 四、分片shard2
 
 ### 4.1、shard2 配置文件
-``` bash
+
+``` zsh
 # 在每个节点都执行，按节点配置bindIp
 
 # 创建shard1数据目录
-$ mkdir -p /ahdata/mongodb/shard2
+➜  mkdir -p /ahdata/mongodb/shard2
 # 创建shard1配置文件
-$ cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/shard2.yaml <<EOF
+➜  cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/shard2.yaml <<EOF
 sharding:
    clusterRole: shardsvr
 replication:
@@ -250,16 +258,18 @@ EOF
 ```
 
 ### 4.2、启动shard2副本集的每个成员
-``` bash
+
+``` zsh
 # 在每个节点都执行
-$ cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
-$ bin/mongod -f conf/shard2.yaml
+➜  cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
+➜  bin/mongod -f conf/shard2.yaml
 ```
 
 ### 4.3、启动shard2副本集
-``` bash
+
+``` zsh
 连接到分片副本集中的一个成员
-$ bin/mongo --host mongo1 --port 27002
+➜  bin/mongo --host mongo1 --port 27002
 
 # 启动副本集
 rs.initiate(
@@ -275,28 +285,29 @@ rs.initiate(
 
 # 返回信息
 {
-	"ok" : 1,
-	"$clusterTime" : {
-		"clusterTime" : Timestamp(1578628869, 1),
-		"signature" : {
-			"hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
-			"keyId" : NumberLong(0)
-		}
-	},
-	"operationTime" : Timestamp(1578628869, 1)
+  "ok" : 1,
+  "$clusterTime" : {
+    "clusterTime" : Timestamp(1578628869, 1),
+    "signature" : {
+      "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      "keyId" : NumberLong(0)
+    }
+  },
+  "operationTime" : Timestamp(1578628869, 1)
 }
 ```
 
 ## 五、路由服务器(mongos)
 
 ### 5.1、mongos配置文件
-``` bash
+
+``` zsh
 # 在每个节点都执行，按节点配置bindIp
 
 # 创建mongos数据目录
-$ mkdir -p /ahdata/mongodb/mongos
+➜  mkdir -p /ahdata/mongodb/mongos
 # 创建mongos配置文件
-$ cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/mongos.yaml <<EOF
+➜  cat > /opt/mongodb-linux-x86_64-rhel70-4.2.2/conf/mongos.yaml <<EOF
 #将confige-server添加到路由
 sharding:
   configDB: config/mongo1:20000,mongo2:20000,mongo3:20000
@@ -313,32 +324,43 @@ EOF
 ```
 
 ### 5.2、启动 mongos
-``` bash
+
+``` zsh
 # 视情况，启动一个或多个路由服务器
-$ cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
-$ bin/mongos -f conf/mongos.yaml
+➜  cd /opt/mongodb-linux-x86_64-rhel70-4.2.2
+➜  bin/mongos -f conf/mongos.yaml
 ```
 
 ### 5.3、连接至分片集群
-``` bash
-$ bin/mongo --host mongo1 --port 21000
+
+``` zsh
+➜  bin/mongo --host mongo1 --port 21000
 ```
 
 ### 5.4、将分片集添加至分片集群中
-``` bash
+
+``` zsh
 mongos> sh.addShard( "shard1/mongo1:27001,mongo2:27001,mongo3:27001")
 mongos> sh.addShard( "shard2/mongo1:27002,mongo2:27002,mongo3:27002")
+
+mongos> sh.status()
+  shards:
+        {  "_id" : "shard1",  "host" : "shard1/mongo1:27001,mongo2:27001,mongo3:27001",  "state" : 1 }
+        {  "_id" : "shard2",  "host" : "shard2/mongo1:27002,mongo2:27002,mongo3:27002",  "state" : 1 }
 ```
 
 ### 5.5、启动数据库
-``` bash
+
+``` zsh
 mongos> sh.enableSharding("ahtest")
 ```
 
 ### 5.6、分片集合
-``` bash
+
+``` zsh
 # 基于hash
-sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+mongos> sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+
 # 基于key值
-sh.shardCollection("<database>.<collection>", { <shard key field> : 1, ... } )
+mongos> sh.shardCollection("<database>.<collection>", { <shard key field> : 1, ... } )
 ```
