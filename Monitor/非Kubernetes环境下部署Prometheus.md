@@ -12,154 +12,157 @@ indent: false
 original: true
 ---
 
+## 更新记录
+
+| 时间       | 内容                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| 2019-09-19 | 初稿                                                                                     |
+| 2020-07-28 | 1、增加 Postgre_exporter</br>2、增加文末引用链接</br>3、修改文档结构</br>4、修改部署目录 |
+
 prometheus架构图，讲解
 
-## 一、exporter
+## 一、exporter - 指标收集器
 
-exporter讲解
-<https://prometheus.io/docs/instrumenting/exporters/>
+[exporter列表](https://prometheus.io/docs/instrumenting/exporters/)
 
-### 1.1、node_exporter
-
-#### 1.1.1、ansible 配置 node_exporter节点
+### 1.1、ansible hosts
 
 ``` zsh
-➜  cat /etc/ansible/hosts
+➜  vim /etc/ansible/hosts
 [21]
-192.168.100.[211:218] ansible_ssh_user='root' ansible_ssh_pass='test123
-```
+192.168.100.[211:219] ansible_ssh_user='root' ansible_ssh_pass='test123'
 
-#### 1.1.2、下载 node_exporter
+[22]
+192.168.100.[221:229] ansible_ssh_user='root' ansible_ssh_pass='test123'
 
-``` zsh
-# github仓库
-https://github.com/prometheus/node_exporter
+[23]
+192.168.100.[221:229] ansible_ssh_user='root' ansible_ssh_pass='test123'
 
-# 下载
-wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
-```
-
-#### 1.1.3、安装 node_exporter
-
-``` zsh
-# 将node_exporter拷贝至所有节点的/opt下
-➜  ansible all -m copy -a "src=/root/node_exporter-0.18.1.linux-amd64.tar.gz dest=/opt/"
-
-# 解压所有节点node_exporter程序包，并启动
-➜  ansible all -m shell -a "cd /opt; tar -zxvf node_exporter-0.18.1.linux-amd64.tar.gz; cd node_exporter-0.18.1.linux-amd64; nohup ./node_exporter &"
-```
-
-### 1.2、redis_exporter
-
-#### 1.2.1、ansible 配置 redis_exporter节点
-
-``` zsh
-➜  cat /etc/ansible/hosts
 [redis]
 192.168.100.[211:212] ansible_ssh_user='root' ansible_ssh_pass='test123'
-```
 
-#### 1.2.2、下载 redis_exporter
-
-``` zsh
-# github仓库
-https://github.com/oliver006/redis_exporter
-
-# 下载
-wget https://github.com/oliver006/redis_exporter/releases/download/v1.3.4/redis_exporter-v1.3.4.linux-amd64.tar.gz
-```
-
-#### 1.2.3、启动 redis_exporter
-
-``` zsh
-# 将redis_exporter拷贝至所有节点的/opt下
-➜  ansible redis -m copy -a "src=/root/redis_exporter-v1.3.4.linux-amd64.tar.gz dest=/opt"
-
-# 解压所有节点redis_exporter程序包，并启动
-➜  ansible redis -m shell -a "cd /opt; tar -zxvf redis_exporter-v1.3.4.linux-amd64.tar.gz; cd redis_exporter-v1.3.4.linux-amd64; nohup ./redis_exporter &"
-```
-
-### 1.3、mysqld_exporter
-
-#### 1.3.1、ansible 配置 mysqld_exporter节点
-
-``` zsh
-➜  cat /etc/ansible/hosts
 [mysql]
 192.168.100.[212:213] ansible_ssh_user='root' ansible_ssh_pass='test123'
-```
 
-#### 1.3.1、下载 mysqld_exporter
-
-``` zsh
-# github仓库
-https://github.com/prometheus/mysqld_exporter
-
-# 下载
-wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
-```
-
-#### 1.3.2、启动 mysqld_exporter
-
-``` zsh
-# 将mysqld_exporter拷贝至所有节点的/opt下
-➜  ansible mysql -m copy -a "src=/root/mysqld_exporter-0.12.1.linux-amd64.tar.gz dest=/opt"
-
-# 解压所有节点mysqld_exporter程序包，并启动
-➜  ansible mysql -m shell -a "cd /opt; tar -zxvf mysqld_exporter-0.12.1.linux-amd64.tar.gz; cd mysqld_exporter-0.12.1.linux-amd64; nohup ./mysqld_exporter &"
-```
-
-### 1.4、elasticsearch_exporter
-
-#### 1.4.1、ansible 配置 elasticsearch_exporter节点
-
-``` zsh
-➜  cat /etc/ansible/hosts
 [es]
+192.168.100.[211:213] ansible_ssh_user='root' ansible_ssh_pass='test123'
+
+[pg]
 192.168.100.[211:213] ansible_ssh_user='root' ansible_ssh_pass='test123'
 ```
 
-#### 1.4.2、下载 elasticsearch_exporter
+### 1.2、node_exporter
 
 ``` zsh
 # github仓库
-https://github.com/justwatchcom/elasticsearch_exporter
+# https://github.com/prometheus/node_exporter
+
+# 下载
+➜  wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
+
+
+# 安装 && 使用
+# 将 node_exporter 拷贝至所有节点的 /opt 下
+➜  ansible all -m copy -a "src=/root/ansible/node_exporter-0.18.1.linux-amd64.tar.gz dest=/opt/"
+
+# 解压所有节点node_exporter程序包，并启动
+➜  ansible all -m shell -a "cd /opt; tar -zxvf node_exporter-0.18.1.linux-amd64.tar.gz; cd node_exporter-0.18.1.linux-amd64; nohup ./node_exporter --web.listen-address=':10091' &"
+```
+
+### 1.3、redis_exporter
+
+``` zsh
+# github仓库
+# https://github.com/oliver006/redis_exporter
+
+# 下载
+➜  wget https://github.com/oliver006/redis_exporter/releases/download/v1.3.4/redis_exporter-v1.3.4.linux-amd64.tar.gz
+
+
+# 安装 && 使用
+# 将 redis_exporter 拷贝至所有 redis节点的 /opt 下
+➜  ansible redis -m copy -a "src=/root/redis_exporter-v1.3.4.linux-amd64.tar.gz dest=/opt"
+
+# 解压所有节点 redis_exporter程序包，并启动
+➜  ansible redis -m shell -a "cd /opt; tar -zxvf redis_exporter-v1.3.4.linux-amd64.tar.gz; cd redis_exporter-v1.3.4.linux-amd64; nohup ./redis_exporter &"
+```
+
+### 1.4、mysqld_exporter
+
+``` zsh
+# github仓库
+# https://github.com/prometheus/mysqld_exporter
+
+# 下载
+wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+
+
+# 安装 && 使用
+# 将 mysqld_exporter 拷贝至所有 mysql节点的 /opt下
+➜  ansible mysql -m copy -a "src=/root/mysqld_exporter-0.12.1.linux-amd64.tar.gz dest=/opt"
+
+# 解压所有节点 mysqld_exporter程序包，并启动
+➜  ansible mysql -m shell -a "cd /opt; tar -zxvf mysqld_exporter-0.12.1.linux-amd64.tar.gz; cd mysqld_exporter-0.12.1.linux-amd64; nohup ./mysqld_exporter &"
+```
+
+### 1.5、elasticsearch_exporter
+
+``` zsh
+# github仓库
+# https://github.com/justwatchcom/elasticsearch_exporter
 
 # 下载
 wget https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v1.1.0/elasticsearch_exporter-1.1.0.linux-amd64.tar.gz
-```
 
-#### 1.4.3、启动 elasticsearch_exporter
 
-``` zsh
-# 将elasticsearch_exporter拷贝至所有节点的/opt下
+# 安装 && 使用
+# 将 elasticsearch_exporter 拷贝至所有 es节点的 /opt下
 ➜  ansible es -m copy -a "src=/root/elasticsearch_exporter-1.1.0.linux-amd64.tar.gz dest=/opt/elasticsearch_exporter-1.1.0.linux-amd64.tar.gz"
 
-# 解压所有节点elasticsearch_exporter程序包，并启动
+# 解压所有节点 elasticsearch_exporter程序包，并启动
 ➜  ansible es -m shell -a "cd /opt; tar -zxvf elasticsearch_exporter-1.1.0.linux-amd64.tar.gz; cd elasticsearch_exporter-1.1.0.linux-amd64; nohup ./elasticsearch_exporter &"
 ```
 
-## 二、alert_manager
+### 1.6、postgres_exporter
+
+``` zsh
+# github仓库
+# https://github.com/wrouesnel/postgres_exporter
+
+# 下载
+➜  wget https://github.com/wrouesnel/postgres_exporter/releases/download/v0.8.0/postgres_exporter_v0.8.0_linux-amd64.tar.gz
+
+
+# 安装 && 使用
+# 将 postgres_exporter 拷贝至所有 pg节点的 /opt下
+➜  ansible pg -m copy -a "src=/root/ansible/postgres_exporter_v0.8.0_linux-amd64.tar.gz dest=/opt/postgres_exporter_v0.8.0_linux-amd64.tar.gz"
+
+# 需要在每个节点配置 postgre 连接串
+➜  vim /etc/profile
+export DATA_SOURCE_USER="postgres"
+export DATA_SOURCE_PASS="test%123"
+export DATA_SOURCE_URI="192.168.100.243:9999?sslmode=disable"
+➜  su - postgres
+➜  ./postgres_exporter
+
+# 解压所有节点 postgres_exporter程序包，并启动
+➜  ansible pg -m shell -a "cd /opt; tar -zxvf postgres_exporter_v0.8.0_linux-amd64.tar.gz; cd postgres_exporter_v0.8.0_linux-amd64; nohup ./postgres_exporter &"
+```
+
+## 二、alert_manager - 告警管理
 
 ### 2.1、下载 alert_manager
 
 ``` zsh
 # github仓库
-https://github.com/prometheus/alertmanager
+# https://github.com/prometheus/alertmanager
 
 # 下载
-wget https://github.com/prometheus/alertmanager/releases/download/v0.19.0/alertmanager-0.19.0.linux-amd64.tar.gz
-```
-
-### 2.2、安装 alert_manager
-
-将alertmanager部署在/usr/local下
-
-``` zsh
+➜  wget https://github.com/prometheus/alertmanager/releases/download/v0.19.0/alertmanager-0.19.0.linux-amd64.tar.gz
 ➜  tar -zxvf alertmanager-0.19.0.linux-amd64.tar.gz -C /usr/local/
 ```
 
-### 2.3、配置 alert_manager
+### 2.2、配置 alert_manager
 
 ``` yaml
 ➜  cd /usr/local/alertmanager-0.19.0.linux-amd64/
@@ -184,7 +187,7 @@ receivers:
   - to: '接收报警信息的邮箱'
 ```
 
-### 2.4、启动 alert_manager
+### 2.3、启动 alert_manager
 
 ``` zsh
 ➜  nohup ./alertmanager &
@@ -196,21 +199,16 @@ receivers:
 
 ``` zsh
 # github仓库
-https://github.com/prometheus/prometheus
+# https://github.com/prometheus/prometheus
 
 # 下载
-wget https://github.com/prometheus/prometheus/releases/download/v2.13.1/prometheus-2.13.1.linux-amd64.tar.gz
-```
-
-### 3.2、安装 prometheus
-
-将alertmanager部署在/usr/local下
-
-``` zsh
+➜  wget https://github.com/prometheus/prometheus/releases/download/v2.13.1/prometheus-2.13.1.linux-amd64.tar.gz
 ➜  tar -zxvf prometheus-2.13.1.linux-amd64.tar.gz -C /usr/local/
 ```
 
-### 3.3、配置 alertrules.yml
+### 3.2、配置 alertrules.yml
+
+alertrules配置告警规则
 
 ``` yaml
 ➜  cat alertrules.yml
@@ -264,7 +262,7 @@ groups:
       description: "{{ $labels.instance }}CPU 使用率已超过 90%, 当前值: {{ $value }}"
 ```
 
-### 3.4、配置 prometheus
+### 3.3、配置 prometheus
 
 ``` yaml
 ➜  cat prometheus.yml
@@ -276,10 +274,10 @@ alerting:
   alertmanagers:
   - static_configs:
     - targets:
-      #alertmanager服务端口
+      # alertmanager 服务端口
       - localhost:9093
 
-#报警规则文件
+# 报警规则文件
 rule_files:
   - "alertrules.yml"
 
@@ -287,13 +285,13 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
     - targets:
-      #prometheus服务端口
+      # prometheus 服务端口
       - localhost:9090
 
-  - job_name: 'node'
+  - job_name: 'node-21x'
     static_configs:
       - targets:
-        #监听node_exporter服务
+        # 监听 node_exporter 服务
         - 192.168.100.211:10091
         - 192.168.100.212:10091
         - 192.168.100.213:10091
@@ -302,6 +300,13 @@ scrape_configs:
         - 192.168.100.216:10091
         - 192.168.100.217:10091
         - 192.168.100.218:10091
+        - 192.168.100.219:10091
+        labels:
+          instance: node-21x
+
+  - job_name: 'node-22x'
+    static_configs:
+      - targets:
         - 192.168.100.221:10091
         - 192.168.100.222:10091
         - 192.168.100.223:10091
@@ -310,13 +315,24 @@ scrape_configs:
         - 192.168.100.226:10091
         - 192.168.100.227:10091
         - 192.168.100.228:10091
+        - 192.168.100.229:10091
+        labels:
+          instance: node-22x
+
+  - job_name: 'node-23x'
+    static_configs:
+      - targets:
         - 192.168.100.231:10091
         - 192.168.100.232:10091
         - 192.168.100.233:10091
+        - 192.168.100.234:10091
         - 192.168.100.235:10091
         - 192.168.100.236:10091
         - 192.168.100.237:10091
         - 192.168.100.238:10091
+        - 192.168.100.239:10091
+        labels:
+          instance: node-23x
 
   - job_name: 'redis'
     static_configs:
@@ -351,9 +367,18 @@ scrape_configs:
         - 192.168.100.216:9256
         labels:
           instance: process
+
+  - job_name: 'postgre'
+    static_configs:
+      - targets:
+        - 192.168.100.211:9187
+        - 192.168.100.212:9187
+        - 192.168.100.213:9187
+        labels:
+          instance: postgre
 ```
 
-### 3.5、启动 prometheus
+### 3.4、启动 prometheus
 
 ``` zsh
 ➜  nohup ./prometheus --storage.tsdb.retention=180d --web.enable-admin-api &
@@ -361,7 +386,7 @@ scrape_configs:
 
 启动admin讲解
 
-### 3.6 prometheus API
+### 3.5 prometheus API
 
 API讲解
 
@@ -374,3 +399,23 @@ API讲解
 
 ➜  curl -X POST -g 'http://localhost:9090/api/v1/admin/tsdb/delete_series?match[]={job="node"}'
 ```
+
+## 四、日常运维
+
+``` zsh
+➜  cd /opt/prometheus-2.13.1.linux-amd64
+
+# 清理数据
+➜  rm -rf ./data
+```
+
+> 参考链接：  
+> 1、[exporter 列表](https://prometheus.io/docs/instrumenting/exporters/)  
+> 2、[node_exporter 地址](https://github.com/prometheus/node_exporter)  
+> 3、[redis_exporter 地址](https://github.com/oliver006/redis_exporter)  
+> 4、[mysqld_exporter 地址](https://github.com/prometheus/mysqld_exporter)  
+> 5、[elasticsearch_exporter 地址](https://github.com/justwatchcom/elasticsearch_exporter)  
+> 6、[postgres_exporter 地址](https://github.com/wrouesnel/postgres_exporter)  
+> 7、[alertmanager 地址](https://github.com/prometheus/alertmanager)  
+> 8、[prometheus 地址](https://github.com/prometheus/prometheus)  
+>
