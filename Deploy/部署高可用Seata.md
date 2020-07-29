@@ -13,9 +13,10 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容 |
-| ---------- | ---- |
-| 2020-07-28 | 初稿 |
+| 时间       | 内容            |
+| ---------- | --------------- |
+| 2020-07-28 | 初稿            |
+| 2020-07-29 | 增加systemd服务 |
 
 ## 环境
 
@@ -30,7 +31,7 @@ original: true
 
 Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 AT、TCC、SAGA 和 XA 事务模式，为用户打造一站式的分布式解决方案。
 
-## 1、下载
+## 一、下载
 
 ``` zsh
 # 下载 seata安装包
@@ -42,7 +43,7 @@ Seata 是一款开源的分布式事务解决方案，致力于提供高性能�
 ➜  scp seata-server-1.3.0.tar.gz n225:/opt
 ```
 
-## 2、配置
+## 二、配置
 
 Seata 的高可用依赖于注册中心、配置中心和数据库来实现
 
@@ -216,7 +217,7 @@ bind 0.0.0.0
 ➜  systemctl start redis
 ```
 
-## 3、启动
+## 三、启动
 
 ### 3.1、启动选项
 
@@ -242,10 +243,61 @@ bind 0.0.0.0
 ➜  sh ./bin/seata-server.sh -n 3
 ```
 
+### 3.3、注册为systemd服务
+
+systemd 服务脚本
+
+``` zsh
+➜  vim /usr/lib/systemd/system/seata@.service
+[Unit]
+Description=The Seata Server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/seata/bin/seata-server.sh -n %i 2>&1 > /opt/seata/logs/seata-%i.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启动服务
+
+``` zsh
+➜  systemctl daemon-reload
+➜  systemctl start seata@3
+➜  systemctl status seata@3
+● seata@3.service - The Seata Server
+   Loaded: loaded (/usr/lib/systemd/system/seata@.service; disabled; vendor preset: disabled)
+   Active: active (running) since Wed 2020-07-29 08:43:43 CST; 1s ago
+ Main PID: 17960 (sh)
+   CGroup: /system.slice/system-seata.slice/seata@3.service
+           ├─17960 /bin/sh -c /opt/seata/bin/seata-server.sh -n 3 2>&1 > /opt/seata/logs/seata-3.log
+           └─17961 /usr/bin/java -server -Xmx2048m -Xms2048m -Xmn1024m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-O...
+
+Jul 29 08:43:43 node225 systemd[1]: Started The Seata Server.
+Jul 29 08:43:45 node225 sh[17960]: log4j:WARN No appenders could be found for logger (org.apache.http.client.protocol.RequestAddCookies).
+Jul 29 08:43:45 node225 sh[17960]: log4j:WARN Please initialize the log4j system properly.
+Jul 29 08:43:45 node225 sh[17960]: log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+➜  cd /opt/seata/logs/
+➜  ll
+total 32
+-rw-r--r-- 1 root root 28037 Jul 29 08:46 seata-3.log
+-rw-r--r-- 1 root root   986 Jul 29 08:44 seata_gc.log
+```
+
 > 参考链接:  
 > 1、[Seata直接部署文档](https://seata.io/zh-cn/docs/ops/deploy-server.html)  
 > 2、[Seata高可用部署](https://seata.io/zh-cn/docs/ops/deploy-ha.html)  
 > 3、[Seata参数配置](https://seata.io/zh-cn/docs/user/configurations.html)  
 > 4、[七步带你集成Seata 1.2 高可用搭建](https://blog.csdn.net/qq_35721287/article/details/105947941)  
 > 5、[Seata GitHub](https://github.com/seata/seata)  
+> 6、[Systemd 入门教程：实战篇](http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html)  
+> 7、[systemctl服务编写，及日志控制](https://blog.csdn.net/jeccisnd/article/details/103166554/)  
+> 8、[linux kill信号列表](https://www.cnblogs.com/the-tops/p/5604537.html)  
 >

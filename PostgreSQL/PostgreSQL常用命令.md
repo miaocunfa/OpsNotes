@@ -20,6 +20,7 @@ original: true
 ## 一、元命令
 
 ``` psql
+    \l         查看所有数据库
     \d         查看用户所有对象，被解释为\dtvsE, E代表外部表
     \dt        查看表
     \ds        查看序列
