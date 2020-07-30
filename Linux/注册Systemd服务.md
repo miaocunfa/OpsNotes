@@ -15,6 +15,7 @@ original: true
 | 时间       | 内容 |
 | ---------- | ---- |
 | 2020-07-28 | 初稿 |
+| 2020-07-30 | 增加promtail |
 
 ## 示例
 
@@ -86,6 +87,25 @@ Jul 29 08:43:45 node225 sh[17960]: log4j:WARN See http://logging.apache.org/log4
 total 32
 -rw-r--r-- 1 root root 28037 Jul 29 08:46 seata-3.log
 -rw-r--r-- 1 root root   986 Jul 29 08:44 seata_gc.log
+```
+
+``` zsh
+➜  vim /usr/lib/systemd/system/promtail.service
+[Unit]
+Description=The Promtail Client
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/opt/promtail/promtail-linux-amd64 -config.file=/opt/promtail/promtail-local-config.yaml 2>&1 > /opt/promtail/promtail.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 > 参考链接：  
