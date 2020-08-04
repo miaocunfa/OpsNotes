@@ -14,10 +14,11 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容                                                                                     |
-| ---------- | ---------------------------------------------------------------------------------------- |
-| 2019-09-19 | 初稿                                                                                     |
-| 2020-07-28 | 1、增加 Postgre_exporter</br>2、增加文末引用链接</br>3、修改文档结构</br>4、修改部署目录 |
+| 时间       | 内容                                                                                          |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| 2019-09-19 | 初稿                                                                                          |
+| 2020-07-28 | 1、增加 Postgre_exporter</br>2、增加文末引用链接</br>3、修改文档结构</br>4、修改部署目录      |
+| 2020-08-04 | 1、增加 exporter注册systemd服务 && 开机自启</br>2、增加 Prometheus注册systemd服务 && 开机自启 |
 
 prometheus架构图，讲解
 
@@ -386,7 +387,7 @@ scrape_configs:
 
 启动admin讲解
 
-### 3.5 prometheus API
+### 3.5、prometheus API
 
 API讲解
 
@@ -402,11 +403,71 @@ API讲解
 
 ## 四、日常运维
 
+### 4.1、清理数据
+
 ``` zsh
 ➜  cd /opt/prometheus-2.13.1.linux-amd64
 
 # 清理数据
 ➜  rm -rf ./data
+```
+
+### 4.2、systemd服务
+
+#### 4.2.1、Unit文件
+
+``` zsh
+## node_exporter
+➜  vim /usr/lib/systemd/system/node_exporter.service
+[Unit]
+Description=The node_exporter Client
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/node_exporter-0.18.1.linux-amd64/node_exporter --web.listen-address=:10091 2>&1 > /opt/node_exporter-0.18.1.linux-amd64/node_exporter.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+## prometheus
+➜  vim /usr/lib/systemd/system/prometheus.service
+[Unit]
+Description=The Prometheus Server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/prometheus-2.13.1.linux-amd64/prometheus --config.file=/opt/prometheus-2.13.1.linux-amd64/prometheus.yml --storage.tsdb.retention=180d --web.enable-admin-api 2>&1 > /opt/prometheus-2.13.1.linux-amd64/prometheus.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### 4.2.2、开机自启
+
+``` zsh
+# prometheus
+➜  systemctl daemon-reload             # 重载 systemd
+➜  systemctl start prometheus          # 启动 prometheus
+➜  systemctl enable prometheus         # 开机自启 prometheus
+
+# node_exporter
+ansible all -m copy -a "src=/root/ansible/node_exporter.service dest=/usr/lib/systemd/system/node_exporter.service"    # 将 systemd Unit File拷贝至每一台主机
+ansible all -m shell -a "systemctl daemon-reload"                                                                      # 重载 systemd
+ansible all -m shell -a "systemctl start node_exporter"                                                                # 启动 node_exporter
+ansible all -m shell -a "ss -tnlp|grep 10091"                                                                          # 查看启动状态
+ansible all -m shell -a "systemctl enable node_exporter"                                                               # 开机自启 node_exporter
 ```
 
 > 参考链接：  

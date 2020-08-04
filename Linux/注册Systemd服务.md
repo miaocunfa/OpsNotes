@@ -12,10 +12,11 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容 |
-| ---------- | ---- |
-| 2020-07-28 | 初稿 |
-| 2020-07-30 | 增加promtail |
+| 时间       | 内容                                                             |
+| ---------- | ---------------------------------------------------------------- |
+| 2020-07-28 | 初稿                                                             |
+| 2020-07-30 | 增加 promtail                                                    |
+| 2020-08-04 | 1、增加 node_exporter</br>2、增加 prometheus</br>3、文档结构优化 |
 
 ## 示例
 
@@ -43,7 +44,7 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-## 案列
+## 1、seata
 
 ``` shell
 ➜  vim /usr/lib/systemd/system/seata@.service
@@ -64,10 +65,11 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-启用 Service
+### 1.1、启动服务
 
 ``` zsh
 ➜  systemctl daemon-reload
+
 ➜  systemctl start seata@3
 ➜  systemctl status seata@3
 ● seata@3.service - The Seata Server
@@ -82,12 +84,14 @@ Jul 29 08:43:43 node225 systemd[1]: Started The Seata Server.
 Jul 29 08:43:45 node225 sh[17960]: log4j:WARN No appenders could be found for logger (org.apache.http.client.protocol.RequestAddCookies).
 Jul 29 08:43:45 node225 sh[17960]: log4j:WARN Please initialize the log4j system properly.
 Jul 29 08:43:45 node225 sh[17960]: log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
-➜  cd /opt/seata/logs/
-➜  ll
+
+➜  ll /opt/seata/logs/
 total 32
 -rw-r--r-- 1 root root 28037 Jul 29 08:46 seata-3.log
 -rw-r--r-- 1 root root   986 Jul 29 08:44 seata_gc.log
 ```
+
+## 2、promtail
 
 ``` zsh
 ➜  vim /usr/lib/systemd/system/promtail.service
@@ -97,7 +101,70 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/opt/promtail/promtail-linux-amd64 -config.file=/opt/promtail/promtail-local-config.yaml 2>&1 > /opt/promtail/promtail.log'
+ExecStart=/bin/sh -c '/opt/promtail/promtail-linux-amd64 -config.file=/opt/promtail/promtail-local-config.yaml 2>&1 > /opt/promtail/promtail.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 3、node_exporter
+
+``` zsh
+➜  vim /usr/lib/systemd/system/node_exporter.service
+[Unit]
+Description=The node_exporter Client
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/node_exporter-0.18.1.linux-amd64/node_exporter --web.listen-address=:10091 2>&1 > /opt/node_exporter-0.18.1.linux-amd64/node_exporter.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 4、prometheus
+
+``` zsh
+➜  vim /usr/lib/systemd/system/prometheus.service
+[Unit]
+Description=The Prometheus Server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/prometheus-2.13.1.linux-amd64/prometheus --config.file=/opt/prometheus-2.13.1.linux-amd64/prometheus.yml --storage.tsdb.retention=180d --web.enable-admin-api 2>&1 > /opt/prometheus-2.13.1.linux-amd64/prometheus.log'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 5、loki
+
+``` zsh
+➜  vim /usr/lib/systemd/system/loki.service
+[Unit]
+Description=The Loki Server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/loki/loki-linux-amd64 -config.file=/opt/loki/loki-local-config.yaml 2>&1 > /opt/loki/loki.log'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
