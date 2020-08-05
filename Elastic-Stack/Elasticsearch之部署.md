@@ -11,6 +11,13 @@ toc: false
 original: true
 ---
 
+## 更新记录
+
+| 时间       | 内容             |
+| ---------- | ---------------- |
+| 2019-12-27 | 初稿             |
+| 2020-08-05 | 增加资源限制部分 |
+
 ## 一、环境准备
 
 在elastic官网下载最新版的elasticsearch安装包
@@ -21,7 +28,7 @@ original: true
 自elasticsearch x.x版本开始，为了安全已经不能使用root用户启动
 
 ``` bash
-$ useradd es
+➜  useradd es
 ```
 
 ## 二、部署配置
@@ -29,15 +36,15 @@ $ useradd es
 ### 2.1、软件包准备
 
 ``` bash
-$ tar -zxvf elasticsearch-7.5.1-linux-x86_64.tar.gz
-$ chown -R es:es elasticsearch-7.5.1 # 将目录属主属组修改给es用户
+➜  tar -zxvf elasticsearch-7.5.1-linux-x86_64.tar.gz
+➜  chown -R es:es elasticsearch-7.5.1                   # 将目录属主属组修改给es用户
 ```
 
 ### 2.2、目录结构介绍
 
 ``` bash
-$ cd elasticsearch-7.5.1
-$ ll
+➜  cd elasticsearch-7.5.1
+➜  ll
 total 556
 drwxr-xr-x.  2 es es   4096 Dec 16 18:01 bin            # 二进制程序
 drwxr-xr-x.  2 es es    178 Dec 27 05:21 config         # 配置文件
@@ -55,7 +62,7 @@ drwxr-xr-x.  2 es es      6 Dec 16 18:01 plugins        # 插件
 ### 2.3、配置文件
 
 ``` conf
-$ cat elasticsearch.yml | grep -v ^# | grep -v ^$
+➜  cat elasticsearch.yml | grep -v ^# | grep -v ^$
 cluster.name: mytest
 node.name: mytest-1
 path.data: data
@@ -65,13 +72,27 @@ network.host: 0.0.0.0
 http.port: 9200
 discovery.seed_hosts: ["192.168.100.217"]
 cluster.initial_master_nodes: ["mytest-1"]
+
+➜  vim /etc/security/limits.conf
+*               soft    nofile          65536
+*               hard    nofile          65536
+*               soft    nproc           4096
+*               hard    nproc           4096
+
+# allow user 'elasticsearch' mlockall
+elasticsearch soft memlock unlimited
+elasticsearch hard memlock unlimited
+
+➜  vim /etc/sysctl.conf
+vm.max_map_count = 262144
+➜  sysctl -p
 ```
 
 ## 三、启动验证
 
 ``` bash
-$ ./elasticsearch -d
-$ curl localhost:9200
+➜  ./elasticsearch -d
+➜  curl localhost:9200
 {
   "name" : "mytest-1",
   "cluster_name" : "mytest",

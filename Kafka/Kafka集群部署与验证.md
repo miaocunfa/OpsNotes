@@ -11,18 +11,28 @@ toc: false
 original: true
 ---
 
+## 更新记录
+
+| 时间       | 内容     |
+| ---------- | -------- |
+| 2019-12-02 | 初稿     |
+| 2020-08-05 | 文档优化 |
+
 ## 一、官网下载kafka
-``` bash
-wget https://www.apache.org/dyn/closer.cgi?path=/kafka/2.3.0/kafka_2.12-2.3.0.tgz
+
+``` zsh
+➜  wget https://www.apache.org/dyn/closer.cgi?path=/kafka/2.3.0/kafka_2.12-2.3.0.tgz
 ```
 
 ## 二、zookeeper
-### 2.1、配置zookeeper
-``` conf
-tar -zxvf kafka_2.12-2.3.0.tgz
-cd /opt/kafka_2.12-2.3.0/config
 
-[miaocunfa@db1 config]$ cat zookeeper.properties | grep -v ^# | grep -v ^$
+### 2.1、配置zookeeper
+
+``` conf
+➜  tar -zxvf kafka_2.12-2.3.0.tgz
+➜  cd /opt/kafka_2.12-2.3.0/config
+
+➜  cat zookeeper.properties | grep -v ^# | grep -v ^$
 
 # tickTime：心跳基本时间单位，毫秒级，ZK基本上所有的时间都是这个时间的整数倍。
 # initLimit：tickTime的个数，表示在leader选举结束后，followers与leader同步需要的时间，如果followers比较多或者说leader的数据灰常多时，同步时间相应可能会增加，那么这个值也需要相应增加。当然，这个值也是follower和observer在开始同步leader的数据时的最大等待时间(setSoTimeout)
@@ -52,33 +62,38 @@ server.3=172.19.26.4:2888:3888
 ```
 
 ### 2.2 各节点分别创建server-id
-``` bash
+
+``` zsh
 # myid文件创建在dataDir目录下
 # myid内容与配置文件中的serverid一致
-echo 1 > /ahdata/kafka-tmp/zookeeper/myid
-echo 2 > /ahdata/kafka-tmp/zookeeper/myid
-echo 2 > /ahdata/kafka-tmp/zookeeper/myid
+➜  echo 1 > /ahdata/kafka-tmp/zookeeper/myid
+➜  echo 2 > /ahdata/kafka-tmp/zookeeper/myid
+➜  echo 3 > /ahdata/kafka-tmp/zookeeper/myid
 ```
 
 ### 2.3、启动zookeeper
-``` bash
-/opt/kafka_2.12-2.3.0/bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
-/opt/kafka_2.12-2.3.0/bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
-/opt/kafka_2.12-2.3.0/bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
+
+``` zsh
+➜  bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
+➜  bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
+➜  bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
 ```
 
 ### 2.4、验证zookeeper状态
-``` bash
-[root@db1 config]# echo stat | nc 172.19.26.3 2181 | grep Mode
+
+``` zsh
+➜  echo stat | nc 172.19.26.3 2181 | grep Mode
 Mode: follower
-[root@db1 config]# echo stat | nc 172.19.26.4 2181 | grep Mode
+➜  echo stat | nc 172.19.26.4 2181 | grep Mode
 Mode: follower
-[root@db1 config]# echo stat | nc 172.19.26.6 2181 | grep Mode
+➜  echo stat | nc 172.19.26.6 2181 | grep Mode
 Mode: leader
 ```
 
 ## 三、kafka
+
 ### 3.1、配置kafka
+
 ``` conf
 # 当前机器在集群中的唯一标识，和zookeeper的myid性质一样
 broker.id=1
@@ -134,43 +149,46 @@ delete.topic.enable=true
 ```
 
 ### 3.2、启动kafka
-``` bash
-/opt/kafka_2.12-2.3.0/bin/kafka-server-start.sh -daemon config/server.properties
-/opt/kafka_2.12-2.3.0/bin/kafka-server-start.sh -daemon config/server.properties
-/opt/kafka_2.12-2.3.0/bin/kafka-server-start.sh -daemon config/server.properties
+
+``` zsh
+➜  bin/kafka-server-start.sh -daemon config/server.properties
+➜  bin/kafka-server-start.sh -daemon config/server.properties
+➜  bin/kafka-server-start.sh -daemon config/server.properties
 ```
 
 ### 3.3、验证kafka状态
-``` bash
-[root@db1 kafka_2.12-2.3.0]# echo dump | nc 172.19.26.3 2181 | grep broker
-	/brokers/ids/1
-	/brokers/ids/2
-[root@db1 kafka_2.12-2.3.0]# echo dump | nc 172.19.26.4 2181 | grep broker
-	/brokers/ids/1
-	/brokers/ids/2
-[root@db1 kafka_2.12-2.3.0]# echo dump | nc 172.19.26.6 2181 | grep broker
-	/brokers/ids/1
-	/brokers/ids/2
+
+``` zsh
+➜  echo dump | nc 172.19.26.3 2181 | grep broker
+    /brokers/ids/1
+    /brokers/ids/2
+➜  echo dump | nc 172.19.26.4 2181 | grep broker
+    /brokers/ids/1
+➜  echo dump | nc 172.19.26.6 2181 | grep broker
+    /brokers/ids/1
+    /brokers/ids/2
 ```
 
 ## 四、验证集群
+
 ### 4.1、topic
-``` bash
+
+``` zsh
 # 创建一个topic
-[miaocunfa@db1 kafka_2.12-2.3.0]$ bin/kafka-topics.sh --create --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --replication-factor 2 --partitions 3 --topic demo_topics
+➜  bin/kafka-topics.sh --create --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --replication-factor 2 --partitions 3 --topic demo_topics
 WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
 Created topic demo_topics.
 
 # 列出所有topic
-[miaocunfa@db1 kafka_2.12-2.3.0]$ /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --list --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181
+➜  /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --list --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181
 demo_topics
 
 # 查看topic详细情况
-[miaocunfa@db1 config]$ /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --describe --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --topic demo_topics
-Topic:demo_topics	PartitionCount:3	ReplicationFactor:2	Configs:
-	Topic: demo_topics	Partition: 0	Leader: 2	Replicas: 1,2	Isr: 2,1
-	Topic: demo_topics	Partition: 1	Leader: 2	Replicas: 2,1	Isr: 2,1
-	Topic: demo_topics	Partition: 2	Leader: 2	Replicas: 1,2	Isr: 2,1
+➜  /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --describe --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --topic demo_topics
+Topic:demo_topics    PartitionCount:3    ReplicationFactor:2    Configs:
+    Topic: demo_topics    Partition: 0    Leader: 2    Replicas: 1,2    Isr: 2,1
+    Topic: demo_topics    Partition: 1    Leader: 2    Replicas: 2,1    Isr: 2,1
+    Topic: demo_topics    Partition: 2    Leader: 2    Replicas: 1,2    Isr: 2,1
 ```
 
 ### 4.2、生产消费验证
@@ -179,29 +197,32 @@ ps. 1) 若producer 和 consumer 两个窗口同时打开，在producer输入信�
 &ensp;&ensp;&ensp;&ensp;2）新开一个终端，去消费同一个topic，刚刚已经消费过的消息还会被新终端继续消费。也就是说，消息被消费过后不会立即被删除。　
 
 #### 4.2.1、生产者发送消息
-``` bash
-[miaocunfa@db1 kafka_2.12-2.3.0]$ /opt/kafka_2.12-2.3.0/bin/kafka-console-producer.sh --broker-list 172.19.26.3:9092,172.19.26.4:9092,172.19.26.6:9092 --topic demo_topics
->Hello Kafka!      
+
+``` zsh
+➜  /opt/kafka_2.12-2.3.0/bin/kafka-console-producer.sh --broker-list 172.19.26.3:9092,172.19.26.4:9092,172.19.26.6:9092 --topic demo_topics
+>Hello Kafka!
 >
 ```
 
 #### 4.2.2、消费者接收消息
-``` bash
+
+``` zsh
 # 启动一个新终端创建一个消费者接收消息。
-[root@db1 kafka_2.12-2.3.0]# /opt/kafka_2.12-2.3.0/bin/kafka-console-consumer.sh --bootstrap-server=172.19.26.3:9092,172.19.26.4:9092,172.19.26.6:9092 --topic demo_topics --from-beginning
+➜  /opt/kafka_2.12-2.3.0/bin/kafka-console-consumer.sh --bootstrap-server=172.19.26.3:9092,172.19.26.4:9092,172.19.26.6:9092 --topic demo_topics --from-beginning
 Hello Kafka!
 ```
 
 ### 4.3、删除测试topic
-``` bash
+
+``` zsh
 # 配置文件中delete.topic.enable=true才可删除topic
-[miaocunfa@db1 config]$ /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --delete --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --topic demo_topics
+➜  /opt/kafka_2.12-2.3.0/bin/kafka-topics.sh --delete --zookeeper 172.19.26.3:2181,172.19.26.4:2181,172.19.26.6:2181 --topic demo_topics
 Topic demo_topics is marked for deletion.
 Note: This will have no impact if delete.topic.enable is not set to true.
 ```
 
 > 参考：  
-> 1.https://www.cnblogs.com/qingyunzong/p/8619184.html  
-> 2.https://www.cnblogs.com/qingyunzong/p/9005062.html#_label3_5  
-> 3.https://www.cnblogs.com/cici20166/p/9426417.html  
-> 4.https://www.orchome.com/805
+> 1.<https://www.cnblogs.com/qingyunzong/p/8619184.html>  
+> 2.<https://www.cnblogs.com/qingyunzong/p/9005062.html#_label3_5>  
+> 3.<https://www.cnblogs.com/cici20166/p/9426417.html>  
+> 4.<https://www.orchome.com/805>
