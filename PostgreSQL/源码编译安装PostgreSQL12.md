@@ -15,6 +15,7 @@ original: true
 | ---------- | -------- |
 | 2019-11-08 | 初稿     |
 | 2020-08-05 | 文档优化 |
+| 2020-08-06 | 文档优化 |
 
 ## 一、环境准备
 
@@ -56,7 +57,7 @@ PostgreSQL installation complete.
 
 安装完成后，PostgreSQL安装在如下位置
 
-``` info
+``` zsh
 ➜  cd /home/postgresql/dbhome/
 ➜  ll
 总用量 16
@@ -68,7 +69,7 @@ drwxr-xr-x 6 root root 4096 11月  8 21:07 share
 
 ## 四、环境变量
 
-``` info
+``` zsh
 ➜  su - postgre
 ➜  vi .bash_profile
 export LD_LBRARY_PATH=$HOME/dbhome/lib:$LD_LIBRARY_PATH
@@ -80,7 +81,7 @@ export PATH=$HOME/dbhome/bin:$PATH
 
 ## 五、PostgreSQL使用
 
-``` info
+``` zsh
 # 创建PostgreSQL的数据路径
 ➜  mkdir $HOME/data
 
@@ -180,9 +181,12 @@ PostgreSQL启动关闭命令
 示例如下
 
 ``` zsh
+# 启动数据库
 ➜  pg_ctl -D $HOME/data -l logfile start
 waiting for server to start.... done
 server started
+
+# 关闭数据库
 ➜  pg_ctl -D $HOME/data stop
 waiting for server to shut down.... done
 server stopped

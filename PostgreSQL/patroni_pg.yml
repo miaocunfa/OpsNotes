@@ -1,0 +1,70 @@
+scope: pgcluster
+# 按节点修改
+name: ty-db1
+
+restapi:
+  # 按节点修改
+  listen: 0.0.0.0:8008
+  connect_address: ty-db1:8008
+
+etcd:
+  # 按节点修改
+  hosts: ty-db1:2379, ty-db2:2379, ty-db3:2379
+
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+    postgresql:
+      use_pg_rewind: true
+      parameters:
+
+  initdb:  
+  - encoding: UTF8
+  - data-checksums
+
+  pg_hba:  
+  - host replication replicator 127.0.0.1/32 md5
+  - host replication rep 192.168.0.106/0 md5
+  - host replication rep 192.168.0.207/0 md5
+  - host replication rep 192.168.0.100/0 md5
+  - host all all 0.0.0.0/0 md5
+
+  users:
+    admin:
+      password: admin
+      options:
+        - createrole
+        - createdb
+
+postgresql:
+  listen: 0.0.0.0:5432
+  # 按节点修改
+  connect_address: ty-db1:5432
+  data_dir: /var/lib/pgsql/10/data
+  bin_dir: /usr/pgsql-10/bin
+  pgpass: /tmp/pgpass0
+  authentication:
+    replication:
+      username: rep
+      password: test%123
+    superuser:
+      username: postgres
+      password: test%123
+
+  parameters:
+    unix_socket_directories: '.'
+    synchronous_commit: "remote_write"
+    synchronous_standby_names: ""
+    max_wal_senders: "100"
+    wal_keep_segments: "0"
+    wal_level: "logical"
+    wal_log_hints: "off"
+
+tags:
+    nofailover: false
+    noloadbalance: false
+    clonefrom: false
+    nosync: false
