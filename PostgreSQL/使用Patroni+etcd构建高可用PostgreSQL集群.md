@@ -16,7 +16,7 @@ original: false
 | 时间       | 内容                                                                                                                                      |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | 2020-08-05 | 初稿                                                                                                                                      |
-| 2020-08-06 | 1、etcd 注册systemd </br> 2、patroni 启动脚本 </br> 3、增加错误部分 </br> 4、增加运行时信息解析 </br> 5、移除postgres用户部分为一篇新Blog |
+| 2020-08-06 | 1、etcd 注册 systemd </br> 2、patroni 启动脚本 && 添加 patroni 配置文件解析 </br> 3、增加错误部分 </br> 4、增加运行时信息解析 </br> 5、移除postgres用户部分为一篇新Blog |
 
 ## 环境
 
@@ -175,18 +175,21 @@ bootstrap:
   - data-checksums
 
   pg_hba:  
-  - host replication replicator 127.0.0.1/32 md5
   - host replication rep 192.168.0.106/0 md5
   - host replication rep 192.168.0.207/0 md5
   - host replication rep 192.168.0.100/0 md5
   - host all all 0.0.0.0/0 md5
 
   users:
-    admin:
-      password: admin
+    postgres:
+      password: test%123
       options:
         - createrole
         - createdb
+    rep:
+      password: test%123
+      options:
+        - replication
 
 postgresql:
   listen: 0.0.0.0:5432
@@ -218,6 +221,18 @@ tags:
     clonefrom: false
     nosync: false
 ```
+
+这是字段的说明：
+
+- scope：这是 Patroni 管理的集群的名称，可用于 patronictl 引用您的集群。所有节点的此键应具有相同的值。
+- name：节点的名称，在集群中是唯一的。
+- restapi：Patroni有一个REST API，它从该地址（`isten`）开始。`connect_address`是其他节点可以用来连接到该API的地址，因此这里的IP应该是可以从其他节点（通常是通过专用VLAN）到达此节点的IP。
+- etcd：用于连接到etcd集群的配置。对于3节点的etcd群集，请使用 `hosts: ip1:port1, ip2:port, ip3:port3`。
+- bootstrap：创建Patroni集群时使用这些值。`postgresql.parameters` 下的值是实际的 `postgresql.conf` 配置参数。一些值（例如 `wal_level` 和 `max_wal_senders`）是流复制正常工作所必需的。
+- initdb：当引导群集的第一个节点并且PostgreSQL`数据目录不存在`时，这些参数将用于调用 `initdb`。
+- pg_hba：Patroni将添加到`pg_hba.conf`它创建的数据库文件中的条目。请参阅下面的`users`部分。
+- users：Patroni创建此处指定的用户列表。pg_hba然后，在postgresql.authentication下面的部分中使用这些用户（应该在上面具有访问权限）允许Patroni登录到Postgres服务器。在这里，创建了用户`postgres`（用于Patroni的管理员访问）和`rep`（用于从备用数据库的复制访问）。
+- postgresql：这些参数包含有关此Patroni节点管理的PostgreSQL服务器`ty-db1`的大量信息。`connect_address`中的IP应该是其他服务器可以从中访问该服务器的IP（通常是通过专用VLAN）。bin_dir是postgre的安装目录，我们正在将数据和配置目录设置为`/var/lib/pgsql/10/data`。目前，该目录为空。`authentication` 参数应引用我们在 `users` 部分中上面创建的复制和管理员用户。最后，`parameters`部分再次包含postgresql.conf Patroni将传递给它们pg_ctl以启动数据库的配置参数。
 
 ### 3.3、启动脚本
 
@@ -431,4 +446,5 @@ psycopg2.OperationalError: FATAL:  role "rep" does not exist
 > 参考链接：  
 > 1、[GETTING STARTED WITH PATRONI](https://www.opsdash.com/blog/postgres-getting-started-patroni.html)  
 > 2、[如何删除etcd上的旧数据](https://www.mayanpeng.cn/archives/74.html)  
+> 3、[patroni官方文档](https://patroni.readthedocs.io/en/latest/)  
 >
