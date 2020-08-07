@@ -12,11 +12,13 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容                                                             |
-| ---------- | ---------------------------------------------------------------- |
-| 2020-07-28 | 初稿                                                             |
-| 2020-07-30 | 增加 promtail                                                    |
-| 2020-08-04 | 1、增加 node_exporter</br>2、增加 prometheus</br>3、文档结构优化 |
+| 时间       | 内容                                                                                    |
+| ---------- | --------------------------------------------------------------------------------------- |
+| 2020-07-28 | 初稿                                                                                    |
+| 2020-07-30 | 增加 promtail                                                                           |
+| 2020-08-04 | 1、增加 node_exporter </br> 2、增加 prometheus </br> 3、文档结构优化 </br> 4、增加 Loki |
+| 2020-08-06 | 1、增加 pg-etcd </br> 2、增加 pg-patroni                                                |
+| 2020-08-07 | 修改启动脚本日志部分                                                                    |
 
 ## 示例
 
@@ -54,7 +56,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/seata/bin/seata-server.sh -n %i 2>&1 > /opt/seata/logs/seata-%i.log'
+ExecStart=/bin/sh -c '/opt/seata/bin/seata-server.sh -n %i > /opt/seata/logs/seata-%i.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
@@ -77,7 +79,7 @@ WantedBy=multi-user.target
    Active: active (running) since Wed 2020-07-29 08:43:43 CST; 1s ago
  Main PID: 17960 (sh)
    CGroup: /system.slice/system-seata.slice/seata@3.service
-           ├─17960 /bin/sh -c /opt/seata/bin/seata-server.sh -n 3 2>&1 > /opt/seata/logs/seata-3.log
+           ├─17960 /bin/sh -c /opt/seata/bin/seata-server.sh -n 3 > /opt/seata/logs/seata-3.log 2>&1
            └─17961 /usr/bin/java -server -Xmx2048m -Xms2048m -Xmn1024m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-O...
 
 Jul 29 08:43:43 node225 systemd[1]: Started The Seata Server.
@@ -101,7 +103,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/promtail/promtail-linux-amd64 -config.file=/opt/promtail/promtail-local-config.yaml 2>&1 > /opt/promtail/promtail.log'
+ExecStart=/bin/sh -c '/opt/promtail/promtail-linux-amd64 -config.file=/opt/promtail/promtail-local-config.yaml > /opt/promtail/promtail.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
@@ -122,7 +124,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/node_exporter-0.18.1.linux-amd64/node_exporter --web.listen-address=:10091 2>&1 > /opt/node_exporter-0.18.1.linux-amd64/node_exporter.log'
+ExecStart=/bin/sh -c '/opt/node_exporter-0.18.1.linux-amd64/node_exporter --web.listen-address=:10091 > /opt/node_exporter-0.18.1.linux-amd64/node_exporter.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
@@ -143,7 +145,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/prometheus-2.13.1.linux-amd64/prometheus --config.file=/opt/prometheus-2.13.1.linux-amd64/prometheus.yml --storage.tsdb.retention=180d --web.enable-admin-api 2>&1 > /opt/prometheus-2.13.1.linux-amd64/prometheus.log'
+ExecStart=/bin/sh -c '/opt/prometheus-2.13.1.linux-amd64/prometheus --config.file=/opt/prometheus-2.13.1.linux-amd64/prometheus.yml --storage.tsdb.retention=180d --web.enable-admin-api > /opt/prometheus-2.13.1.linux-amd64/prometheus.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
@@ -164,7 +166,49 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/loki/loki-linux-amd64 -config.file=/opt/loki/loki-local-config.yaml 2>&1 > /opt/loki/loki.log'
+ExecStart=/bin/sh -c '/opt/loki/loki-linux-amd64 -config.file=/opt/loki/loki-local-config.yaml > /opt/loki/loki.log 2>&1'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 6、pg-etcd
+
+``` zsh
+➜  vim /usr/lib/systemd/system/pg-etcd.service
+[Unit]
+Description=The etcd Server for postgre
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/pg-HA/etcd/start_etcd.sh > /opt/pg-HA/etcd/etcd.log 2>&1'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 7、pg-patroni
+
+``` zsh
+➜  vim /usr/lib/systemd/system/pg-patroni.service
+[Unit]
+Description=The patroni Server for postgre-cluster
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/pg-HA/patroni/start_patroni.sh'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM

@@ -13,10 +13,11 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容         |
-| ---------- | ------------ |
-| 2020-01-09 | 初稿         |
-| 2020-08-04 | 修改节点规划 |
+| 时间       | 内容                     |
+| ---------- | ------------------------ |
+| 2020-01-09 | 初稿                     |
+| 2020-08-04 | 修改节点规划             |
+| 2020-08-06 | 文档结构优化 && 分片均衡 |
 
 ## 一、环境准备
 
@@ -43,9 +44,9 @@ MongoDB shell version v4.2.2
 
 | Node            | config servers | mongos | shard1 | shard2 |
 | --------------- | -------------- | ------ | ------ | ------ |
-| 192.168.100.226 | 20000          | 21000  | 27001  | 27003  |
-| 192.168.100.227 | 20000          | 21000  | 27001  | 27003  |
-| 192.168.100.228 | 20000          | 21000  | 27001  | 27003  |
+| 192.168.100.226 | 20000          | 21000  | 27001  | 27002  |
+| 192.168.100.227 | 20000          | 21000  | 27001  | 27002  |
+| 192.168.100.228 | 20000          | 21000  | 27001  | 27002  |
 
 ### 1.3、hosts文件
 
@@ -101,7 +102,7 @@ storage:
 #端口配置
 net:
   #按节点配置
-  bindIp: mongo1
+  bindIp: 0.0.0.0
   port: 20000
 processManagement:
   fork: true
@@ -182,7 +183,7 @@ processManagement:
    fork: true
 net:
    #按节点配置
-   bindIp: mongo1
+   bindIp: 0.0.0.0
    port: 27001
 setParameter:
    enableLocalhostAuthBypass: false
@@ -256,7 +257,7 @@ processManagement:
    fork: true
 net:
    #按节点配置
-   bindIp: mongo1
+   bindIp: 0.0.0.0
    port: 27002
 setParameter:
    enableLocalhostAuthBypass: false
@@ -322,7 +323,7 @@ systemLog:
   path: "/ahdata/mongodb/mongos.log"
   logAppend: true
 net:
-  bindIp: mongo1
+  bindIp: 0.0.0.0
   port: 21000
 processManagement:
   fork: true
@@ -337,13 +338,15 @@ EOF
 ➜  bin/mongos -f conf/mongos.yaml
 ```
 
-### 5.3、连接至分片集群
+## 六、启动分片集群
+
+### 6.1、连接至分片集群
 
 ``` zsh
 ➜  bin/mongo --host mongo1 --port 21000
 ```
 
-### 5.4、将分片集添加至分片集群中
+### 6.2、将分片集添加至分片集群中
 
 ``` zsh
 mongos> sh.addShard( "shard1/mongo1:27001,mongo2:27001,mongo3:27001")
@@ -355,18 +358,30 @@ mongos> sh.status()
         {  "_id" : "shard2",  "host" : "shard2/mongo1:27002,mongo2:27002,mongo3:27002",  "state" : 1 }
 ```
 
-### 5.5、启动数据库
+## 七、分片均衡
+
+### 7.1、分片表
+
+mongodb的分片是基于表的，也就是说就算你有了分片集群并不等于你的所有数据就会自动分布在所有的分片上。一定要显式的创建分片表。比如说你有10张表，可能只有两张表需要分片，其他8张表不需要分片，那么他就不会分布。
 
 ``` zsh
-mongos> sh.enableSharding("ahtest")
-```
+mongos> sh.status()
+mongos> sh.enableSharding("foo")                         # 对foo这个数据库允许分片，一次有效
+mongos> sh.shardCollection("foo.bar", {_id:'hashed'});   # 对foo里的bar这个集合启用分片
+mongos> sh.status()
 
-### 5.6、分片集合
 
-``` zsh
 # 基于hash
 mongos> sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
-
 # 基于key值
 mongos> sh.shardCollection("<database>.<collection>", { <shard key field> : 1, ... } )
+```
+
+### 7.2、插入测试数据
+
+``` zsh
+mongos> use foo
+for(var i=0; i<10000; i++){
+  db.bar.insert({i:i});
+}
 ```
