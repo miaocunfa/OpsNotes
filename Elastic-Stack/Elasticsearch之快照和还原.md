@@ -11,6 +11,11 @@ toc: false
 original: true
 ---
 
+| 时间       | 内容                                      |
+| ---------- | ----------------------------------------- |
+| 2019-12-03 | 初稿                                      |
+| 2020-08-10 | 1、增加指定多个索引 </br> 2、全部索引还原 |
+
 > 官网链接：
 > <https://www.elastic.co/guide/en/elasticsearch/reference/7.x/modules-snapshots.html#modules-snapshots>
 
@@ -177,6 +182,14 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
     }
   }
 }
+
+# 指定多个索引
+curl -X PUT "localhost:9200/_snapshot/ahtest_backup_20200810/snapshot_aihang3?wait_for_completion=true" -H 'Content-Type: application/json' -d'
+{
+  "indices": ["infos","relatedwords"],
+  "ignore_unavailable": true,
+  "include_global_state": false
+}'
 ```
 
 ### 2.2、全索引快照
@@ -317,6 +330,14 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
 {
   "acknowledged":true
 }
+```
+
+### 3.3、全部索引还原
+
+es中不能有跟快照中索引重名的，否则还原失败
+
+``` json
+➜  curl -X POST "localhost:9200/_snapshot/ahtest_backup_20200810/snapshot_aihang3/_restore"
 ```
 
 ## 四、清除仓库
