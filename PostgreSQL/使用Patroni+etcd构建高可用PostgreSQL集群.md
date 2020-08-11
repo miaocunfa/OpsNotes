@@ -17,6 +17,7 @@ original: false
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2020-08-05 | 初稿                                                                                                                                                                    |
 | 2020-08-06 | 1、etcd 注册 systemd </br> 2、patroni 启动脚本 && 添加 patroni 配置文件解析 </br> 3、增加错误部分 </br> 4、增加运行时信息解析 </br> 5、移除postgres用户部分为一篇新Blog |
+| 2020-08-11 | 修改 patroni 字段说明                                                                                                                                                   |
 
 ## 环境
 
@@ -41,6 +42,7 @@ original: false
 # 每台主机都执行
 ➜  mkdir -p /opt/pg-HA/etcd
 
+# etcd默认API为v3版本，Patroni 现阶段不支持 v3 API，因此在etcd集群中增加--enable-v2属性
 ➜  vim /opt/pg-HA/etcd/start_etcd.sh
 etcd --name pg-etcd-db1 \
   --initial-advertise-peer-urls http://192.168.0.106:2380 \
@@ -134,6 +136,8 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
 
 ## 三、Patroni
 
+Patroni（帕特罗尼）
+
 ### 3.1、安装
 
 ``` zsh
@@ -203,7 +207,7 @@ postgresql:
       username: rep
       password: test%123
     superuser:
-      username: postgres
+      username: admin
       password: test%123
 
   parameters:
@@ -224,15 +228,15 @@ tags:
 
 这是字段的说明：
 
-- **scope**：集群的名称，可使用 `patronictl` 管理集群集群。所有节点值应该一样。
+- **scope**：集群的名称，可使用 `patronictl` 管理集群集群。所有节点值一。
 - **name**：节点的名称，在集群中是唯一的。
-- **restapi**：Patroni 有一个 REST API，它从该地址（`listen`）开始。`connect_address` 是其他节点可以用来连接到该API的地址，因此这里的IP应该是可以从其他节点（通常是通过专用VLAN）到达此节点的IP。
-- **etcd**：用于连接到etcd集群的配置。对于3节点的etcd群集，请使用 `hosts: ip1:port1, ip2:port, ip3:port3`。
+- **restapi**：Patroni 有一个 REST API，`listen` 是监听地址。`connect_address` 是其他节点可以用来连接到该API的地址，因此这里的IP应该是可以从其他节点（通常是通过专用VLAN）到达此节点的IP。
+- **etcd**：用于连接到etcd集群的配置。对于3节点的etcd群集，请使用 `hosts: IP1:Port1, IP2:Port, IP3:Port3`。
 - **bootstrap**：创建 Patroni 集群时使用这些值。`postgresql.parameters` 下的值是实际的 `postgresql.conf` 配置参数。一些值（例如 `wal_level` 和 `max_wal_senders`）是流复制正常工作所必需的。
 - **initdb**：当引导群集的第一个节点并且 PostgreSQL `数据目录不存在` 时，这些参数将用于调用 `initdb`。
-- **pg_hba**：Patroni 将添加到它创建的数据库 `pg_hba.conf` 文件中的条目。请参阅下面的 `users` 部分。
-- **users**：Patroni 创建此处指定的用户列表。pg_hba 然后，在postgresql.authentication下面的部分中使用这些用户（应该在上面具有访问权限）允许 Patroni 登录到 Postgres 服务器。在这里，创建了用户`postgres`（用于Patroni的管理员访问）和 `rep`（用于从备用数据库的复制访问）。
-- **postgresql**：这些参数包含有关此 Patroni 节点管理的 PostgreSQL 服务器 `ty-db1` 的大量信息。`connect_address` 中的 IP 应该是其他服务器可以从中访问该服务器的 IP（通常是通过专用VLAN）。bin_dir 是 postgre 的安装目录，我们正在将数据和配置目录设置为 `/var/lib/pgsql/10/data`。目前，该目录为空。`authentication` 参数应引用我们在 `users` 部分中上面创建的复制和管理员用户。最后，`parameters` 部分再次包含 postgresql.conf Patroni 将传递给它们 pg_ctl 以启动数据库的配置参数。
+- **pg_hba**：这个选项的值将添加至 Patroni 创建的数据库中的 `pg_hba.conf` 配置文件
+- **users**：Patroni 创建此处指定的用户列表。然后 pg_hba 在 postgresql.authentication下面的部分中使用这些用户，允许 Patroni 登录到 Postgres 服务器。在这里，创建了用户`admin`（用于Patroni的管理员访问）和 `rep`（用于从备用数据库的复制访问）。
+- **postgresql**：这个选项包含了 Patroni 创建 PostgreSQL 服务的大量信息。`connect_address` 配置得是可以访问Postgre服务的地址。`bin_dir` 是Postgre的程序目录，`data_dir` 配置了Postgre的数据存储目录，在使用Patroni初始化之前该目录需要为空。`authentication` 参数应引用我们在 `users` 部分中上面创建的有复制权限和管理权限的用户。
 
 ### 3.3、启动脚本
 
@@ -243,12 +247,12 @@ su - postgres -c "patroni /opt/pg-HA/patroni/patroni_pg.yml > /opt/pg-HA/patroni
 
 # 添加执行权限
 ➜  chmod u+x /opt/pg-HA/patroni/start_patroni.sh
-➜  chown -R postgres:postgres /opt/pg-HA/patroni
+➜  chown -R postgres:postgres /opt/pg-HA/patroni    # 用于写入patroni日志文件
 
-# 启动 patroni
+# 启动 patroni 以初始化 Postgre集群
 ➜  /opt/pg-HA/patroni/start_patroni.sh
 
-# 验证集群
+# 待三节点都初始化完毕后，验证集群
 ➜  patronictl -d etcd://localhost:2379 list pgcluster
 + Cluster: pgcluster (6857818384330525938) -----------+
 | Member |  Host  |  Role  |  State  | TL | Lag in MB |
@@ -278,15 +282,15 @@ su - postgres -c "patroni /opt/pg-HA/patroni/patroni_pg.yml > /opt/pg-HA/patroni
 /service/pgcluster/optime
 /service/pgcluster/optime/leader
 
-# 获取 leader
+# 获取 leader 的值
 ➜  etcdctl get /service/pgcluster/leader
 ty-db1
 
-# 获取节点信息
+# 获取节点信息，返回为JSON，使用jq格式化返回信息
 ➜  etcdctl get /service/pgcluster/members/ty-db1 | jq '.'
 {
   "conn_url": "postgres://ty-db1:5432/postgres",
-  "api_url": "http://ty-db1:8008/patroni",
+  "api_url": "http://ty-db1:8008/patroni",    # ty-db1节点，patroni的api地址
   "state": "running",
   "role": "master",
   "version": "1.6.5",
@@ -297,18 +301,18 @@ ty-db1
 
 ### 4.2、patroni
 
-通过访问 patroni的 API 获取节点 PostgreSQL的信息
+访问 patroni的 API 获取信息
 
 ``` zsh
 ➜  curl http://ty-db1:8008/patroni | jq '.'
 {
   "state": "running",                                         # 运行状态
   "postmaster_start_time": "2020-08-06 18:37:49.535 CST",
-  "role": "master",                                           # 主节点
+  "role": "master",                                           # 本节点 - 主节点
   "server_version": 100013,
   "cluster_unlocked": false,
   "xlog": {
-    "location": 67110664                                      # 复制的位置
+    "location": 67110664                                      # 日志的位置
   },
   "timeline": 1,
   "replication": [                                            # 从节点信息
@@ -340,12 +344,12 @@ ty-db1
 {
   "state": "running",                                        # 运行状态
   "postmaster_start_time": "2020-08-06 18:37:51.599 CST",
-  "role": "replica",                                         # 复制节点
+  "role": "replica",                                         # 本节点 - 复制节点
   "server_version": 100013,
   "cluster_unlocked": false,
   "xlog": {
-    "received_location": 67110664,                           # 复制的位置
-    "replayed_location": 67110664,
+    "received_location": 67110664,                           # 接受的日志 位置
+    "replayed_location": 67110664,                           # 已经同步 位置
     "replayed_timestamp": null,
     "paused": false
   },
@@ -358,9 +362,9 @@ ty-db1
 }
 ```
 
-## 、错误
+## 五、错误
 
-### .1、patroni 包无法导入
+### 5.1、patroni 包无法导入
 
 ``` log
 2020-08-06 15:05:22,338 INFO: Failed to import patroni.dcs.consul
@@ -390,7 +394,7 @@ patroni.exceptions.PatroniException: 'Can not find suitable configuration of dis
 Successfully installed dnspython-2.0.0 python-etcd-0.4.5
 ```
 
-### .2、没有找到 pg 复制用户
+### 5.2、没有找到 pg 复制用户
 
 ``` log
 2020-08-06 15:22:12,853 ERROR: Can not fetch local timeline and lsn from replication connection
@@ -413,11 +417,11 @@ psycopg2.OperationalError: FATAL:  role "rep" does not exist
 错误解决
 
 ``` zsh
-# 先于 patroni 初始化数据库了，pg 应该不启动，仅使用 patroni 初始化数据库
+# 先于 patroni 初始化数据库了，pg不应该启动，只用yum安装pg即可。仅使用 patroni 初始化数据库
 
 # 清理原集群
-➜  rm -rf /var/lib/pgsql/10/data    # 所有节点执行
-➜  etcdctl rm -r /service           # 任意节点执行
+➜  rm -rf /var/lib/pgsql/10/data    # 所有节点执行，清理pg的数据目录
+➜  etcdctl rm -r /service           # 任意节点执行，清理etcd集群信息
 
 # 重新初始化
 ➜  /opt/pg-HA/patroni/start_patroni.sh
