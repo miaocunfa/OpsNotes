@@ -17,6 +17,7 @@ original: true
 | ---------- | ------------ |
 | 2020-03-25 | 初稿         |
 | 2020-08-05 | 文档结构优化 |
+| 2020-08-12 | 增加插件列表 |
 
 ## 版本信息
 
@@ -303,10 +304,30 @@ rabbit@MQ3
 ``` zsh
 # 启动web管理插件
 ➜  sbin/rabbitmq-plugins enable rabbitmq_management
-# 增加用户
-➜  sbin/rabbitmqctl add_user ahy ahy
-# 设置用户角色
-➜  sbin/rabbitmqctl set_user_tags ahy administrator
+
+# 启用插件列表
+➜  sbin/rabbitmq-plugins list
+Listing plugins with pattern ".*" ...
+ Configured: E = explicitly enabled; e = implicitly enabled
+ | Status: * = running on rabbit@ty-db1
+ |/
+[  ] rabbitmq_amqp1_0                  3.8.2
+[  ] rabbitmq_auth_backend_cache       3.8.2
+[  ] rabbitmq_auth_backend_http        3.8.2
+[  ] rabbitmq_auth_backend_ldap        3.8.2
+[  ] rabbitmq_auth_backend_oauth2      3.8.2
+[  ] rabbitmq_auth_mechanism_ssl       3.8.2
+[  ] rabbitmq_consistent_hash_exchange 3.8.2
+[  ] rabbitmq_event_exchange           3.8.2
+[  ] rabbitmq_federation               3.8.2
+[  ] rabbitmq_federation_management    3.8.2
+[  ] rabbitmq_jms_topic_exchange       3.8.2
+[E*] rabbitmq_management               3.8.2    # E 显式启用
+[e*] rabbitmq_management_agent         3.8.2    # e 隐式启用
+
+# 增加用户 && 设置用户角色
+➜  sbin/rabbitmqctl add_user ahy ahy                  # 执行一遍
+➜  sbin/rabbitmqctl set_user_tags ahy administrator   # 执行一遍
 ```
 
 ### 4.2、访问管理界面

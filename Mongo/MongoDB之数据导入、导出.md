@@ -91,9 +91,14 @@ querying options:
 ➜  cd /home/miaocunfa/
 ➜  chown miaocunfa:miaocunfa info_collection1.json
 
+cd /opt/mongodb-linux-x86_64-rhel70-4.2.2/bin
 ./mongoexport -d aihang3 -c info -o ~/aihang3_info.json
 2020-08-07T10:04:27.429+0800  connected to: mongodb://localhost/
 2020-08-07T10:04:27.437+0800  exported 45 records
+
+./mongoexport -h 192.168.100.226:27017 -d aihang3 -o ~/aihang3_20200810.json
+2020-08-12T14:12:50.786+0800  must specify a collection
+2020-08-12T14:12:50.786+0800  try 'mongoexport --help' for more information
 ```
 
 ## 二、数据导入

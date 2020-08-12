@@ -255,7 +255,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/seata/bin/seata-server.sh -n %i 2>&1 > /opt/seata/logs/seata-%i.log'
+ExecStart=/bin/sh -c '/opt/seata/bin/seata-server.sh -n %i > /opt/seata/logs/seata-%i.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
