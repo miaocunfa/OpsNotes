@@ -12,9 +12,10 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容 |
-| ---------- | ---- |
-| 2020-07-30 | 初稿 |
+| 时间       | 内容         |
+| ---------- | ------------ |
+| 2020-07-30 | 初稿         |
+| 2020-08-13 | 增加采样配置 |
 
 ## 版本信息
 
@@ -243,6 +244,20 @@ select userid::regrole, dbid, query from pg_stat_statements order by (shared_blk
 select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_written desc limit 20;
 ```
 
+## 五、采样配置
+
+``` zsh
+➜  vi $PGDATA/postgresql.conf
+pg_stat_statements.max = 10000           # 在pg_stat_statements中最多保留多少条统计信息，通过LRU算法，覆盖老的记录。  
+pg_stat_statements.track = all           # all - (所有SQL包括函数内嵌套的SQL), top - 直接执行的SQL(函数内的sql不被跟踪), none - (不跟踪)  
+pg_stat_statements.track_utility = off   # 是否跟踪非DML语句 (例如DDL，DCL)， on表示跟踪, off表示不跟踪  
+pg_stat_statements.save = on             # 重启后是否保留统计信息
+
+track_io_timing = on                     # 如果要跟踪IO消耗的时间，还需要打开如下参数
+track_activity_query_size = 3000         # 设置单条SQL的最长长度，超过被截断; 默认:1024 最低限度:100 最大:102400
+```
+
 > 参考链接：  
 > 1、[postgresql 查找慢sql之二: pg_stat_statements](https://blog.csdn.net/ctypyb2002/article/details/83151836?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param)  
+> 2、[postgre官方配置文件 -- track_activity_query_size](https://postgresqlco.nf/zh/doc/param/track_activity_query_size/10/)  
 >

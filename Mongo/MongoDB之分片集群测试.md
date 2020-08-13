@@ -113,5 +113,17 @@ for(var i=1;i<=1000000;i++){
 ## 二、分片均衡
 
 ``` mongo
-
+mongos> sh.status()
+  databases:
+        {  "_id" : "test",  "primary" : "shard2",  "partitioned" : true,  "version" : {  "uuid" : UUID("51834159-2269-4108-a02e-49b9f74256a7"),  "lastMod" : 1 } }
+                test.table1
+                        shard key: { "id" : 1 }
+                        unique: false
+                        balancing: true
+                        chunks:
+                                shard1  1
+                                shard2  2
+                        { "id" : { "$minKey" : 1 } } -->> { "id" : 2 } on : shard1 Timestamp(3, 0)
+                        { "id" : 2 } -->> { "id" : 500002 } on : shard2 Timestamp(3, 1)
+                        { "id" : 500002 } -->> { "id" : { "$maxKey" : 1 } } on : shard2 Timestamp(2, 3)
 ```

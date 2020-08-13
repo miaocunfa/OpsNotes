@@ -4,8 +4,7 @@ date: "2020-06-22"
 categories:
     - "技术"
 tags:
-    - "运维"
-    - "shell"
+    - "错误汇总"
     - "python"
 toc: false
 original: true
