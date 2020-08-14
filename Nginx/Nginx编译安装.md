@@ -12,16 +12,19 @@ original: true
 ---
 
 ## 一、环境准备
+
 ``` bash
 yum -y install gcc gcc-c++ automake pcre pcre-devel zlib zlib-devel openssl openssl-devel
 ```
 
 ## 二、下载源码包
+
 ``` bash
 wget http://nginx.org/download/nginx-1.16.1.tar.gz
 ```
 
 ## 三、编译安装
+
 ``` bash
 # 解压源码包
 tar -zxvf nginx-1.16.1.tar.gz
@@ -39,6 +42,7 @@ make && make install
 ```
 
 ## 四、查看nginx版本号
+
 ``` bash
 [root@localhost /usr/local/nginx-1.16.1/sbin]#./nginx -V
 nginx version: nginx/1.16.1
@@ -49,6 +53,7 @@ configure arguments: --prefix=/usr/local/nginx-1.16.1 --with-http_stub_status_mo
 ```
 
 ## 五、创建软连接
+
 ``` bash
 # 将nginx可执行文件链接至/usr/bin下，可在系统任意路径执行nginx
 ln -s /usr/local/nginx-1.16.1/sbin/nginx /usr/bin/nginx

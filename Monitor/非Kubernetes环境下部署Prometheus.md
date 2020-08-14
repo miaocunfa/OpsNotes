@@ -19,6 +19,7 @@ original: true
 | 2019-09-19 | 初稿                                                                                          |
 | 2020-07-28 | 1、增加 Postgre_exporter</br>2、增加文末引用链接</br>3、修改文档结构</br>4、修改部署目录      |
 | 2020-08-04 | 1、增加 exporter注册systemd服务 && 开机自启</br>2、增加 Prometheus注册systemd服务 && 开机自启 |
+| 2020-08-14 | 修改systemd Unit文件中的日志部分                                                              |
 
 prometheus架构图，讲解
 
@@ -425,7 +426,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/node_exporter-0.18.1.linux-amd64/node_exporter --web.listen-address=:10091 2>&1 > /opt/node_exporter-0.18.1.linux-amd64/node_exporter.log'
+ExecStart=/bin/sh -c '/opt/node_exporter-0.18.1.linux-amd64/node_exporter --web.listen-address=:10091 > /opt/node_exporter-0.18.1.linux-amd64/node_exporter.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
@@ -443,7 +444,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/opt/prometheus-2.13.1.linux-amd64/prometheus --config.file=/opt/prometheus-2.13.1.linux-amd64/prometheus.yml --storage.tsdb.retention=180d --web.enable-admin-api 2>&1 > /opt/prometheus-2.13.1.linux-amd64/prometheus.log'
+ExecStart=/bin/sh -c '/opt/prometheus-2.13.1.linux-amd64/prometheus --config.file=/opt/prometheus-2.13.1.linux-amd64/prometheus.yml --storage.tsdb.retention=180d --web.enable-admin-api > /opt/prometheus-2.13.1.linux-amd64/prometheus.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM

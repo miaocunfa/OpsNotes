@@ -128,7 +128,9 @@ total 1383380
 
 ``` zsh
 ➜  cd /usr/pgsql-10/bin
+
 ➜  ./pg_dump info -Fc -T comm > ~/info_20200810.dump
+➜  ./pg_dump -h 192.168.100.243 -p 9999 infov3 -Fc > ~/infov3_20200814.dump
 ```
 
 ## 二、还原
@@ -205,7 +207,7 @@ Report bugs to <pgsql-bugs@postgresql.org>.
 ### 2.2、
 
 ``` zsh
-scp info_20200727.dump n212:~
+➜  scp info_20200727.dump n212:~
 
 ➜  cd /usr/pgsql-10/bin
 ➜  ./pg_restore -h 192.168.100.243 -p 9999 -d infov3 ~/info_20200727.dump

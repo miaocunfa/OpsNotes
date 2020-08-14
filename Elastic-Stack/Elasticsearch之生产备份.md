@@ -9,22 +9,27 @@ toc: false
 original: true
 ---
 
+| 时间       | 内容               |
+| ---------- | ------------------ |
+| 2020-07-24 | 初稿               |
+| 2020-08-14 | 增加jq解析返回json |
+
 ## 一、注册仓库
 
 ``` zsh
-➜  curl -XPOST "localhost:9200/_snapshot/ahprod_backup_20200724" -H 'Content-Type: application/json' -d '
+➜  curl -s -XPOST "localhost:9200/_snapshot/ahprod_backup_20200724" -H 'Content-Type: application/json' -d '
 {
   "type": "fs",
   "settings": {
     "location": "/ahdata/elasticsearch-repository/ahprod_backup_20200724"
   }
-}'
+}' | jq .
 ```
 
 ## 二、备份
 
 ``` zsh
-➜  curl -X PUT "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724?wait_for_completion=true"
+➜  curl -s -X PUT "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724?wait_for_completion=true" | jq .
 
 # 压缩快照
 ➜  cd /ahdata/elasticsearch-repository
@@ -54,13 +59,13 @@ exporting 192.168.100.0/24:/ahdata/elasticsearch-repository
 ### 3.2、注册仓库
 
 ``` zsh
-➜  curl -XPOST "localhost:9200/_snapshot/ahprod_backup_20200724" -H 'Content-Type: application/json' -d '
+➜  curl -s -XPOST "localhost:9200/_snapshot/ahprod_backup_20200724" -H 'Content-Type: application/json' -d '
 {
   "type": "fs",
   "settings": {
     "location": "/ahdata/elasticsearch-repository/ahprod_backup_20200724"
   }
-}'
+}' | jq .
 
 # 解压快照
 ➜  cd /ahdata/elasticsearch-repository
@@ -70,46 +75,46 @@ exporting 192.168.100.0/24:/ahdata/elasticsearch-repository
 ### 3.3、es还原
 
 ``` zsh
-curl -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
+curl -s -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
 {
     "indices": "info-*",
     "rename_pattern": "info-(.+)",
     "rename_replacement": "prod-restored-0724-info-$1"
-}'
+}' | jq .
 
-curl -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
+curl -s -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
 {
     "indices": "info_scenic_spot",
     "ignore_unavailable": true,
     "include_global_state": true,
     "rename_pattern": "info_scenic_spot",
     "rename_replacement": "prod-restored-0724-info_scenic_spot"
-}'
+}' | jq .
 
-curl -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
+curl -s -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
 {
     "indices": "info_group_purchase",
     "ignore_unavailable": true,
     "include_global_state": true,
     "rename_pattern": "info_group_purchase",
     "rename_replacement": "prod-restored-0724-info_group_purchase"
-}'
+}' | jq .
 
-curl -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
+curl -s -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
 {
     "indices": "user-growth",
     "ignore_unavailable": true,
     "include_global_state": true,
     "rename_pattern": "user-growth",
     "rename_replacement": "prod-restored-0724-user-growth"
-}'
+}' | jq .
 
-curl -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
+curl -s -X POST "localhost:9200/_snapshot/ahprod_backup_20200724/snapshot_infov2_20200724/_restore"  -H 'Content-Type: application/json' -d '
 {
     "indices": "ad-label",
     "ignore_unavailable": true,
     "include_global_state": true,
     "rename_pattern": "ad-label",
     "rename_replacement": "prod-restored-0724-ad-label"
-}'
+}' | jq .
 ```
