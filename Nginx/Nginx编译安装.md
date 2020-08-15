@@ -46,7 +46,7 @@ make && make install
 ``` bash
 [root@localhost /usr/local/nginx-1.16.1/sbin]#./nginx -V
 nginx version: nginx/1.16.1
-built by gcc 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC) 
+built by gcc 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC)
 built with OpenSSL 1.0.2k-fips  26 Jan 2017
 TLS SNI support enabled
 configure arguments: --prefix=/usr/local/nginx-1.16.1 --with-http_stub_status_module --with-http_ssl_module --with-http_realip_module
