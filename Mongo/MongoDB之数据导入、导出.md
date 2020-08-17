@@ -18,6 +18,7 @@ original: true
 | 2020-05-27 | 初稿                                     |
 | 2020-08-07 | 添加 mongoimport                         |
 | 2020-08-12 | 文档优化 && 添加 mongodump、mongorestore |
+| 2020-08-17 | 导出目录 && 常用数据操作                 |
 
 ## 环境
 
@@ -61,7 +62,7 @@ See http://docs.mongodb.org/manual/reference/program/mongoexport/ for more infor
 ➜  mongoexport -h mongo1:27017 -d info -c collection1 -o /home/miaocunfa/info_collection1.json
 ➜  chown miaocunfa:miaocunfa /home/miaocunfa/info_collection1.json
 
-# 2、标准输出
+# 2、导出至标准输出 stdout
 ➜  mongoexport -h mongo1:27017 -d info -c collection1
 ➜  mongoexport -h mongo1:27017 -d info -c collection1 | mongoimport -h mongo1:21000 -d talk -c collection1
 ```
@@ -96,8 +97,39 @@ See http://docs.mongodb.org/manual/reference/program/mongodump/ for more informa
 # 导出为归档文件，--archive 指定归档文件名字
 ➜  mongodump -h 192.168.100.226:27017 --archive=aihang3.20200812.archive -d aihang3
 
+➜  mkdir -p /opt/mongodump
 ➜  ./mongodump -h 192.168.100.224:28018 --archive=/opt/mongodump/aihang3.20200814.archive -d aihang3
 ➜  ./mongodump -h 192.168.100.224:28018 --archive=/opt/mongodump/aitalk.20200814.archive -d aitalk
+
+# 导出为目录文件
+➜  mkdir -p /home/miaocunfa/mongodump/20200817
+➜  ./mongodump -h pg1:21000 -o /home/miaocunfa/mongodump/20200817 -d aitalk
+# 目录结构
+➜  tree 20200817
+20200817
+└── aitalk
+    ├── blacklist.bson
+    ├── blacklist.metadata.json
+    ├── conversation.bson
+    ├── conversation.metadata.json
+    ├── friendship.bson
+    ├── friendship.metadata.json
+    ├── group.bson
+    ├── group.metadata.json
+    ├── invitation.bson
+    ├── invitationGroup.bson
+    ├── invitationGroup.metadata.json
+    ├── invitation.metadata.json
+    ├── resource.bson
+    ├── resource.metadata.json
+    ├── subscription.bson
+    ├── subscription.metadata.json
+    ├── systemInforms.bson
+    ├── systemInforms.metadata.json
+    ├── team.bson
+    ├── team.metadata.json
+    ├── user.bson
+    └── user.metadata.json
 
 # --archive 不指定文件名 则输出至stdout，一般与 mongorestore连用
 ➜  mongodump -h 192.168.100.226:27017 --archive -d aihang3
@@ -161,6 +193,32 @@ See http://docs.mongodb.org/manual/reference/program/mongorestore/ for more info
 
 # --archive 不指定文件名 则从stdin获得数据，一般与 mongodump连用
 ➜  mongorestore -h 192.168.100.226:21000 --archive
+➜  mongodump -h 192.168.100.226:27017 --archive -d aihang3  | mongorestore -h 192.168.100.226:21000 --archive
+```
+
+## 三、常用数据操作
+
+### 3.1、源库与目标库非同名
+
+``` zsh
+# 源库与目标库非同名时，只能使用目录格式，归档文件无法指定导入库
+# the --db and --collection args should only be used when restoring from a BSON file.
+
+# 导出 aitalk 库
+➜  mkdir -p /home/miaocunfa/mongodump/20200817
+➜  ./mongodump -h pg1:21000 -o /home/miaocunfa/mongodump/20200817 -d aitalk
+➜  cd /home/miaocunfa/mongodump
+➜  tar -zcf aitalk-prod-20200817.tgz 20200817
+
+# 将 aitalk库 导入aitalk-0817
+➜  cd /opt/mongodump/
+➜  tar -zxf aitalk-prod-20200817.tgz
+➜  ./mongorestore -h mongo1:21000 --dir=/opt/mongodump/20200817/aitalk -d aitalk-0817
+```
+
+### 3.2、标准输入输出传输数据
+
+``` zsh
 ➜  mongodump -h 192.168.100.226:27017 --archive -d aihang3  | mongorestore -h 192.168.100.226:21000 --archive
 ```
 
