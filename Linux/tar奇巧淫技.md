@@ -351,12 +351,13 @@ Compression options:
   -Z, --compress, --uncompress   filter the archive through compress
 
 # gzip
+➜  gzip FileName                     # 压 缩
 ➜  gunzip FileName.gz                # 解压1
 ➜  gzip -d FileName.gz               # 解压2
-➜  gzip FileName                     # 压 缩
+
 # tar.gz
-➜  tar zxvf FileName.tar.gz          # 解压
 ➜  tar zcvf FileName.tar.gz foo bar  # 压缩
+➜  tar zxvf FileName.tar.gz          # 解压
 
 # bzip2
 ➜  bzip2 -z FileName                 # 压 缩
@@ -396,6 +397,7 @@ drwxr-xr-x root/root         0 2020-08-04 16:06 loki/
 -rw-r--r-- root/root       792 2020-07-21 17:45 loki/loki-local-config.yaml
 
 # 往tar包中添加文件
+# tar包只能往一个层级添加文件，所以先将其他文件夹下的文件拷过来。
 ➜  cp /usr/lib/systemd/system/loki.service loki
 ➜  tar -rvf ty-loki.tar loki/loki.service
 loki/loki.service

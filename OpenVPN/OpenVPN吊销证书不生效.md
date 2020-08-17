@@ -7,7 +7,7 @@ tags:
     - "OpenVPN"
 toc: false
 indent: false
-original: false
+original: true
 ---
 
 ## 1、查看哪些证书被吊销

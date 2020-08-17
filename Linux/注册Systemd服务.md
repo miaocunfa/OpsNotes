@@ -219,6 +219,69 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
+## 8、consul
+
+``` zsh
+cd /home/wangshuxian
+➜  mkdir consul-HA; mv consul consul-HA
+
+# S1
+➜  vim /home/wangshuxian/consul-HA/start_consul.sh
+consul agent -server \
+       -bootstrap-expect 3 \
+       -data-dir /tmp/consul \
+       -node=c1 \
+       -bind=172.19.26.2 \
+       -client=0.0.0.0 \
+       -ui \
+       -retry-join=172.19.26.2 \
+       -retry-join=172.19.26.9 \
+       -retry-join=172.19.26.10
+
+# S2
+➜  vim /home/wangshuxian/consul-HA/start_consul.sh
+consul agent -server \
+       -bootstrap-expect 3 \
+       -data-dir /tmp/consul \
+       -node=c2 \
+       -bind=172.19.26.9 \
+       -client=0.0.0.0 \
+       -ui \
+       -retry-join=172.19.26.2 \
+       -retry-join=172.19.26.9 \
+       -retry-join=172.19.26.10
+
+# S3
+➜  vim /home/wangshuxian/consul-HA/start_consul.sh
+consul agent -server \
+       -bootstrap-expect 3 \
+       -data-dir /tmp/consul \
+       -node=c3 \
+       -bind=172.19.26.10 \
+       -client=0.0.0.0 \
+       -ui \
+       -retry-join=172.19.26.2 \
+       -retry-join=172.19.26.9 \
+       -retry-join=172.19.26.10
+
+➜  vim /usr/lib/systemd/system/consul.service
+[Unit]
+Description=The consul Server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/home/wangshuxian/consul-HA/start_consul.sh > /home/wangshuxian/consul-HA/consul.log 2>&1'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
 > 参考链接：  
 > 1、[Systemd 入门教程：实战篇](http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html)  
 > 2、[systemctl服务编写，及日志控制](https://blog.csdn.net/jeccisnd/article/details/103166554/)  

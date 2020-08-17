@@ -384,4 +384,79 @@ mongos> use foo
 for(var i=0; i<10000; i++){
   db.bar.insert({i:i});
 }
+
+mongos> sh.status()
+  databases:
+        {  "_id" : "foo",  "primary" : "shard1",  "partitioned" : true,  "version" : {  "uuid" : UUID("6ca78f03-63bf-4db9-937d-1ce00834eb52"),  "lastMod" : 1 } }
+                foo.bar
+                        shard key: { "_id" : "hashed" }
+                        unique: false
+                        balancing: true
+                        chunks:
+                                shard1  2
+                                shard2  2
+                        { "_id" : { "$minKey" : 1 } } -->> { "_id" : NumberLong("-4611686018427387902") } on : shard1 Timestamp(1, 0)
+                        { "_id" : NumberLong("-4611686018427387902") } -->> { "_id" : NumberLong(0) } on : shard1 Timestamp(1, 1)
+                        { "_id" : NumberLong(0) } -->> { "_id" : NumberLong("4611686018427387902") } on : shard2 Timestamp(1, 2)
+                        { "_id" : NumberLong("4611686018427387902") } -->> { "_id" : { "$maxKey" : 1 } } on : shard2 Timestamp(1, 3)
+
+mongos> db.bar.stats()
+{
+  "sharded" : true,
+  "capped" : false,
+  "ns" : "foo.bar",
+  "count" : 10000,
+  "size" : 330000,
+  "storageSize" : 151552,
+  "totalIndexSize" : 331776,
+  "indexSizes" : {
+    "_id_" : 122880,
+    "_id_hashed" : 208896
+  },
+  "avgObjSize" : 33,
+  "maxSize" : NumberLong(0),
+  "nindexes" : 2,
+  "nchunks" : 4,
+  "shards" : {
+    "shard1" : {
+      "ns" : "foo.bar",
+      "size" : 168597,
+      "count" : 5109,                  # shard1分片下的数量
+      "avgObjSize" : 33,
+      "storageSize" : 77824,
+      "capped" : false,
+      "nindexes" : 2,
+      "indexBuilds" : [ ],
+      "totalIndexSize" : 167936,
+      "indexSizes" : {
+        "_id_" : 61440,
+        "_id_hashed" : 106496
+      },
+    },
+    "shard2" : {
+      "ns" : "foo.bar",
+      "size" : 161403,
+      "count" : 4891,                 # shard2分片下的数量
+      "avgObjSize" : 33,
+      "storageSize" : 73728,
+      "capped" : false,
+      "nindexes" : 2,
+      "indexBuilds" : [ ],
+      "totalIndexSize" : 163840,
+      "indexSizes" : {
+        "_id_" : 61440,
+        "_id_hashed" : 102400
+      },
+    }
+  },
+  "ok" : 1,
+  "operationTime" : Timestamp(1596784295, 6),
+  "$clusterTime" : {
+    "clusterTime" : Timestamp(1596784300, 1),
+    "signature" : {
+      "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      "keyId" : NumberLong(0)
+    }
+  }
+}
 ```
