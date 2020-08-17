@@ -43,3 +43,10 @@ mongos> help
     DBQuery.shellBatchSize = x   set default number of items to display on shell
     exit                         quit the mongo shell
 ```
+
+## 数据查询
+
+``` zsh
+db.getCollection("concern_store").find( {"user_id": NumberLong("4478710120144633929")} );
+db.getCollection("info").find( {"description":"个人一信息1"} );
+```
