@@ -157,3 +157,30 @@ client list
 id=6018 addr=192.168.100.211:36001 fd=15 name= age=1723130 idle=1 flags=S db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=0 obl=0 oll=0 omem=0 events=r cmd=replconf
 id=1052523 addr=192.168.100.240:55416 fd=7 name= age=553 idle=0 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=26 qbuf-free=32742 obl=0 oll=0 omem=0 events=r cmd=client
 ```
+
+### 2.5、清理数据
+
+>del key //①删除指定key
+>Flushdb //②删除当前数据库中的所有Key
+>flushall //③删除所有数据库中的key
+
+``` zsh
+127.0.0.1:6379> info keyspace
+# Keyspace
+db0:keys=10071,expires=1059,avg_ttl=1286146998
+db1:keys=1802,expires=0,avg_ttl=0
+db2:keys=20142,expires=19839,avg_ttl=75439528
+db6:keys=175,expires=0,avg_ttl=0
+db7:keys=31,expires=0,avg_ttl=0
+127.0.0.1:6379> select 2
+OK
+127.0.0.1:6379[2]> Flushdb
+OK
+127.0.0.1:6379[2]> info
+# Keyspace
+db0:keys=10071,expires=1059,avg_ttl=1273371885
+db1:keys=1802,expires=0,avg_ttl=0
+db2:keys=49,expires=12,avg_ttl=1886616555
+db6:keys=175,expires=0,avg_ttl=0
+db7:keys=31,expires=0,avg_ttl=0
+```
