@@ -50,3 +50,9 @@ mongos> help
 db.getCollection("concern_store").find( {"user_id": NumberLong("4478710120144633929")} );
 db.getCollection("info").find( {"description":"个人一信息1"} );
 ```
+
+## 数据删除
+
+``` zsh
+db.conversation.remove({"receiverType":"group"})
+```
