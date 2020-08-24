@@ -271,7 +271,28 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c '/home/wangshuxian/consul-HA/start_consul.sh > /home/wangshuxian/consul-HA/consul.log 2>&1'
+ExecStart=/bin/sh -c '/opt/consul-HA/start_consul.sh > /opt/consul-HA/consul.log 2>&1'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 9、consul 单节点
+
+``` zsh
+vim /usr/lib/systemd/system/consul.service
+[Unit]
+Description=The consul Server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/consul-standalone/consul agent -dev -advertise 127.0.0.1 -enable-local-script-checks -client=0.0.0.0 > /opt/consul-standalone/consul.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
