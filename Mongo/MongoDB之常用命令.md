@@ -47,12 +47,16 @@ mongos> help
 ## 数据查询
 
 ``` zsh
-db.getCollection("concern_store").find( {"user_id": NumberLong("4478710120144633929")} );
 db.getCollection("info").find( {"description":"个人一信息1"} );
+
+db.getCollection("concern_store").find( {"user_id": NumberLong("4478710120144633929")} );
+
+db.getCollection('conversation').find({"_id":ObjectId("5f3f82598dd9e24bce25e167")});
 ```
 
 ## 数据删除
 
 ``` zsh
-db.conversation.remove({"receiverType":"group"})
+db.conversation.remove({"receiverType":"group"});
+db.getCollection('conversation').remove({"receiverType":"group"});
 ```

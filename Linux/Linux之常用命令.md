@@ -30,3 +30,9 @@ original: false
 # Remove 180 Ago hsp-archive
 00 02 * * * find /home/hsp/backup -type f -name "hsp_*_DailyBk.tar.gz" -mtime +180 -exec rm -f {} \;
 ```
+
+## 2、gbk 文件转 utf-8
+
+``` zsh
+iconv -f gbk -t utf-8 source-file -o target-file
+```
