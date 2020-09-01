@@ -43,27 +43,15 @@ configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module --with-htt
 ➜  cp -R /home/wangshuxian/nginx_upstream_check_module-master /home/miaocunfa/
 
 ➜  cd nginx-1.18.0
-➜  ./configure --prefix=/usr/local/nginx-1.18.0
---http-client-body-temp-path=/var/cache/nginx/client_temp \
---http-proxy-temp-path=/var/cache/nginx/proxy_temp \
---http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
---http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
---http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+➜  ./configure --prefix=/usr/local/nginx-1.18.0 \
 --with-pcre \
+--with-debug \
 --with-compat \
 --with-file-aio \
 --with-threads \
---with-http_rewrite_module \
---with-http_headers_module \
---with-http_log_module \
---with-http_referer_module \
---with-http_access_module \
---with-http_proxy_module \
---with-http_fastcgi_module \
---with-http_upstream_module \
---with-stream_core_module \
---with-stream_proxy_module \
---with-http_core_module \
+--with-http_ssl_module \
+--with-http_realip_module \
+--with-http_stub_status_module \
 --with-http_addition_module \
 --with-http_auth_request_module \
 --with-http_dav_module \
@@ -72,11 +60,8 @@ configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module --with-htt
 --with-http_gzip_static_module \
 --with-http_mp4_module \
 --with-http_random_index_module \
---with-http_realip_module \
 --with-http_secure_link_module \
 --with-http_slice_module \
---with-http_ssl_module \
---with-http_stub_status_module \
 --with-http_sub_module \
 --with-http_v2_module \
 --with-mail \
@@ -86,6 +71,29 @@ configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module --with-htt
 --with-stream_ssl_module \
 --with-stream_ssl_preread_module \
 --add-module=/home/miaocunfa/nginx_upstream_check_module-master
+
+# temp
+--http-client-body-temp-path=/var/cache/nginx/client_temp \
+--http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+
+# 核心模块 或 需要安装依赖
+--with-sha1 \
+--with-md5 \
+--with-http_log_module \
+--with-http_headers_module \
+--with-http_rewrite_module \
+--with-http_referer_module \
+--with-http_access_module \
+--with-http_proxy_module \
+--with-http_fastcgi_module \
+--with-http_upstream_module \
+--with-stream_core_module \
+--with-stream_proxy_module \
+--with-http_core_module \
+--with-http_xslt_module \
 
 ➜  make
 ➜  make install
