@@ -134,6 +134,9 @@ See http://docs.mongodb.org/manual/reference/program/mongodump/ for more informa
 # --archive 不指定文件名 则输出至stdout，一般与 mongorestore连用
 ➜  mongodump -h 192.168.100.226:27017 --archive -d aihang3
 ➜  mongodump -h 192.168.100.226:27017 --archive -d aihang3  | mongorestore -h 192.168.100.226:21000 --archive
+
+➜  mongodump -h 192.168.100.226:21000 --archive -d aihang3  | mongorestore -h 192.168.100.226:27017 --archive
+➜  mongodump -h 192.168.100.226:21000 --archive -d aitalk  | mongorestore -h 192.168.100.226:27017 --archive
 ```
 
 ## 二、数据导入
