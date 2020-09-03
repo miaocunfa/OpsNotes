@@ -11,11 +11,19 @@ toc: false
 original: true
 ---
 
+## 更新记录
+
+| 时间       | 内容     |
+| ---------- | -------- |
+| 2020-09-02 | 初稿     |
+| 2020-09-03 | 增加插件 |
+
 ## 一、安装
 
 ### 1.1、安装zsh
 
 ``` zsh
+# 安装zsh、git
 ➜  yum install zsh git -y
 
 ➜  zsh --version
@@ -28,6 +36,7 @@ zsh 5.0.2 (x86_64-redhat-linux-gnu)
 /usr/bin/bash
 /bin/tcsh
 /bin/csh
+/bin/zsh
 
 # 切换默认shell
 ➜  chsh -s $(which zsh)
@@ -112,28 +121,19 @@ Zsh 的主题都在 `$HOME/.oh-my-zsh/themes` 下
 
 ``` zsh
 ➜  ~ cd ~/.oh-my-zsh/themes
-➜  themes git:(master) ls
-3den.zsh-theme           cypher.zsh-theme      frisk.zsh-theme            jonathan.zsh-theme        mikeh.zsh-theme                 refined.zsh-theme       suvash.zsh-theme
-adben.zsh-theme          dallas.zsh-theme      frontcube.zsh-theme        josh.zsh-theme            miloshadzic.zsh-theme           rgm.zsh-theme           takashiyoshida.zsh-theme
-af-magic.zsh-theme       darkblood.zsh-theme   funky.zsh-theme            jreese.zsh-theme          minimal.zsh-theme               risto.zsh-theme         terminalparty.zsh-theme
-afowler.zsh-theme        daveverwer.zsh-theme  fwalch.zsh-theme           jtriley.zsh-theme         mira.zsh-theme                  rixius.zsh-theme        theunraveler.zsh-theme
-agnoster.zsh-theme       dieter.zsh-theme      gallifrey.zsh-theme        juanghurtado.zsh-theme    mlh.zsh-theme                   rkj-repos.zsh-theme     tjkirch_mod.zsh-theme
-alanpeabody.zsh-theme    dogenpunk.zsh-theme   gallois.zsh-theme          junkfood.zsh-theme        mortalscumbag.zsh-theme         rkj.zsh-theme           tjkirch.zsh-theme
-amuse.zsh-theme          dpoggi.zsh-theme      garyblessington.zsh-theme  kafeitu.zsh-theme         mrtazz.zsh-theme                robbyrussell.zsh-theme  tonotdo.zsh-theme
-apple.zsh-theme          dstufft.zsh-theme     gentoo.zsh-theme           kardan.zsh-theme          murilasso.zsh-theme             sammy.zsh-theme         trapd00r.zsh-theme
-arrow.zsh-theme          dst.zsh-theme         geoffgarside.zsh-theme     kennethreitz.zsh-theme    muse.zsh-theme                  simonoff.zsh-theme      wedisagree.zsh-theme
-aussiegeek.zsh-theme     duellj.zsh-theme      gianu.zsh-theme            kiwi.zsh-theme            nanotech.zsh-theme              simple.zsh-theme        wezm.zsh-theme
-avit.zsh-theme           eastwood.zsh-theme    gnzh.zsh-theme             kolo.zsh-theme            nebirhos.zsh-theme              skaro.zsh-theme         wezm+.zsh-theme
-awesomepanda.zsh-theme   edvardm.zsh-theme     gozilla.zsh-theme          kphoen.zsh-theme          nicoulaj.zsh-theme              smt.zsh-theme           wuffers.zsh-theme
-bira.zsh-theme           emotty.zsh-theme      half-life.zsh-theme        lambda.zsh-theme          norm.zsh-theme                  Soliah.zsh-theme        xiong-chiamiov-plus.zsh-theme
-blinks.zsh-theme         essembeh.zsh-theme    humza.zsh-theme            linuxonly.zsh-theme       obraun.zsh-theme                sonicradish.zsh-theme   xiong-chiamiov.zsh-theme
-bureau.zsh-theme         evan.zsh-theme        imajes.zsh-theme           lukerandall.zsh-theme     peepcode.zsh-theme              sorin.zsh-theme         ys.zsh-theme
-candy-kingdom.zsh-theme  fino-time.zsh-theme   intheloop.zsh-theme        macovsky-ruby.zsh-theme   philips.zsh-theme               sporty_256.zsh-theme    zhann.zsh-theme
-candy.zsh-theme          fino.zsh-theme        itchy.zsh-theme            macovsky.zsh-theme        pmcgee.zsh-theme                steeef.zsh-theme
-clean.zsh-theme          fishy.zsh-theme       jaischeema.zsh-theme       maran.zsh-theme           pygmalion-virtualenv.zsh-theme  strug.zsh-theme
-cloud.zsh-theme          flazz.zsh-theme       jbergantine.zsh-theme      mgutz.zsh-theme           pygmalion.zsh-theme             sunaku.zsh-theme
-crcandy.zsh-theme        fletcherm.zsh-theme   jispwoso.zsh-theme         mh.zsh-theme              random.zsh-theme                sunrise.zsh-theme
-crunch.zsh-theme         fox.zsh-theme         jnrowe.zsh-theme           michelebologna.zsh-theme  re5et.zsh-theme                 superjarin.zsh-theme
+➜  themes git:(master) ll
+total 580K
+-rw-r--r--. 1 root root  325 Sep  2 17:17 3den.zsh-theme
+-rw-r--r--. 1 root root 4.5K Sep  2 17:17 adben.zsh-theme
+-rw-r--r--. 1 root root 1.5K Sep  2 17:17 af-magic.zsh-theme
+-rw-r--r--. 1 root root  394 Sep  2 17:17 afowler.zsh-theme
+-rw-r--r--. 1 root root 7.7K Sep  2 17:17 agnoster.zsh-theme
+-rw-r--r--. 1 root root  943 Sep  2 17:17 alanpeabody.zsh-theme
+-rw-r--r--. 1 root root  552 Sep  2 17:17 amuse.zsh-theme
+-rw-r--r--. 1 root root  822 Sep  2 17:17 apple.zsh-theme
+-rw-r--r--. 1 root root  504 Sep  2 17:17 arrow.zsh-theme
+-rw-r--r--. 1 root root  325 Sep  2 17:17 aussiegeek.zsh-theme
+-rw-r--r--. 1 root root 3.0K Sep  2 17:17 avit.zsh-theme
 ```
 
 这些形如 *.zsh-theme的主题文件  
@@ -153,4 +153,151 @@ ZSH_THEME="random"
 ➜  echo $ZSH_THEME
 ```
 
-### 2.4、zsh 的插件
+如果这些默认主题还不能满足你的需要，我们还可以到这里找到更多的主题
+><https://github.com/robbyrussell/oh-my-zsh/wiki/Themes>  
+><https://github.com/robbyrussell/oh-my-zsh/wiki/External-themes>  
+><https://github.com/unixorn/awesome-zsh-plugins#themes>
+
+## 三、zsh 的插件
+
+zsh 有很多超级强大的插件，启用后你会发现  
+
+``` log
+Your terminal never felt this good before
+```
+
+### 3.1、默认插件
+
+zsh 有很多的默认插件在  `$HOME/.oh-my-zsh/plugins` 下
+
+zsh 默认只启用了git插件，如需启用更多插件，可加入需启用插件的名称
+
+#### 3.1.1、z
+
+提供一个 z 命令，在常用目录之间跳转。类似 autojump，但是不需要额外安装。
+
+``` zsh
+# 启用插件
+➜  vim ~/.zshrc
+plugins=(z)
+➜  source ~/.zshrc
+
+# 演示效果
+➜  cd ~/.oh-my-zsh/plugins
+➜  cd ~; pwd
+/root
+➜  z plugins; pwd
+/root/.oh-my-zsh/plugins
+```
+
+#### 3.1.2、extract
+
+提供一个 extract 命令，以及它的别名 x。实现一键解压功能
+
+``` zsh
+# 启用插件
+➜  vim ~/.zshrc
+plugins=(extract)
+➜  source ~/.zshrc
+```
+
+#### 3.1.3、vi-mode
+
+按esc键，以vim模式编辑命令
+
+``` zsh
+# 启用插件
+➜  vim ~/.zshrc
+plugins=(vi-mode)
+➜  source ~/.zshrc
+```
+
+### 3.2、需要安装的插件
+
+zsh 还有很多功能特别强大的插件需要安装才能用，但这绝对物超所值。
+
+#### 3.2.1、zsh-autosuggestions
+
+在输入命令的过程中根据你的历史记录显示你可能想要输入的命令，按向右箭头补全。
+
+``` zsh
+➜  git clone git://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+
+➜  vim ~/.zshrc
+plugins=(zsh-autosuggestions)
+➜  source ~/.zshrc
+```
+
+#### 3.2.2、zsh-syntax-highlighting
+
+shell 命令的代码高亮。你没有理由拒绝高亮。
+
+特性：正确路径自带下划线
+
+``` zsh
+➜  git clone https://github.com/zsh-users/zsh-syntax-highlighting $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+
+➜  vim ~/.zshrc
+plugins=(zsh-syntax-highlighting)
+➜  source ~/.zshrc
+```
+
+#### 3.2.3、zsh-history-substring-search
+
+历史命令搜索
+
+``` zsh
+➜  git clone https://github.com/zsh-users/zsh-history-substring-search $ZSH_CUSTOM/plugins/zsh-history-substring-search
+
+➜  vim ~/.zshrc
+plugins=(zsh-history-substring-search)
+➜  source ~/.zshrc
+```
+
+#### 3.2.4、zsh-navigation-tools
+
+``` zsh
+
+```
+
+#### 3.2.5、incr
+
+自动补全插件
+
+``` zsh
+➜  wget http://mimosa-pudica.net/src/incr-0.2.zsh -P $ZSH_CUSTOM/plugins/incr
+
+➜  vim ~/.zshrc
+source $ZSH_CUSTOM/plugins/incr/incr*.zsh
+➜  source ~/.zshrc
+```
+
+## 四、更新zsh
+
+设置自动更新oh-my-zsh
+
+默认情况下，当oh-my-zsh有更新时，都会给你提示。如果希望让oh-my-zsh自动更新，在 ~/.zshrc 中添加下面这句
+
+``` zsh
+DISABLE_UPDATE_PROMPT=true
+```
+
+要手动更新，可以执行
+
+``` zsh
+➜  upgrade_oh_my_zsh
+```
+
+## 五、卸载
+
+卸载oh my zsh, 执行命令
+
+``` zsh
+➜  uninstall_oh_my_zsh
+```
+
+> 参考链接：
+> 1、[利用Oh-My-Zsh打造你的超级终端](https://mp.weixin.qq.com/s?__biz=MzI3MTI2NzkxMA==&mid=2247483784&idx=1&sn=60aa4c40e12b0d64bf373d5606f8e2e9&chksm=eac520a1ddb2a9b70ce515e9ee6f290842ef2276d0b52f620f05280b8e30f7f3c7591802ca5f&mpshare=1&scene=1&srcid=0902mAQRlr8XD2dBih5WORYG&sharer_sharetime=1599025557489&sharer_shareid=84509455e791b9103670fc35d3df3fe2&key=72c3d5049afd48cd55464d955ce5fd8e9669dd9e36d7ca8764d9601d42b3734033d73f900e6b80d33b56993cb474d550116f9875b7eba0ce6d4c025e030e44c670016a6711c38bc01103b741958aeec759cf2b11c0697ea7ee77aa5eb431ecb8cc594fb778189994ee5b989e57fd88746af3e02933cc8c95b6b935ebd6dcfbb4&ascene=1&uin=NjAwMjI3MTM2&devicetype=Windows+10+x64&version=62090529&lang=zh_CN&exportkey=A8YpMivm07HpVurRWMom860%3D&pass_ticket=kNr9jBeaLtB7eCDJgTKaJqX3jMNIc5JufLHFS4y%2FBWfr%2Bzx%2FIf2E18oWu%2Bn2luNc&wx_header=0)  
+> 2、[自动补全插件incr](https://mimosa-pudica.net/zsh-incremental.html)  
+> 3、[oh-my-zsh,让你的终端从未这么爽过](https://www.jianshu.com/p/d194d29e488c)  
+>

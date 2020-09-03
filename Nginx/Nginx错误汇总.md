@@ -79,5 +79,8 @@ patching file src/http/ngx_http_upstream_round_robin.h
 ```
 
 > 参考列表：
-> 1、[nginx_upstream_check_module-master](http://www.04007.cn/article/696.html)  
+> 1、[nginx_upstream_check_module-master - 错误描述](http://www.04007.cn/article/696.html)  
+> 2、[github - nginx_upstream_check_module](https://github.com/yaoweibin/nginx_upstream_check_module/)  
+> 3、[github - nginx_upstream_check_module - issues](https://github.com/yaoweibin/nginx_upstream_check_module/issues/77)  
+> 4、[nginx 添加第三方nginx_upstream_check_module 模块实现健康状态检测](https://www.cnblogs.com/dance-walter/p/12212607.html)  
 >

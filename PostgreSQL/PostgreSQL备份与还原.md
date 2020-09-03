@@ -19,7 +19,7 @@ original: true
 
 ## 一、备份
 
-### 1.1、pg_dump Usage
+### 1.1、pg_dump Usage  
 
 ``` zsh
 ➜  ./pg_dump --help
@@ -129,8 +129,10 @@ total 1383380
 ``` zsh
 ➜  cd /usr/pgsql-10/bin
 
-➜  ./pg_dump info -Fc -T comm > ~/info_20200810.dump
-➜  ./pg_dump -h 192.168.100.243 -p 9999 infov3 -Fc > ~/infov3_20200814.dump
+➜  pg_dump -h 192.168.100.243 -p 9999 infov3 -Fc > ~/infov3_20200814.dump
+
+# 导出为自定义格式，且忽略comm表
+➜  pg_dump -h 192.168.100.241 info -Fc -T comm > ~/info_20200902.dump
 ```
 
 ## 二、还原
@@ -210,5 +212,9 @@ Report bugs to <pgsql-bugs@postgresql.org>.
 ➜  scp info_20200727.dump n212:~
 
 ➜  cd /usr/pgsql-10/bin
-➜  ./pg_restore -h 192.168.100.243 -p 9999 -d infov3 ~/info_20200727.dump
+
+# 导入infov3库
+➜  pg_restore -h pg2 -d infov3 ~/infov3_20200818.dump
+# 导入info库
+➜  pg_restore -h 192.168.100.243 -p 9999 -d info ~/info_20200902.dump
 ```
