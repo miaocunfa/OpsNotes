@@ -76,3 +76,14 @@ original: false
 ➜  ls /home/miaocunfa/deployJar | wc -w
 0
 ```
+
+## 4、遍历文件每一行
+
+``` zsh
+    while read -r line
+    do
+        test_id=$(echo $line | awk '{print $1}')
+        student_id=$(echo $line | awk '{print $2}')
+        __getSidImage ${test_id} ${student_id}       # 根据学号将原始图片存入临时文件夹
+    done < $sid_file
+```
