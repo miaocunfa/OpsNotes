@@ -377,7 +377,7 @@ Compression options:
 # xz
 ```
 
-## tar包内文件操作
+## tar包内文件操作 (删除 && 添加)
 
 ``` zsh
 # 打包
@@ -406,4 +406,10 @@ drwxr-xr-x root/root         0 2020-08-04 16:06 loki/
 -rwxr-xr-x root/root  88166400 2020-07-21 17:19 loki/loki-linux-amd64
 -rw-r--r-- root/root       792 2020-07-21 17:45 loki/loki-local-config.yaml
 -rw-r--r-- root/root       390 2020-08-07 18:54 loki/loki.service
+```
+
+## 解压tar包内指定文件
+
+``` zsh
+
 ```

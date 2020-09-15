@@ -256,7 +256,48 @@ plugins=(zsh-history-substring-search)
 
 #### 3.2.4、zsh-navigation-tools
 
+一组工具，例如
+
+- n-aliases - 浏览别名，relegates编辑到 vared
+- n-cd - 浏览dirstack和书签目录，允许输入所选目录
+- n-functions - 浏览函数，relegates编辑到 zed 或者 vared
+- n-history 浏览历史，允许编辑和运行命令
+- n-kill - 浏览进程列表，允许向所选进程发送信号
+- n-env - 浏览环境，relegates编辑到 vared
+- n-options - 浏览选项，允许切换它的状态
+- n-panelize - 将给定命令的输出加载到列表中以便浏览
+
+功能亮点包括增量多词搜索，近似匹配，ANSI着色，主题，唯一模式，水平滚动，grepping，高级历史记录管理以及与的各种集成Zsh。
+
+所有工具都支持带有 `< >` `{ }` `H l` 或者左和右光标的水平滚动。 其他快捷键是：
+
+H，? ( 从n 历史) - 运行帮助
+Ctrl-R - 开始n 个历史，增量的多关键字历史搜索器( Zsh绑定)
+Ctrl-A - 旋转输入的单词( 1+2+3 -> 3 +1+2 )
+Ctrl-F - 固定模式( 近似匹配)
+Ctrl-L - 整个显示的重绘
+Ctrl-T - 浏览主题( 下一个主题)
+Ctrl-G - 浏览主题( 上一个主题)
+Ctrl-U - 半页面
+Ctrl-D - 半页面
+Ctrl-P - 前一元素( 也使用vim的k 进行)
+Ctrl-N - 下一个元素( 也是用vim做的)
+[，] - 在n-光盘中跳转目录书签和中的典型信号
+g，g - 列表的开始和结束
+/ - 显示渐进式搜索
+F3 - 显示/隐藏渐进式搜索
+Esc - 退出渐进式搜索，清除过滤器
+Ctrl-W ( 在渐进式搜索中) - 删除整个单词
+Ctrl-K ( 在渐进式搜索中) - 删除整个行
+Ctrl-O，o - 输入uniq模式( 无重复行)
+Ctrl-E，e - 编辑 private 历史记录( 在 private 历史视图中时)
+F1 - ( 在历史中) - switch 视图
+F2，Ctrl-X，Ctrl-/ - 搜索预定义关键字( 在配置文件中定义)
+
 ``` zsh
+➜  git clone https://github.com/psprint/zsh-navigation-tools $ZSH_CUSTOM/plugins/zsh-navigation-tools
+
+➜  git clone https://github.com/zsh-users/zsh-history-substring-search $ZSH_CUSTOM/plugins/zsh-history-substring-search
 
 ```
 

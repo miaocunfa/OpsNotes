@@ -64,6 +64,10 @@ function __check_logfile_Exception()
 
 #--------------------------Main Script------------------------------------
 
+# 清空临时文件
+> $tail_logfile_CMD
+> $check_logfile_Exception_Script
+
 # 判断部署目录下是否有jar包需要部署，没有则退出
 deployJarNum=$(ls $deployPath | wc -w)
 
@@ -72,10 +76,6 @@ then
     echo "$deployPath: There are no JARS to deploy!"
     __exit_handler
 fi
-
-# 清空临时文件
-> $tail_logfile_CMD
-> $check_logfile_Exception_Script
 
 # 循环遍历部署目录，执行部署
 for i in $(ls $deployPath)
@@ -114,5 +114,5 @@ sh $check_logfile_Exception_Script
 echo
 echo -e "\tIf you want to See logfile! Please execute this Command: "
 echo 
-cat $tail_Logfile_CMD
+cat ${tail_logfile_CMD}
 echo

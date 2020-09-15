@@ -17,10 +17,6 @@ original: true
 
 ## 一、企业微信
 
-``` zsh
-➜  chown zabbix:zabbix wechat.py
-```
-
 AgentId
 1000003
 Secret
@@ -28,13 +24,17 @@ Secret
 企业ID
 wwf9e09da7812a4d37
 
+## 二、Zabbix 配置 && 告警脚本
+
 {
     u'invaliduser': u'',
     u'errcode': 0,
     u'errmsg': u'ok. Warning: wrong json format. '
 }
 
-## 二、Zabbix 配置 && 告警脚本
+``` zsh
+➜  chown zabbix:zabbix wechat.py
+```
 
 ``` zsh
 # 测试脚本时，提示警告信息
@@ -78,3 +78,8 @@ Successfully installed chardet-3.0.4
 ```
 
 ## 三、Zabbix 告警媒介 && 触发告警
+
+> 参考链接：
+> 1、[github - 企业微信报警脚本](https://github.com/X-Mars/Zabbix-Alert-WeChat)  
+> 2、
+>

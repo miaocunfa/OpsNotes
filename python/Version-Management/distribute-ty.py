@@ -26,28 +26,15 @@ def sendfile(local_filename, remote_filename, remote_hosts):
             print("")
 
 deploy_info = {
-    'info-gateway.jar':           ['s1', 's4'],
-    'info-cms.jar':               ['ng1'],
-    'info-org-property.jar':      ['ng1'],
-    'info-org-hotel.jar':         ['ng2'],
-    'info-config.jar':            ['s1'],
-    'info-consumer-service.jar':  ['s2'],
-    'info-message-service.jar':   ['192.168.100.222'],
-    'info-scheduler-service.jar': ['s3'],
-    'info-agent-service.jar':     ['s2', 's3'],
-    'info-ad-service.jar':        ['192.168.100.222'],
-    'info-auth-service.jar':      ['s2', 's3'],
-    'info-community-service.jar': ['s2', 's3'],
-    'info-groupon-service.jar':   ['s2', 's3'],
-    'info-hotel-service.jar':     ['s2', 's3'],
-    'info-nearby-service.jar':    ['s2', 's3'],
-    'info-news-service.jar':      ['s2', 's3'],
-    'info-payment-service.jar':   ['s2', 's3'],
-    'info-uc-service.jar':        ['192.168.100.222'],
+    'info-gateway.jar':                ['ty-s1','ty-s2'],
+    'info-ahxx-service.jar':           ['ty-s2','ty-s3'],
+    'info-consumer-service.jar':       ['ty-s2','ty-s3'],
+    'info-hotel-service.jar':          ['ty-s2','ty-s3'],
+    'info-payment-service.jar':        ['ty-s2','ty-s3'],
+    'info-uc-service.jar':             ['ty-s2','ty-s3'],
 }
 
-#version_hosts = ['s1', 's2', 's3', 's4', 'ng1', 'ng2']
-version_hosts = ['192.168.100.218', '192.168.100.222']
+version_hosts = ['ty-s1', 'ty-s2','ty-s3']
 
 distribute_dir = "/home/wangchaochao/distributeJar/"
 distribute_jars = os.listdir(distribute_dir)
@@ -56,10 +43,8 @@ distributed_file = "/home/miaocunfa/bin/distributed.json"
 
 remote_path="/home/miaocunfa/deployJar/"
 remote_port="22"
-#remote_user="miaocunfa"
-#remote_pass="@WSX#EDC"
 remote_user="root"
-remote_pass="test123"
+remote_pass="AiHang@3389$"
 
 # 创建ssh访问
 ssh = paramiko.SSHClient()
