@@ -1,3 +1,21 @@
+---
+title: "Elasticsearch之定时制作快照备份"
+date: "2020-09-16"
+categories:
+    - "技术"
+tags:
+    - "Elasticsearch"
+    - "搜索引擎"
+    - "运维"
+toc: false
+original: true
+---
+
+## 一、备份脚本
+
+脚本可在执行运维操作前手动执行备份快照，也可写入crontab，做定时快照，用于数据恢复。
+
+``` shell
 #!/bin/bash
 
 # Describe:     create elasticsearch snapshot by date
@@ -93,3 +111,33 @@ then
 else
     __Write_LOG  "ERR"  "Error Reason: ${es_Snapshot}: ${error_reason}"
 fi
+```
+
+## 二、crontab
+
+``` zsh
+➜  crontab -l
+01 00 * * * /opt/elasticsearch-7.1.1/bin/es_snapshot_by_date.sh;
+```
+
+## 三、脚本日志
+
+``` zsh
+# 原先是Start、Stop，后来修改为Begin、Done
+➜  cat snapshot_bydate.log
+2020-09-16 16:06:26 [ERR] Register Repo: infov3_test: Fail!
+2020-09-16 16:06:26 [ERR] Register Repo: infov3_test: ErrorReason: [infov3_test] failed to create repository
+2020-09-16 16:08:02 [LOG] Register Repo: infov3_test: true!
+2020-09-16 16:08:02 [LOG] Make Snapshot: infov3_20200916: Begin!
+2020-09-16 16:08:03 [LOG] Make Snapshot: infov3_20200916: Done!
+2020-09-16 16:08:04 [LOG] Result: infov3_20200916: SUCCESS
+2020-09-16 16:08:17 [LOG] Make Snapshot: infov3_20200916: Begin!
+2020-09-16 16:08:17 [LOG] Make Snapshot: infov3_20200916: Done!
+2020-09-16 16:08:17 [ERR] Error Reason: infov3_20200916: [infov3_test:infov3_20200916] Invalid snapshot name [infov3_20200916], snapshot with the same name already exists
+2020-09-16 16:08:43 [LOG] Make Snapshot: infov3_20200916-1608: Begin!
+2020-09-16 16:08:44 [LOG] Make Snapshot: infov3_20200916-1608: Done!
+2020-09-16 16:08:44 [LOG] Result: infov3_20200916-1608: SUCCESS
+2020-09-16 16:09:03 [LOG] Make Snapshot: infov3_20200916-1609: Begin!
+2020-09-16 16:09:04 [LOG] Make Snapshot: infov3_20200916-1609: Done!
+2020-09-16 16:09:04 [LOG] Result: infov3_20200916-1609: SUCCESS
+```
