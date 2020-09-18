@@ -1,5 +1,5 @@
 ---
-title: "Elasticsearch之定时制作快照备份"
+title: "Elasticsearch之定时备份快照"
 date: "2020-09-16"
 categories:
     - "技术"
