@@ -1,6 +1,6 @@
 ---
 title: "PostgreSQL 扩展之 PostGIS"
-date: "2019-12-03"
+date: "2020-09-18"
 categories:
     - "技术"
 tags:
@@ -9,6 +9,13 @@ tags:
 toc: false
 original: true
 ---
+
+## 更新记录
+
+| 时间       | 内容     |
+| ---------- | -------- |
+| 2020-09-18 | 初稿     |
+| 2020-09-12 | 依赖安装 |
 
 ## 版本信息
 
@@ -22,10 +29,54 @@ original: true
 
 ## 一、安装依赖
 
-### 1.1、
+### 1.1、geos
+
+[geos安装手册](https://gitlab.com/geos/libgeos/-/blob/master/INSTALL)  
 
 ``` zsh
+# 下载源码
+➜  wget http://download.osgeo.org/geos/geos-3.8.1.tar.bz2
+➜  tar jxvf geos-3.8.1.tar.bz2
 
+# 编译
+➜  cd geos-3.8.1
+➜  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+CMake Error at CMakeLists.txt:14 (cmake_minimum_required):
+  CMake 3.8 or higher is required.  You are running version 2.8.12.2
+
+
+-- Configuring incomplete, errors occurred!
+
+# 升级cmake
+➜  yum install -y cmake3
+
+# 重新编译
+➜  mkdir build && cd build && cmake3 -DCMAKE_BUILD_TYPE=Release ..
+➜  make
+➜  make install
+```
+
+### 1.2、SFCGAL
+
+``` zsh
+➜  wget https://gitlab.com/Oslandia/SFCGAL/-/archive/v1.3.8/SFCGAL-v1.3.8.tar.gz
+➜  tar zxf SFCGAL-v1.3.8.tar.gz
+
+
+```
+
+### 1.3、gdal
+
+``` zsh
+➜  wget https://github.com/OSGeo/gdal/releases/download/v3.1.3/gdal-3.1.3.tar.gz
+➜  tar zxf gdal-3.1.3.tar.gz
+```
+
+### 1.4、proj
+
+``` zsh
+➜  wget https://download.osgeo.org/proj/proj-7.1.0.tar.gz
+➜  tar zxf proj-7.1.0.tar.gz
 ```
 
 ## 二、安装PostGIS
