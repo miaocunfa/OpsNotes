@@ -15,42 +15,38 @@ original: true
 | 时间       | 内容     |
 | ---------- | -------- |
 | 2020-09-18 | 初稿     |
-| 2020-09-12 | 依赖安装 |
+| 2020-09-21 | 依赖安装 |
 
 ## 版本信息
 
 | Server  | Version |
 | ------- | ------- |
+| CentOS  | 7.6     |
 | geos    | 3.8.1   |
 | proj    | 7.1.0   |
+| sqlite  | 3.33    |
 | gdal    | 3.1.3   |
 | SFCGAL  | 1.3.8   |
+| CGAL    | 4.13    |
 | postgis | 30_10   |
 
 ## 一、安装依赖
 
+这四个依赖最好不要换顺序，有的包依赖前一个包。gdal --> proj
+
 ### 1.1、geos
 
-[geos安装手册](https://gitlab.com/geos/libgeos/-/blob/master/INSTALL)  
+安装说明查看源代码主目录下的INSTALL文件
 
 ``` zsh
 # 下载源码
 ➜  wget http://download.osgeo.org/geos/geos-3.8.1.tar.bz2
 ➜  tar jxvf geos-3.8.1.tar.bz2
 
-# 编译
-➜  cd geos-3.8.1
-➜  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
-CMake Error at CMakeLists.txt:14 (cmake_minimum_required):
-  CMake 3.8 or higher is required.  You are running version 2.8.12.2
-
-
--- Configuring incomplete, errors occurred!
-
-# 升级cmake
+# 升级cmake --> cmake3
 ➜  yum install -y cmake3
 
-# 重新编译
+# 编译
 ➜  mkdir build && cd build && cmake3 -DCMAKE_BUILD_TYPE=Release ..
 ➜  make
 ➜  make install
@@ -58,25 +54,21 @@ CMake Error at CMakeLists.txt:14 (cmake_minimum_required):
 
 ### 1.2、SFCGAL
 
-``` zsh
-➜  wget https://gitlab.com/Oslandia/SFCGAL/-/archive/v1.3.8/SFCGAL-v1.3.8.tar.gz
-➜  tar zxf SFCGAL-v1.3.8.tar.gz
+[SFCGAL安装文档]()
 
+### 1.3、proj
 
-```
+[proj安装文档]()
 
-### 1.3、gdal
+### 1.4、gdal
+
+[gdal官网](http://gdal.org/)
 
 ``` zsh
 ➜  wget https://github.com/OSGeo/gdal/releases/download/v3.1.3/gdal-3.1.3.tar.gz
 ➜  tar zxf gdal-3.1.3.tar.gz
-```
 
-### 1.4、proj
-
-``` zsh
-➜  wget https://download.osgeo.org/proj/proj-7.1.0.tar.gz
-➜  tar zxf proj-7.1.0.tar.gz
+cd gdal-3.1.3
 ```
 
 ## 二、安装PostGIS
@@ -137,6 +129,8 @@ CREATE EXTENSION postgis_tiger_geocoder;
 
 ## 四、错误
 
+### 4.1、
+
 ``` zsh
 --> Finished Dependency Resolution
 Error: Package: postgis30_10-3.0.2-1.rhel7.x86_64 (pgdg10)
@@ -157,21 +151,44 @@ Error: Package: postgis30_10-3.0.2-1.rhel7.x86_64 (pgdg10)
  You could try running: rpm -Va --nofiles --nodigest
 ```
 
-安装依赖
+错误解决
 
 ``` zsh
+# 下载依赖包，并安装。
+
+# geos
 ➜  wget http://download.osgeo.org/geos/geos-3.8.1.tar.bz2
-➜  tar jxvf geos-3.8.1.tar.bz2
 
+# proj
 ➜  wget https://download.osgeo.org/proj/proj-7.1.0.tar.gz
-➜  tar zxf proj-7.1.0.tar.gz
 
+# gdal
 ➜  wget https://github.com/OSGeo/gdal/releases/download/v3.1.3/gdal-3.1.3.tar.gz
-➜  tar zxf gdal-3.1.3.tar.gz
 
 # SFCGAL
 ➜  wget https://gitlab.com/Oslandia/SFCGAL/-/archive/v1.3.8/SFCGAL-v1.3.8.tar.gz
-➜  tar zxf SFCGAL-v1.3.8.tar.gz
+```
+
+### 4.2、geos
+
+``` zsh
+# 编译
+➜  cd geos-3.8.1
+➜  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+CMake Error at CMakeLists.txt:14 (cmake_minimum_required):
+  CMake 3.8 or higher is required.  You are running version 2.8.12.2
+
+
+-- Configuring incomplete, errors occurred!
+```
+
+问题解决
+
+``` zsh
+# 升级cmake
+➜  yum install -y cmake3
+
+➜  mkdir build && cd build && cmake3 -DCMAKE_BUILD_TYPE=Release ..
 ```
 
 > 参考链接：
@@ -179,6 +196,8 @@ Error: Package: postgis30_10-3.0.2-1.rhel7.x86_64 (pgdg10)
 > 2、[PostGIS - 官方安装手册](http://www.postgis.net/install/)  
 > 3、[PostGIS官网](http://www.postgis.org/)  
 > 4、[PostGIS 如何通过dnf包管理工具安装在CentOS8上](https://people.planetpostgresql.org/devrim/index.php?/archives/102-Installing-PostGIS-3.0-and-PostgreSQL-12-on-CentOS-8.html)  
-> 5、[搜索libSFCGAL.so包](https://rpm.pbone.net/index.php3/stat/3/srodzaj/1/search/libSFCGAL.so.1%28%29%2864bit%29)
-> 6、[sfcgal官网](http://www.sfcgal.org/)
+> 5、[搜索libSFCGAL.so包](https://rpm.pbone.net/index.php3/stat/3/srodzaj/1/search/libSFCGAL.so.1%28%29%2864bit%29)  
+> 6、[sfcgal官网](http://www.sfcgal.org/)  
+> 7、[pkg官网](https://pkgs.org/)  
+> 8、[boost的编译、安装](https://www.cnblogs.com/smallredness/p/9245127.html)  
 >

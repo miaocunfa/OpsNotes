@@ -13,6 +13,7 @@ original: true
 ---
 
 ## 切分日志
+
 nginx日志随着时间而增长一直挺令人头疼，其实我们可以向nginx主进程发送信号`USR1`来生成新的日志文件，然后将旧的日志文件归档，下面是我用来切分日志的脚本。
 
 ``` shell
@@ -32,21 +33,24 @@ mkdir -p $base_path/$year_month
 # copy logfile to backup
 mv $base_path/access.log $base_path/$year_month/access_$day.log
 
-# 
 echo $base_path/$year_month/access_$day.log
 # reload logfile
 kill -USR1 `cat /usr/local/nginx-1.12.1/logs/nginx.pid`
 ```
 
 ## 定时切分
+
 crontab中添加定时任务，在每天23:59分执行切分日志的脚本
+
 ``` bash
 # nginx access log backup
 59 23 * * * sh /home/ysyf/bin/nginx_reload_logfile.sh
 ```
 
 ## 切分效果
+
 切分后的效果如下，当然你也可以自定义你喜欢的路径，修改一下脚本即可。
+
 ``` bash
 [root@master /usr/local/nginx-1.12.1/logs]# ll
 总用量 490828

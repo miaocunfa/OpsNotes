@@ -38,24 +38,23 @@ Requirements
 ``` zsh
 # CGAL
 # https://centos.pkgs.org/7/springdale-computational-x86_64/CGAL-devel-4.11.1-1.sdl7.x86_64.rpm.html
-➜  wget http://springdale.princeton.edu/data/springdale/7/x86_64/os/Computational/CGAL-4.11.1-1.sdl7.x86_64.rpm
-➜  wget http://springdale.princeton.edu/data/springdale/7/x86_64/os/Computational/CGAL-devel-4.11.1-1.sdl7.x86_64.rpm
-➜  yum install CGAL-4.11.1-1.sdl7.x86_64.rpm CGAL-devel-4.11.1-1.sdl7.x86_64.rpm
-➜  yum remove CGAL.x86_64 -y
+# ➜  wget http://springdale.princeton.edu/data/springdale/7/x86_64/os/Computational/CGAL-4.11.1-1.sdl7.x86_64.rpm
+# ➜  wget http://springdale.princeton.edu/data/springdale/7/x86_64/os/Computational/CGAL-devel-4.11.1-1.sdl7.x86_64.rpm
+# ➜  yum install CGAL-4.11.1-1.sdl7.x86_64.rpm CGAL-devel-4.11.1-1.sdl7.x86_64.rpm
+# ➜  yum remove CGAL.x86_64 -y
 
 ➜  wget https://github.com/CGAL/cgal/archive/releases/CGAL-4.13.2.tar.gz
 ➜  tar -zxf CGAL-4.13.2.tar.gz
 ➜  mkdir -p build/release; cd build/release
 ➜  cmake3 -DCMAKE_BUILD_TYPE=Release ../..
-➜  make
-➜  make install
+➜  make && make install
 
 # Boost
-➜  wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz
-➜  tar -zxf boost_1_74_0.tar.gz
-➜  cd boost_1_74_0/
-➜  ./bootstrap.sh --with-libraries=all --with-toolset=gcc
-➜  ./b2 install
+# ➜  wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz
+# ➜  tar -zxf boost_1_74_0.tar.gz
+# ➜  cd boost_1_74_0/
+# ➜  ./bootstrap.sh --with-libraries=all --with-toolset=gcc
+# ➜  ./b2 install
 
 # MPFR
 ➜  yum info mpfr
@@ -86,9 +85,7 @@ Version     : 6.0.0
 
 # 编译
 ➜  cd SFCGAL-v1.3.8
-➜  cmake3 .
-➜  make
-➜  make install
+➜  cmake3 . && make && make install
 ```
 
 ## 四、错误汇总
