@@ -30,8 +30,7 @@ original: true
 
 # 编译 && 安装
 ➜  ./configure
-➜  make
-➜  make install
+➜  make && make install
 ```
 
 ## 三、错误汇总
@@ -60,9 +59,7 @@ See the pkg-config man page for more details.
 
 # sqlite3 就使用最简单的编译三部曲安装。
 ➜  cd sqlite-autoconf-3330000
-➜  ./configure
-➜  make
-➜  make install
+➜  ./configure && make && make install
 
 # 环境变量
 ➜  find / -name "pkgconfig" -print

@@ -12,10 +12,11 @@ original: true
 
 ## 更新记录
 
-| 时间       | 内容     |
-| ---------- | -------- |
-| 2020-09-18 | 初稿     |
-| 2020-09-21 | 依赖安装 |
+| 时间       | 内容                                    |
+| ---------- | --------------------------------------- |
+| 2020-09-18 | 初稿                                    |
+| 2020-09-21 | 依赖安装                                |
+| 2020-09-22 | 依赖安装 && 参考链接 && PostGIS主体安装 |
 
 ## 版本信息
 
@@ -28,7 +29,8 @@ original: true
 | gdal    | 3.1.3   |
 | SFCGAL  | 1.3.8   |
 | CGAL    | 4.13    |
-| postgis | 30_10   |
+| libxml2 | 2.9.1   |
+| postgis | 3.0.2   |
 
 ## 一、安装依赖
 
@@ -48,17 +50,16 @@ original: true
 
 # 编译
 ➜  mkdir build && cd build && cmake3 -DCMAKE_BUILD_TYPE=Release ..
-➜  make
-➜  make install
+➜  make && make install
 ```
 
 ### 1.2、SFCGAL
 
-[SFCGAL安装文档]()
+[SFCGAL安装文档](https://github.com/miaocunfa/OpsNotes/blob/master/Deploy/SFCGAL%E4%B9%8B%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85.md)
 
 ### 1.3、proj
 
-[proj安装文档]()
+[proj安装文档](https://github.com/miaocunfa/OpsNotes/blob/master/Deploy/Proj%E4%B9%8B%E7%BC%96%E8%AF%91%E3%80%81%E5%AE%89%E8%A3%85.md)
 
 ### 1.4、gdal
 
@@ -68,7 +69,21 @@ original: true
 ➜  wget https://github.com/OSGeo/gdal/releases/download/v3.1.3/gdal-3.1.3.tar.gz
 ➜  tar zxf gdal-3.1.3.tar.gz
 
-cd gdal-3.1.3
+# 编译
+➜  cd gdal-3.1.3
+➜  ./configure && make && make install
+```
+
+### 1.5、libxml2
+
+``` zsh
+➜  yum install -y libxml2.x86_64 libxml2-devel.x86_64
+```
+
+### 1.6、postgresql-devel
+
+``` zsh
+➜  yum install -y postgresql10-devel.x86_64
 ```
 
 ## 二、安装PostGIS
@@ -82,11 +97,55 @@ cd gdal-3.1.3
 还需要安装或构建[GEOS](http://trac.osgeo.org/geos), [Proj](https://proj.org/), [GDAL](http://gdal.org/), [LibXML2](http://www.xmlsoft.org/)和[JSON-C](https://github.com/json-c/json-c)
 
 ``` zsh
+➜  wget https://download.osgeo.org/postgis/source/postgis-3.0.2.tar.gz
 ➜  tar xvzf postgis-3.0.2.tar.gz
 ➜  cd postgis-3.0.2
-➜  ./configure
-➜  make
-➜  make install
+
+# 编译
+➜  ./configure --with-pgconfig=/usr/pgsql-10/bin/pg_config
+
+  PostGIS is now configured for x86_64-pc-linux-gnu
+
+ -------------- Compiler Info -------------
+  C compiler:           gcc -std=gnu99 -g -O2 -fno-math-errno -fno-signed-zeros
+  CPPFLAGS:              -I/usr/local/include -I/usr/local/include    -I/usr/include/libxml2 -I/usr/local/include
+  SQL preprocessor:     /usr/bin/cpp -traditional-cpp -w -P
+
+ -------------- Additional Info -------------
+  Interrupt Tests:   DISABLED use: --with-interrupt-tests to enable
+
+ -------------- Dependencies --------------
+  GEOS config:          /usr/local/bin/geos-config
+  GEOS version:         3.8.1
+  GDAL config:          /usr/local/bin/gdal-config
+  GDAL version:         3.1.3
+  SFCGAL config:        /usr/local/bin/sfcgal-config
+  SFCGAL version:       1.3.8
+  PostgreSQL config:    /usr/pgsql-10/bin/pg_config
+  PostgreSQL version:   PostgreSQL 10.14
+  PROJ4 version:        71
+  Libxml2 config:       /usr/bin/xml2-config
+  Libxml2 version:      2.9.1
+  JSON-C support:       no
+  protobuf support:     no
+  PCRE support:         no
+  Perl:                 /usr/bin/perl
+  Wagyu:                no
+
+ --------------- Extensions ---------------
+  PostGIS Raster:                     enabled
+  PostGIS Topology:                   enabled
+  SFCGAL support:                     enabled
+  Address Standardizer support:       disabled
+
+ -------- Documentation Generation --------
+  xsltproc:             /usr/bin/xsltproc
+  xsl style sheets:
+  dblatex:
+  convert:
+  mathml2.dtd:          http://www.w3.org/Math/DTD/mathml2/mathml2.dtd
+
+➜  make && make install
 ```
 
 ### 2.2、使用yum包
@@ -129,7 +188,7 @@ CREATE EXTENSION postgis_tiger_geocoder;
 
 ## 四、错误
 
-### 4.1、
+### 4.1、依赖
 
 ``` zsh
 --> Finished Dependency Resolution
@@ -182,7 +241,7 @@ CMake Error at CMakeLists.txt:14 (cmake_minimum_required):
 -- Configuring incomplete, errors occurred!
 ```
 
-问题解决
+错误解决
 
 ``` zsh
 # 升级cmake
@@ -191,13 +250,58 @@ CMake Error at CMakeLists.txt:14 (cmake_minimum_required):
 ➜  mkdir build && cd build && cmake3 -DCMAKE_BUILD_TYPE=Release ..
 ```
 
+### 4.3、with-pgconfig
+
+``` zsh
+checking for pg_config... no
+configure: error: could not find pg_config within the current path. You may need to re-run configure with a --with-pgconfig parameter.
+```
+
+错误解决
+
+``` zsh
+➜  ./configure --with-pgconfig=/usr/pgsql-10/bin/pg_config
+Using user-specified pg_config file: /usr/pgsql-10/bin/pg_config
+configure: error: the PGXS Makefile /usr/pgsql-10/lib/pgxs/src/makefiles/pgxs.mk cannot be found. Please install the PostgreSQL server development packages and re-run configure.
+
+➜  yum install -y postgresql10-devel.x86_64
+```
+
+### 4.4、libxml2
+
+``` zsh
+configure: error: Package requirements (libxml-2.0) were not met:
+
+No package 'libxml-2.0' found
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBXML2_CFLAGS
+and LIBXML2_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+```
+
+错误解决
+
+``` zsh
+➜  yum install -y libxml2.x86_64 libxml2-devel.x86_64
+```
+
 > 参考链接：
-> 1、[PostGIS - 官方二进制编译手册](http://www.postgis.net/source/)  
-> 2、[PostGIS - 官方安装手册](http://www.postgis.net/install/)  
-> 3、[PostGIS官网](http://www.postgis.org/)  
-> 4、[PostGIS 如何通过dnf包管理工具安装在CentOS8上](https://people.planetpostgresql.org/devrim/index.php?/archives/102-Installing-PostGIS-3.0-and-PostgreSQL-12-on-CentOS-8.html)  
-> 5、[搜索libSFCGAL.so包](https://rpm.pbone.net/index.php3/stat/3/srodzaj/1/search/libSFCGAL.so.1%28%29%2864bit%29)  
-> 6、[sfcgal官网](http://www.sfcgal.org/)  
-> 7、[pkg官网](https://pkgs.org/)  
-> 8、[boost的编译、安装](https://www.cnblogs.com/smallredness/p/9245127.html)  
+> 1、[pkg - 官网](https://pkgs.org/)  
+> 2、[sfcgal - 官网](http://www.sfcgal.org/)  
+> 3、[gdal - 下载中心](https://gdal.org/download.html#current-releases)  
+> 4、[PostGIS - 官网](http://www.postgis.org/)  
+> 5、[PostGIS - 官方二进制编译手册](http://www.postgis.net/source/)  
+> 6、[PostGIS - 官方安装手册](http://www.postgis.net/install/)  
+> 7、[PostGIS 如何通过dnf包管理工具安装在CentOS8上](https://people.planetpostgresql.org/devrim/index.php?/archives/102-Installing-PostGIS-3.0-and-PostgreSQL-12-on-CentOS-8.html)  
+> 8、[搜索libSFCGAL.so包](https://rpm.pbone.net/index.php3/stat/3/srodzaj/1/search/libSFCGAL.so.1%28%29%2864bit%29)  
+> 9、[boost的编译、安装](https://www.cnblogs.com/smallredness/p/9245127.html)  
+> 10、[centos-7-postgis-upgrade.md](https://gist.github.com/pramsey/2e6d140837c37e936cb501fec0922cd2)  
+> 11、[PostGIS教程一：PostGIS介绍](https://blog.csdn.net/qq_35732147/article/details/85158177)  
+> 12、[centos 升级cmake from 2.* to 3.*](https://www.cnblogs.com/jj1118/p/8028989.html)  
+> 13、[centos7下升级cmake，很简单](https://blog.csdn.net/u013714645/article/details/77002555)  
+> 14、[The install of the last version of postgis on RedHat 7U1 fails with "Error: Package: SFCGAL-libs-1.2.2-1.rhel7.x86_64 (Postgres_9.5) Requires: libboost_date_time-mt.so.1.53.0()(64bit)"](https://trac.osgeo.org/postgis/ticket/3442)  
+> 15、[PostGIS 错误汇总](http://blog.sina.com.cn/s/blog_8acf1be10101lbfc.html)  
 >
