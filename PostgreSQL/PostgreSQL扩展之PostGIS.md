@@ -17,6 +17,7 @@ original: true
 | 2020-09-18 | 初稿                                    |
 | 2020-09-21 | 依赖安装                                |
 | 2020-09-22 | 依赖安装 && 参考链接 && PostGIS主体安装 |
+| 2020-09-23 | PostGIS 插件启用 && 报错解决            |
 
 ## 版本信息
 
@@ -165,6 +166,9 @@ postgis30_10.x86_64 : Geographic Information Systems Extensions to PostgreSQL
 
 ## 三、启用扩展
 
+> DO NOT INSTALL it in the database called postgres  
+> 不要将扩展安装的postgres库上
+
 ``` zsh
 -- Enable PostGIS (as of 3.0 contains just geometry/geography)
 CREATE EXTENSION postgis;
@@ -176,6 +180,7 @@ CREATE EXTENSION postgis_topology;
 -- and other geoprocessing algorithms
 -- sfcgal not available with all distributions
 CREATE EXTENSION postgis_sfcgal;
+
 -- fuzzy matching needed for Tiger
 CREATE EXTENSION fuzzystrmatch;
 -- rule based standardizer
@@ -288,6 +293,67 @@ See the pkg-config man page for more details.
 ➜  yum install -y libxml2.x86_64 libxml2-devel.x86_64
 ```
 
+### 4.5、启用postgis插件 --> postgis-3.so
+
+``` zsh
+# PSQL
+CREATE EXTENSION postgis
+> ERROR:  could not load library "/usr/pgsql-10/lib/postgis-3.so": libgeos_c.so.1: cannot open shared object file: No such file or directory
+
+➜  ldd postgis-3.so
+    linux-vdso.so.1 =>  (0x00007ffefe314000)
+    libgeos_c.so.1 => not found
+    libproj.so.19 => not found
+    libxml2.so.2 => /lib64/libxml2.so.2 (0x00007f38605e3000)
+    libz.so.1 => /lib64/libz.so.1 (0x00007f38603cd000)
+    libm.so.6 => /lib64/libm.so.6 (0x00007f38600cb000)
+    libdl.so.2 => /lib64/libdl.so.2 (0x00007f385fec7000)
+    libSFCGAL.so.1 => not found
+    libc.so.6 => /lib64/libc.so.6 (0x00007f385fafa000)
+    liblzma.so.5 => /lib64/liblzma.so.5 (0x00007f385f8d4000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f3860c31000)
+    libpthread.so.0 => /lib64/libpthread.so.0 (0x00007f385f6b8000)
+```
+
+问题解决
+
+``` zsh
+➜  find / -name "libgeos_c.so.1" -print
+/root/postgis/geos-3.8.1/build/lib/libgeos_c.so.1
+/usr/local/lib/libgeos_c.so.1
+➜  cp /usr/local/lib/libgeos_c.so.1 /usr/lib64/
+
+➜  find / -name "libproj.so.19" -print
+/root/postgis/proj-7.1.0/src/.libs/libproj.so.19
+/usr/local/lib/libproj.so.19
+➜  cp /usr/local/lib/libproj.so.19 /usr/lib64/
+
+➜  find / -name "libSFCGAL.so.1" -print
+/root/postgis/SFCGAL-v1.3.8/src/libSFCGAL.so.1
+/usr/local/lib64/libSFCGAL.so.1
+➜  cp /usr/local/lib64/libSFCGAL.so.1 /usr/lib64/
+
+➜  ldd postgis-3.so
+    libgeos.so.3.8.1 => not found
+
+➜  find / -name "libgeos.so.3.8.1" -print
+/root/postgis/geos-3.8.1/build/lib/libgeos.so.3.8.1
+/usr/local/lib/libgeos.so.3.8.1
+➜  cp /usr/local/lib/libgeos.so.3.8.1 /usr/lib64
+```
+
+### 4.6、启用postgis_raster插件 --> postgis_raster-3.so
+
+``` zsh
+➜  ldd postgis_raster-3.so
+    libgdal.so.27 => not found
+
+➜  find / -name "libgdal.so.27" -print
+/root/postgis/gdal-3.1.3/.libs/libgdal.so.27
+/usr/local/lib/libgdal.so.27
+➜  cp /usr/local/lib/libgdal.so.27 /usr/lib64
+```
+
 > 参考链接：
 > 1、[pkg - 官网](https://pkgs.org/)  
 > 2、[sfcgal - 官网](http://www.sfcgal.org/)  
@@ -304,4 +370,5 @@ See the pkg-config man page for more details.
 > 13、[centos7下升级cmake，很简单](https://blog.csdn.net/u013714645/article/details/77002555)  
 > 14、[The install of the last version of postgis on RedHat 7U1 fails with "Error: Package: SFCGAL-libs-1.2.2-1.rhel7.x86_64 (Postgres_9.5) Requires: libboost_date_time-mt.so.1.53.0()(64bit)"](https://trac.osgeo.org/postgis/ticket/3442)  
 > 15、[PostGIS 错误汇总](http://blog.sina.com.cn/s/blog_8acf1be10101lbfc.html)  
+> 16、[手动安装postgis时遇到的坑](https://blog.csdn.net/u011170540/article/details/52248751?utm_source=blogxgwz2)  
 >
