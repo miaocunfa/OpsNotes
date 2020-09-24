@@ -11,51 +11,65 @@ original: true
 
 ## 一、iptables
 
-## 二、抓包
+### 1.1、允许其他机器ping通
 
 ``` zsh
-# 226 --> 211
-ping 192.168.100.211
-PING 192.168.100.211 (192.168.100.211) 56(84) bytes of data.
-^C
---- 192.168.100.211 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 999ms
+# 允许其他机器的ping请求入
+➜  iptables -A INPUT  -p icmp --icmp-type echo-request -j ACCEPT
 
-# 211 抓到了226上来的ping包，但是没有返回
-tcpdump -i eth0 icmp
+# 允许给其他机器的ping回复出
+➜  iptables -A OUTPUT -p icmp --icmp-type echo-reply   -j ACCEPT
+```
+
+### 1.2、能ping通回环地址
+
+``` zsh
+➜  iptables -A INPUT  -i lo -p all -j ACCEPT
+➜  iptables –A OUTPUT –o lo –p all –j ACCEPT
+```
+
+### 1.3、能ping通域名
+
+``` zsh
+➜  iptables -A INPUT  -p udp --sport 53 -j ACCEPT
+➜  iptables -A OUTPUT -p udp --sport 53 -j ACCEPT
+```
+
+## 二、抓包
+
+### 2.1、正常抓包
+
+``` zsh
+# 我们首先在ty-es1加入 允许ping请求，和允许ping回复的规则。
+# ty-es1
+➜  iptables -A INPUT  -p icmp --icmp-type echo-request -j ACCEPT
+➜  iptables -A OUTPUT -p icmp --icmp-type echo-reply   -j ACCEPT
+
+# 之后我们在ty-ng1 ping ty-es1
+# ty-ng1
+➜  ping ty-es1
+PING ty-es1 (192.168.0.188) 56(84) bytes of data.
+64 bytes from ty-es1 (192.168.0.188): icmp_seq=1 ttl=64 time=7.24 ms
+64 bytes from ty-es1 (192.168.0.188): icmp_seq=2 ttl=64 time=0.393 ms
+64 bytes from ty-es1 (192.168.0.188): icmp_seq=3 ttl=64 time=0.233 ms
+^C
+--- ty-es1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 0.233/2.622/7.240/3.266 ms
+
+# ty-es1抓到的包
+# 可以看到 ty-ng1 > ty-es1 的ping请求
+#      与 ty-es1 > ty-ng1 的ping回复
+➜  tcpdump -i eth0 icmp
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
-14:25:15.744331 IP n226 > n211: ICMP echo request, id 19378, seq 47, length 64
-14:25:16.112571 IP n235 > n211: ICMP host n235 unreachable - admin prohibited, length 68
-14:25:16.744327 IP n226 > n211: ICMP echo request, id 19378, seq 48, length 64
-14:25:17.744400 IP n226 > n211: ICMP echo request, id 19378, seq 49, length 64
-14:25:18.744383 IP n226 > n211: ICMP echo request, id 19378, seq 50, length 64
-14:25:19.744303 IP n226 > n211: ICMP echo request, id 19378, seq 51, length 64
-14:25:20.744315 IP n226 > n211: ICMP echo request, id 19378, seq 52, length 64
 
-# 211 --> 226
-ping 192.168.100.226
-PING 192.168.100.226 (192.168.100.226) 56(84) bytes of data.
-ping: sendmsg: No buffer space available
-^C
---- 192.168.100.226 ping statistics ---
-1 packets transmitted, 0 received, 100% packet loss, time 19022ms
-
-# 211 自己抓自己的ping包都抓不到
-# tcpdump -i eth0 icmp
-
-ping 192.168.100.227
-PING 192.168.100.227 (192.168.100.227) 56(84) bytes of data.
-64 bytes from 192.168.100.227: icmp_seq=1 ttl=64 time=0.368 ms
-64 bytes from 192.168.100.227: icmp_seq=2 ttl=64 time=0.246 ms
-^C
---- 192.168.100.227 ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 1024ms
-rtt min/avg/max/mdev = 0.246/0.307/0.368/0.061 ms
-
-15:08:10.694631 IP n211 > n227: ICMP echo request, id 30403, seq 1, length 64
-15:08:10.694982 IP n227 > n211: ICMP echo reply, id 30403, seq 1, length 64
-15:08:11.718935 IP n211 > n227: ICMP echo request, id 30403, seq 2, length 64
-15:08:11.719154 IP n227 > n211: ICMP echo reply, id 30403, seq 2, length 64
-15:08:16.623383 IP n235 > n211: ICMP host n235 unreachable - admin prohibited, length 68
+15:25:00.829846 IP ty-ng1 > ty-es1: ICMP echo request, id 57875, seq 1, length 64
+15:25:00.829868 IP ty-es1 > ty-ng1: ICMP echo reply, id 57875, seq 1, length 64
+15:25:01.826158 IP ty-ng1 > ty-es1: ICMP echo request, id 57875, seq 2, length 64
+15:25:01.826176 IP ty-es1 > ty-ng1: ICMP echo reply, id 57875, seq 2, length 64
+15:25:02.826620 IP ty-ng1 > ty-es1: ICMP echo request, id 57875, seq 3, length 64
+15:25:02.826642 IP ty-es1 > ty-ng1: ICMP echo reply, id 57875, seq 3, length 64
 ```
+
+### 2.2、设置不方通

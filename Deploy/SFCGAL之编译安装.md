@@ -9,13 +9,21 @@ toc: false
 original: true
 ---
 
+## 版本信息
+
+| Server | Version |
+| ------ | ------- |
+| CentOS | 7.6     |
+| CGAL   | 4.13.2  |
+| SFCGAL | 1.3.8   |
+
 ## 一、概述
 
 [SFCGAL官网](http://www.sfcgal.org/)  
 SFCGAL是一个围绕CGAL(Computational Geometry Algorithms Library - 计算几何算法库)的c++包装库，旨在支持ISO 19107:2013和OGC简单特性Access 1.2用于3D操作。  
 SFCGAL提供了符合标准的几何类型和操作，可以通过其C或c++ api访问。PostGIS使用C API，在空间数据库中公开一些SFCGAL的功能(参见PostGIS手册)。
 
-安装要求
+### 安装要求
 
 Supported platforms
 SFCGAL has been successfully compiled and tested on the following platforms :
@@ -121,7 +129,7 @@ CMake Error at CMakeLists.txt:59 (if):
 See also "/root/postgis/SFCGAL-v1.3.8/CMakeFiles/CMakeOutput.log".
 ```
 
-查看CMakeLists.txt文件，推荐4.13版本的CGAL
+查看 CMakeLists.txt文件，推荐 4.13版本的 CGAL
 
 ``` zsh
 #-- find CGAL  ---------------------------------------------

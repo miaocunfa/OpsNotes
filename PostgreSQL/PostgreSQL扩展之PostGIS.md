@@ -354,7 +354,7 @@ CREATE EXTENSION postgis
 ➜  cp /usr/local/lib/libgdal.so.27 /usr/lib64
 ```
 
-> 参考链接：
+> 参考链接：  
 > 1、[pkg - 官网](https://pkgs.org/)  
 > 2、[sfcgal - 官网](http://www.sfcgal.org/)  
 > 3、[gdal - 下载中心](https://gdal.org/download.html#current-releases)  
