@@ -17,6 +17,7 @@ original: true
 | ---------- | -------------- |
 | 2020-06-09 | 初稿           |
 | 2020-08-05 | 增加 es limits |
+| 2020-09-30 | 增加 es master |
 
 ## 一、kibana
 
@@ -99,13 +100,20 @@ max number of threads [3818] for user [es] is too low, increase to at least [409
 *               hard    nproc           4096
 ```
 
-### 4.3、max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+### 2.3、max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
 
 ``` zsh
 ➜  vi /etc/sysctl.conf
 vm.max_map_count=262144
 
 ➜  sysctl -p
+```
+
+### 2.4、节点掉多了，master not discovered
+
+``` zsh
+[2020-09-29T16:50:25,320][WARN ][o.e.c.c.ClusterFormationFailureHelper] [es-node-3] master not discovered or elected yet, an election requires at least 2 nodes with ids from [hN_rn9JaRp-PRTnj4mmRYA, u3xjdGA7S0-5AytxnyADrw, rCdsFXdgRbCK1nkKpREnLg], have discovered [{es-node-1}{rCdsFXdgRbCK1nkKpREnLg}{PwdwISkQRDSZB6cclseBjA}{192.168.100.211}{192.168.100.211:9300}, {es-node-2}{hN_rn9JaRp-PRTnj4mmRYA}{wy04Vv9tQaeqghwxY_k5Lw}{192.168.100.212}{192.168.100.212:9300}] which is a quorum; discovery will continue using [192.168.100.211:9300, 192.168.100.212:9300] from hosts providers and [{es-node-3}{u3xjdGA7S0-5AytxnyADrw}{9BvhYJ-IQmOaVEjDCNq75A}{192.168.100.213}{192.168.100.213:9300}] from last-known cluster state; node term 142, last-accepted version 2736 in term 140
+[2020-09-29T16:50:35,323][WARN ][o.e.c.c.ClusterFormationFailureHelper] [es-node-3] master not discovered or elected yet, an election requires at least 2 nodes with ids from [hN_rn9JaRp-PRTnj4mmRYA, u3xjdGA7S0-5AytxnyADrw, rCdsFXdgRbCK1nkKpREnLg], have discovered [{es-node-1}{rCdsFXdgRbCK1nkKpREnLg}{PwdwISkQRDSZB6cclseBjA}{192.168.100.211}{192.168.100.211:9300}, {es-node-2}{hN_rn9JaRp-PRTnj4mmRYA}{wy04Vv9tQaeqghwxY_k5Lw}{192.168.100.212}{192.168.100.212:9300}] which is a quorum; discovery will continue using [192.168.100.211:9300, 192.168.100.212:9300] from hosts providers and [{es-node-3}{u3xjdGA7S0-5AytxnyADrw}{9BvhYJ-IQmOaVEjDCNq75A}{192.168.100.213}{192.168.100.213:9300}] from last-known cluster state; node term 142, last-accepted version 2736 in term 140
 ```
 
 > 参考链接：  
