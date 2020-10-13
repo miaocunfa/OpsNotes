@@ -169,7 +169,7 @@ vim /root/ansible/playbook/stop_mongo_226-228.yml
 - hosts: 192.168.100.228
   remote_user: root
   gather_facts: no
-  tasks:
+  tasks: 
     - name: stop mongo - 228
       shell: ps -ef | grep mongo | grep -v grep | awk '{print $2}' | xargs kill
 ```

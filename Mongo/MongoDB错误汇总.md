@@ -113,6 +113,7 @@ rs.remove("192.168.100.227:27017")
 # 227
 cd /ahdata/mongo
 mv rs0{,.bak}
+mkdir rs0
 >rs0.log
 tail -f rs0.log
 
@@ -122,6 +123,19 @@ bin/mongod -f conf/rs0.yaml
 # 226
 rs.add("192.168.100.227:27017")
 
+
+# 运行一会儿后
+2020-10-13T16:22:31.238+0800 I  CONNPOOL [Replication] Connecting to 192.168.100.227:27017
+2020-10-13T16:22:31.882+0800 I  REPL     [replexec-24] Member 192.168.100.227:27017 is now in state STARTUP
+2020-10-13T16:22:31.882+0800 I  NETWORK  [listener] connection accepted from 192.168.100.227:48762 #591 (7 connections now open)
+2020-10-13T16:22:31.882+0800 I  NETWORK  [conn591] received client metadata from 192.168.100.227:48762 conn591: { driver: { name: "NetworkInterfaceTL", version: "4.2.2" }, os: { type: "Linux", name: "CentOS Linux release 7.6.1810 (Core) ", architecture: "x86_64", version: "Kernel 3.10.0-957.el7.x86_64" } }
+2020-10-13T16:22:31.884+0800 I  NETWORK  [listener] connection accepted from 192.168.100.227:48764 #592 (8 connections now open)
+2020-10-13T16:22:31.885+0800 I  NETWORK  [conn592] end connection 192.168.100.227:48764 (7 connections now open)
+2020-10-13T16:22:32.425+0800 W  STORAGE  [FlowControlRefresher] Flow control is engaged and the sustainer point is not moving. Please check the health of all secondaries.
+2020-10-13T16:22:35.882+0800 I  REPL     [replexec-23] Member 192.168.100.227:27017 is now in state STARTUP2
+2020-10-13T16:22:42.425+0800 W  STORAGE  [FlowControlRefresher] Flow control is engaged and the sustainer point is not moving. Please check the health of all secondaries.
+
+# 查看复制集状态
 rs.status()
 {
     "members" : [
@@ -206,6 +220,30 @@ rs.status()
     "operationTime" : Timestamp(1602569803, 1)
 }
 ```
+
+``` log
+# 226 又连接不上227了
+2020-10-13T16:25:52.425+0800 W  STORAGE  [FlowControlRefresher] Flow control is engaged and the sustainer point is not moving. Please check the health of all secondaries.
+2020-10-13T16:25:53.571+0800 I  NETWORK  [conn591] end connection 192.168.100.227:48762 (9 connections now open)
+2020-10-13T16:25:53.571+0800 I  NETWORK  [conn594] end connection 192.168.100.227:48932 (8 connections now open)
+2020-10-13T16:25:53.571+0800 I  NETWORK  [conn620] Error sending response to client: HostUnreachable: Connection reset by peer. Ending connection from 192.168.100.227:50728 (connection id: 620)
+2020-10-13T16:25:53.571+0800 I  NETWORK  [conn620] end connection 192.168.100.227:50728 (7 connections now open)
+2020-10-13T16:25:53.931+0800 I  CONNPOOL [replexec-23] dropping unhealthy pooled connection to 192.168.100.227:27017
+2020-10-13T16:25:53.931+0800 I  CONNPOOL [Replication] Connecting to 192.168.100.227:27017
+2020-10-13T16:25:53.933+0800 I  REPL_HB  [replexec-23] Heartbeat to 192.168.100.227:27017 failed after 2 retries, response status: HostUnreachable: Error connecting to 192.168.100.227:27017 :: caused by :: Connection refused
+```
+
+rs0:PRIMARY> db.printReplicationInfo()
+configured oplog size:   2048MB
+log length start to end: 81861secs (22.74hrs)
+oplog first event time:  Mon Oct 12 2020 18:12:35 GMT+0800 (CST)
+oplog last event time:   Tue Oct 13 2020 16:56:56 GMT+0800 (CST)
+now:                     Tue Oct 13 2020 16:57:04 GMT+0800 (CST)
+
+rs0:PRIMARY> rs.printSlaveReplicationInfo()
+source: 192.168.100.227:27017
+	syncedTo: Thu Jan 01 1970 08:00:00 GMT+0800 (CST)
+	1602579446 secs (445160.96 hrs) behind the primary
 
 mongodb statestr状态大全及功能解释  
 STARTUP：刚加入到复制集中，配置还未加载  
