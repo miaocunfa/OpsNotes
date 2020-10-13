@@ -4,10 +4,9 @@ date: "2020-09-29"
 categories:
     - "技术"
 tags:
-    - "Elasticsearch"
-    - "搜索引擎"
-    - "X-pack"
-    - "数据迁移"
+    - "Mac"
+    - "ftp"
+    - "item2"
 toc: false
 original: true
 ---
