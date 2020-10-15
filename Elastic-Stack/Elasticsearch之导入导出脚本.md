@@ -1,6 +1,6 @@
 ---
-title: "Elasticsearch之定时备份快照"
-date: "2020-09-16"
+title: "Elasticsearch之导入导出脚本"
+date: "2020-10-15"
 categories:
     - "技术"
 tags:
@@ -11,133 +11,255 @@ toc: false
 original: true
 ---
 
-## 一、备份脚本
+## 概述
 
-脚本可在执行运维操作前手动执行备份快照，也可写入crontab，做定时快照，用于数据恢复。
+## 一、导出脚本
 
-``` shell
+``` sh
 #!/bin/bash
 
-# Describe:     create elasticsearch snapshot by date
-# Create Date： 2020-09-14
-# Create Time:  16:26
-# Update Date： 2020-09-16
-# Update Time:  16:10
+# Describe:     export elasticsearch snapshot by index
+# Create Date： 2020-10-14
+# Create Time:  16:15
+# Update Date:  2020-10-15
+# Update Time:  13:55
 # Author:       MiaoCunFa
-#
-# Usage:
-#
-# 1、查看仓库
-# ➜  curl -X GET "localhost:9200/_snapshot/infov3_backup/_all"
 
-#---------------------------Variable--------------------------------------
+#===================================================================
+
+curDate=`date +'%Y%m%d-%H%M'`
+repository="/ahdata/elasticsearch-repository"
+EXITCODE=0
+
+# 索引信息
+unset esIndex
+esIndex=$1
+esSnapshot="${esIndex}_${curDate}"
+
+#===================================================================
+
+__exit_handler()
+{
+    exit $EXITCODE
+}
+
+__usage(){
+
+    cat << EOF
+Usage:
+    ./export-es-snapshot-byIndex.sh [index]
+EOF
+
+    exit 1
+}
+
+#===================================================================
+
+if [ "$esIndex" == "" ]
+then
+    __usage
+fi
+
+rm -rf ${repository}/${esSnapshot}
+
+echo "注册仓库"
+curl -s -X POST "localhost:9200/_snapshot/ahtest_backup" -H 'Content-Type: application/json' -d '
+{
+  "type": "fs",
+  "settings": {
+    "location": "'"/ahdata/elasticsearch-repository/${esSnapshot}"'"
+  }
+}' | jq .
+
+echo
+echo "制作快照"
+curl -s -X PUT "localhost:9200/_snapshot/ahtest_backup/${esSnapshot}?wait_for_completion=true" -H 'Content-Type: application/json' -d'
+{
+  "indices": "'"${esIndex}"'",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}' | jq .
+
+cd ${repository}
+tar -zcf ${esSnapshot}.tgz ${esSnapshot}
+```
+
+## 二、导入脚本
+
+``` sh
+#!/bin/bash
+
+# Describe:     import elasticsearch snapshot by tarball
+# Create Date： 2020-10-15
+# Create Time:  09:15
+# Update Date： 2020-10-15
+# Update Time:  18:28
+# Author:       MiaoCunFa
+
+#===================================================================
 
 curDate=`date +'%Y%m%d'`
-curTime=`date +'%H%M'`
-error_reason=${var:-default}
-
+EXITCODE=0
+dataDir="/home/miaocunfa/data"
 repository="/ahdata/elasticsearch-repository"
-es_Repo="infov3_test"
-es_Snapshot="infov3_${curDate}-${curTime}"
-#es_Snapshot="infov3_${curDate}"
+esUser=zyes
 
-logFile="${repository}/snapshot_bydate.log"
-resultFile="${repository}/result.log"
+# es 快照信息
+tar=$1
+snapshot=$(echo $tar | awk -F. '{print $1}')
+esIndex=$(echo $tar | awk -F_ '{print $1}')
 
-#---------------------------Function--------------------------------------
+#===================================================================
 
-function __Write_LOG()
+__exit_handler()
 {
-  echo "$(date "+%Y-%m-%d %H:%M:%S") [$1] $2" >> ${logFile}
+    exit $EXITCODE
 }
 
-function __Register_Repo()
-{
-    curl -s -X POST "localhost:9200/_snapshot/${es_Repo}" -H 'Content-Type: application/json' -d '
-    {
-        "type": "fs",
-        "settings": {
-          "location": "'"${repository}/${es_Repo}"'"
-        }
-    }' > $resultFile
+__usage(){
+
+    cat << EOF
+
+Usage:
+    ./import-es-snapshot-byTar.sh [tar]
+
+EOF
+
+    exit 1
 }
 
-function __error_reason()
-{
-    error_reason=$(cat $resultFile | jq .error.reason | awk -F'"' '{print $2}')
-    status=$(cat $resultFile | jq .status)
+#===================================================================
 
-    if [ "$status" == "null" ]
-    then
-        return 0
-    else
-        return 1
-    fi
-}
-
-#--------------------------Main Script------------------------------------
-
-# 判断仓库状态
-if [ ! -d ${repository}/${es_Repo} ]
+# 判断是否传入tar包
+if [ "$tar" == "" ]
 then
-    __Register_Repo
-    unset error_reason
-    __error_reason
-
-    if [ $? == 0 ]
-    then
-        regRepo_result=$(cat $resultFile | jq .acknowledged)
-        __Write_LOG  "LOG"  "Register Repo: ${es_Repo}: ${regRepo_result}!"
-    else
-        __Write_LOG  "ERR"  "Register Repo: ${es_Repo}: Fail!"
-        __Write_LOG  "ERR"  "Register Repo: ${es_Repo}: ErrorReason: ${error_reason}"
-        exit
-    fi
+    __usage
 fi
 
-# 制作快照
-__Write_LOG  "LOG"  "Make Snapshot: ${es_Snapshot}: Begin!"
-curl -s -X PUT "localhost:9200/_snapshot/${es_Repo}/${es_Snapshot}?wait_for_completion=true" > $resultFile
-__Write_LOG  "LOG"  "Make Snapshot: ${es_Snapshot}: Done!"
-
-# 判断状态
-unset error_reason
-__error_reason
-
-if [ $? == 0 ]
+# 判断是否存在tar包
+if [ ! -f $dataDir/$tar ]
 then
-    snapshot_result=$(cat $resultFile | jq .snapshot.state | awk -F'"' '{print $2}')
-    __Write_LOG  "LOG"  "Result: ${es_Snapshot}: ${snapshot_result}"
-else
-    __Write_LOG  "ERR"  "Error Reason: ${es_Snapshot}: ${error_reason}"
+    echo "$dataDir/$tar: no such file or directory"
+    __exit_handler
 fi
+
+# 清理仓库
+rm -rf $repository/$snapshot
+
+echo "注册仓库"
+curl -s -X POST "localhost:9200/_snapshot/${snapshot}" -H 'Content-Type: application/json' -d '
+{
+  "type": "fs",
+  "settings": {
+    "location": "'"/ahdata/elasticsearch-repository/${snapshot}"'"
+  }
+}' | jq .
+
+# 整理快照文件
+mv $dataDir/$tar $repository
+cd $repository
+tar -zxf $tar
+chown -R $esUser:$esUser $repository
+
+echo
+echo "索引信息: $esIndex"
+curl localhost:9200/_cat/indices/${esIndex}
+
+echo
+echo "删除索引：$esIndex"
+curl -s -X DELETE localhost:9200/infos | jq .
+
+echo
+echo "快照还原：$snapshot"
+curl -s -X POST "localhost:9200/_snapshot/${snapshot}/${snapshot}/_restore" | jq .
+
+echo
+echo "索引信息：$esIndex"
+curl localhost:9200/_cat/indices/$esIndex
 ```
 
-## 二、crontab
+## 三、脚本实例
+
+导出部分的情景演示
 
 ``` zsh
-➜  crontab -l
-01 00 * * * /opt/elasticsearch-7.1.1/bin/es_snapshot_by_date.sh;
+# 1、不指定索引 提示Usage
+➜  ./export-es-snapshot-byIndex.sh
+
+Usage:
+    ./export-es-snapshot-byIndex.sh [index]
+
+# 2、正常导出
+➜  ./export-es-snapshot-byIndex.sh infos
+注册仓库
+{
+  "acknowledged": true
+}
+
+制作快照
+{
+  "snapshot": {
+    "snapshot": "infos_20201015-1522",
+    "uuid": "pCk0aCmHRO67ZtYjrnoLvw",
+    "version_id": 7010199,
+    "version": "7.1.1",
+    "indices": [
+      "infos"
+    ],
+    "include_global_state": false,
+    "state": "SUCCESS",
+    "start_time": "2020-10-15T07:22:44.746Z",
+    "start_time_in_millis": 1602746564746,
+    "end_time": "2020-10-15T07:22:58.479Z",
+    "end_time_in_millis": 1602746578479,
+    "duration_in_millis": 13733,
+    "failures": [],
+    "shards": {
+      "total": 3,
+      "failed": 0,
+      "successful": 3
+    }
+  }
+}
+
+# 3、输入错误索引
+➜  ./export-es-snapshot-byIndex.sh fdsf
+no such index [fdsf]
 ```
 
-## 三、脚本日志
+导入部分的情景演示
 
 ``` zsh
-# 原先是Start、Stop，后来修改为Begin、Done
-➜  cat snapshot_bydate.log
-2020-09-16 16:06:26 [ERR] Register Repo: infov3_test: Fail!
-2020-09-16 16:06:26 [ERR] Register Repo: infov3_test: ErrorReason: [infov3_test] failed to create repository
-2020-09-16 16:08:02 [LOG] Register Repo: infov3_test: true!
-2020-09-16 16:08:02 [LOG] Make Snapshot: infov3_20200916: Begin!
-2020-09-16 16:08:03 [LOG] Make Snapshot: infov3_20200916: Done!
-2020-09-16 16:08:04 [LOG] Result: infov3_20200916: SUCCESS
-2020-09-16 16:08:17 [LOG] Make Snapshot: infov3_20200916: Begin!
-2020-09-16 16:08:17 [LOG] Make Snapshot: infov3_20200916: Done!
-2020-09-16 16:08:17 [ERR] Error Reason: infov3_20200916: [infov3_test:infov3_20200916] Invalid snapshot name [infov3_20200916], snapshot with the same name already exists
-2020-09-16 16:08:43 [LOG] Make Snapshot: infov3_20200916-1608: Begin!
-2020-09-16 16:08:44 [LOG] Make Snapshot: infov3_20200916-1608: Done!
-2020-09-16 16:08:44 [LOG] Result: infov3_20200916-1608: SUCCESS
-2020-09-16 16:09:03 [LOG] Make Snapshot: infov3_20200916-1609: Begin!
-2020-09-16 16:09:04 [LOG] Make Snapshot: infov3_20200916-1609: Done!
-2020-09-16 16:09:04 [LOG] Result: infov3_20200916-1609: SUCCESS
+# 1、不指定tar包 提示Usage
+➜  ./import-es-snapshot-byTar.sh
+
+Usage:
+    ./import-es-snapshot-byTar.sh [tar]
+
+# 2、指定错误文件
+➜  ./import-es-snapshot-byTar.sh infos_20201015-fsd
+/home/miaocunfa/data/infos_20201015-fsd: no such file or directory
+
+# 3、正常导入
+➜  ./import-es-snapshot-byTar.sh infos_20201015-1522.tgz
+注册仓库
+{
+  "acknowledged": true
+}
+
+索引信息: infos
+yellow open infos O8vUhI97Sc-ztwejg1Zalg 3 1 158 155 217.1kb 217.1kb
+
+删除索引：infos
+{
+  "acknowledged": true
+}
+
+快照还原：infos_20201015-1522
+{
+  "accepted": true
+}
+
+索引信息：infos
+yellow open infos SiYQZABwT-qRuQL2soRfFQ 3 1
 ```

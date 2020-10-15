@@ -4,7 +4,7 @@
 # Create Date： 2020-10-15
 # Create Time:  09:15
 # Update Date： 2020-10-15
-# Update Time:  15:13
+# Update Time:  18:28
 # Author:       MiaoCunFa
 
 #===================================================================
@@ -41,17 +41,20 @@ EOF
 
 #===================================================================
 
+# 判断是否传入tar包
 if [ "$tar" == "" ]
 then
     __usage
 fi
 
+# 判断是否存在tar包
 if [ ! -f $dataDir/$tar ]
 then
     echo "$dataDir/$tar: no such file or directory"
     __exit_handler
 fi
 
+# 清理仓库
 rm -rf $repository/$snapshot
 
 echo "注册仓库"
@@ -63,6 +66,7 @@ curl -s -X POST "localhost:9200/_snapshot/${snapshot}" -H 'Content-Type: applica
   }
 }' | jq .
 
+# 整理快照文件
 mv $dataDir/$tar $repository
 cd $repository
 tar -zxf $tar

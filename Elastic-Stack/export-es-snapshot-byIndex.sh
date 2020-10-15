@@ -4,13 +4,15 @@
 # Create Date： 2020-10-14 
 # Create Time:  16:15
 # Update Date:  2020-10-15
-# Update Time:  13:55
+# Update Time:  18:23
 # Author:       MiaoCunFa
 
 #===================================================================
 
 curDate=`date +'%Y%m%d-%H%M'`
 repository="/ahdata/elasticsearch-repository"
+resultFile="${repository}/result.log"
+error_reason=${var:-default}
 EXITCODE=0
 
 # 索引信息
@@ -37,13 +39,40 @@ EOF
     exit 1
 }
 
+function __error_reason()
+{
+    error_reason=$(cat $resultFile | jq .error.reason | awk -F'"' '{print $2}')
+    status=$(cat $resultFile | jq .status)
+
+    if [ "$status" == "null" ]
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
 #===================================================================
 
+# 判断是否传入索引
 if [ "$esIndex" == "" ]
 then
     __usage
 fi
 
+# 判断索引是否存在
+curl -s localhost:9200/_cat/indices/$esIndex > $resultFile
+
+unset error_reason
+__error_reason
+
+if [ $? != 0 ]
+then
+    echo $error_reason
+    __exit_handler
+fi
+
+# 清理仓库
 rm -rf ${repository}/${esSnapshot}
 
 echo "注册仓库"
