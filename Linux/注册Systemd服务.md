@@ -219,7 +219,7 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-## 8、consul
+## 8、consul-ha
 
 ``` zsh
 cd /home/wangshuxian
@@ -264,7 +264,7 @@ consul agent -server \
        -retry-join=172.19.26.9 \
        -retry-join=172.19.26.10
 
-➜  vim /usr/lib/systemd/system/consul.service
+➜  vim /usr/lib/systemd/system/consul-ha.service
 [Unit]
 Description=The consul Server
 After=syslog.target network.target remote-fs.target nss-lookup.target
@@ -293,6 +293,27 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 [Service]
 Type=simple
 ExecStart=/bin/sh -c '/opt/consul-standalone/consul agent -dev -advertise 127.0.0.1 -enable-local-script-checks -client=0.0.0.0 > /opt/consul-standalone/consul.log 2>&1'
+Restart=always
+ExecStop=/usr/bin/kill -15  $MAINPID
+KillSignal=SIGTERM
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 10、kafka_exporter
+
+``` zsh
+➜  vim /usr/lib/systemd/system/kafka_exporter.service
+[Unit]
+Description=The node_exporter Client
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '/opt/kafka_exporter-1.2.0.linux-amd64/kafka_exporter --kafka.server=DB1:9092 --kafka.server=DB2:9092 --kafka.server=DB3:9092 > /opt/kafka_exporter-1.2.0.linux-amd64/kafka_exporter.log 2>&1'
 Restart=always
 ExecStop=/usr/bin/kill -15  $MAINPID
 KillSignal=SIGTERM
