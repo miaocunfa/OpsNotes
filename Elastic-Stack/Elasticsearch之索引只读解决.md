@@ -15,7 +15,7 @@ original: true
 在确保你剩余的磁盘空间足够存储你的数据，可以进行如下操作
 
 ``` json
-curl -s -X PUT "localhost:9200/infos/settings" -h "" '
+curl -s -X PUT "localhost:9200/infos/_settings" -h "" '
 {
     "index": {
         "blocks": {
