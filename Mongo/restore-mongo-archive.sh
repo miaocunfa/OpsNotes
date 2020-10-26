@@ -3,8 +3,8 @@
 # Describe:     MongoDB Restore From archive
 # Create Date： 2020-10-23 
 # Create Time:  16:30
-# Update Date:  2020-10-23
-# Update Time:  
+# Update Date:  2020-10-26
+# Update Time:  10:08
 # Author:       MiaoCunFa
 
 #===================================================================
@@ -31,7 +31,7 @@ __usage(){
     cat << EOF
 
 Usage:
-    ./restore-mongo-archive.sh [db]
+    ./restore-mongo-archive.sh [tar]
 
 EOF
 
@@ -54,7 +54,7 @@ then
 fi
 
 # 名称校验
-if [ ! $archive =~ ".archive" ]
+if [ ! $archive =~ "archive" ]
 then
     echo "$dumpDir/$archive: The file is not correct"
 fi

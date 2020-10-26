@@ -3,8 +3,8 @@
 # Describe:     MongoDB Backup To dir
 # Create Date： 2020-10-23
 # Create Time:  15:48
-# Update Date:  2020-10-23
-# Update Time:  16:24
+# Update Date:  2020-10-26
+# Update Time:  17:40
 # Author:       MiaoCunFa
 
 #===================================================================
@@ -15,11 +15,12 @@ EXITCODE=0
 
 unset db
 db=$1
-dumpDir="/opt/mongodump"
+dumpDir="/opt/mongodump/dir"
+tarDir="/opt/mongodump/tar"
 env_tag="test"
 host="192.168.100.226"
 port="21000"
-dumpTar="${db}.${env_tag}.${curDateTime}.tgz"
+dumpTar="${db}.${env_tag}.${curDateTime}.dir.tgz"
 
 #===================================================================
 
@@ -49,14 +50,16 @@ then
 fi
 
 # 归档
-mongodump -h $host:$port -o ${dumpDir}/${curDate} -d $db
+mongodump -h $host:$port -o $dumpDir/$curDate -d $db
 
-cd ${dumpDir}/${curDate}/
+cd $dumpDir/$curDate
 
-if [ -d ${db} ]
+if [ ! -d $db ]
 then
-    echo "dump Mongo database: $dumpTar: SUCCESS!"
-    tar -zcf $dumpTar ${db}
-else
     echo "dump Mongo database: $db: Failed!"
+    __exit_handler
 fi
+
+echo "dump Mongo database: $dumpTar: SUCCESS!"
+tar -zcf $dumpTar $db
+mv $dumpTar $dumpDir
