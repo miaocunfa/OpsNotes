@@ -1,10 +1,14 @@
 #!/bin/bash
 
+# Host: PG1
+# Path: /ahdata/mongodump
+# Name: dump-mongo-dir.sh
+
 # Describe:     MongoDB Backup To dir
 # Create Date： 2020-10-23
 # Create Time:  15:48
-# Update Date:  2020-10-26
-# Update Time:  17:40
+# Update Date:  2020-10-27
+# Update Time:  16:30
 # Author:       MiaoCunFa
 
 #===================================================================
@@ -15,10 +19,13 @@ EXITCODE=0
 
 unset db
 db=$1
-dumpDir="/opt/mongodump/dir"
-tarDir="/opt/mongodump/tar"
-env_tag="test"
-host="192.168.100.226"
+mongoBin="/opt/mongodb-linux-x86_64-rhel70-4.2.2/bin"
+dumpDir="/ahdata/mongodump/dir"
+tarDir="/ahdata/mongodump/tar"
+#env_tag="test"
+#host="192.168.100.226"
+env_tag="prod"
+host="pg1"
 port="21000"
 dumpTar="${db}.${env_tag}.${curDateTime}.dir.tgz"
 
@@ -49,8 +56,20 @@ then
     __usage
 fi
 
+# 判断是否存在归档目录，若不存在即创建
+if [ ! -d $dumpDir ]
+then
+    mkdir -p $dumpDir
+fi
+
+# 判断是否存在tar目录，若不存在即创建
+if [ ! -d $tarDir ]
+then
+    mkdir -p $tarDir
+fi
+
 # 归档
-mongodump -h $host:$port -o $dumpDir/$curDate -d $db
+$mongoBin/mongodump -h $host:$port -o $dumpDir/$curDate -d $db
 
 cd $dumpDir/$curDate
 
@@ -62,4 +81,4 @@ fi
 
 echo "dump Mongo database: $dumpTar: SUCCESS!"
 tar -zcf $dumpTar $db
-mv $dumpTar $dumpDir
+mv $dumpTar $tarDir

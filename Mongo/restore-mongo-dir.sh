@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Describe:     MongoDB Restore From archive
-# Create Date： 2020-10-23 
-# Create Time:  16:30
-# Update Date:  2020-10-26
+# Describe:     MongoDB Restore From dir
+# Create Date： 2020-10-27
+# Create Time:  11:03
+# Update Date:  2020-10-27
 # Update Time:  14:45
 # Author:       MiaoCunFa
 
@@ -12,8 +12,8 @@
 curDate=`date +'%Y%m%d-%H%M'`
 EXITCODE=0
 
-unset archiveTar
-archiveTar=$1
+unset dirTar
+dirTar=$1
 dumpDir="/opt/mongodump"
 restoreDir="/opt/mongodump/restore"
 host="192.168.100.226"
@@ -31,7 +31,7 @@ __usage(){
     cat << EOF
 
 Usage:
-    ./restore-mongo-archive.sh [tar]
+    ./restore-mongo-dir.sh [tar]
 
 EOF
 
@@ -40,16 +40,16 @@ EOF
 
 #===================================================================
 
-# 判断是否传入 archive
-if [ "$archiveTar" == "" ]
+# 判断是否传入 dir tar
+if [ "$dirTar" == "" ]
 then
     __usage
 fi
 
 # 判断 归档文件 是否存在
-if [ ! -f $dumpDir/$archiveTar ]
+if [ ! -f $dumpDir/$dirTar ]
 then
-    echo "$dumpDir/$archiveTar: no such file or directory"
+    echo "$dumpDir/$dirTar: no such file or directory"
     __exit_handler
 fi
 
@@ -60,13 +60,12 @@ then
 fi
 
 # 名称校验
-if [[ ! $archiveTar =~ "archive" ]]
+if [[ ! $dirTar =~ "dir" ]]
 then
-    echo "$dumpDir/$archiveTar: The file is not correct"
-    __exit_handler
+    echo "$dumpDir/$dirTar: The file is not correct"
 fi
 
-mv $archiveTar $restoreDir
+mv $dirTar $restoreDir
 
-# 还原
-# mongodump -h $host:$port --archive=${archive} -d $db
+# 归档
+#mongodump -h $host:$port --archive=${archive} -d $db
