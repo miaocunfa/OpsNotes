@@ -16,6 +16,7 @@ original: true
 | 时间       | 内容 |
 | ---------- | ---- |
 | 2020-07-29 | 初稿 |
+| 2020-12-07 | 增加导入导出hash格式 |
 
 ## 一、redis-cli
 
@@ -184,3 +185,42 @@ db2:keys=49,expires=12,avg_ttl=1886616555
 db6:keys=175,expires=0,avg_ttl=0
 db7:keys=31,expires=0,avg_ttl=0
 ```
+
+## 三、导入导出 hash
+
+``` zsh
+# 导出命令
+➜  echo "HGETALL selfGoods:discount" | redis-cli -n 2 | xargs -n 2 | awk -F" " -v KEYNAME=selfGoods:discount '{print "HSET " KEYNAME" " $1, "\""$2"\""}' >> type.raw
+
+# 导入命令
+➜  cat type.raw | redis-cli -n 2
+```
+
+分步解析
+
+``` zsh
+➜  echo "HGETALL selfGoods:discount" | redis-cli -n 2
+  1) "stock_4873953557866176598"
+  2) "78"
+  3) "under_4820134181673260764"
+  4) "\xe4\xb8\x8b\xe6\x9e\xb6\xe6\x97\xb6\xe9\x97\xb4\xef\xbc\x9a2020-11-20T16:44:48.275"
+  5) "info_4873953557866176597"
+
+➜  echo "HGETALL selfGoods:discount" | redis-cli -n 2 | xargs -n 2
+stock_4873953557866176598 78
+under_4820134181673260764 下架时间：2020-11-20T16:44:48.275
+info_4873953557866176597 {goodsId:4873953557866176597,goodsName:6L厨夫人高汤锅_传统煲汤明火炖锅耐高温沙锅,limitQuantity:0,price:329.000,spec:6L厨夫人砂锅,worthPrice:249.000}
+under_4873955241493389341 下架时间：2020-11-26T09:16:00.635
+stock_4915471597967466812 134
+
+➜  echo "HGETALL selfGoods:discount" | redis-cli -n 2 | xargs -n 2 | awk -F" " -v KEYNAME=selfGoods:discount '{print "HSET " KEYNAME" " $1, "\""$2"\""}'
+HSET selfGoods:discount stock_4873953557866176598 "78"
+HSET selfGoods:discount under_4820134181673260764 "下架时间：2020-11-20T16:44:48.275"
+HSET selfGoods:discount info_4873953557866176597 "{goodsId:4873953557866176597,goodsName:6L厨夫人高汤锅_传统煲汤明火炖锅耐高温沙锅,limitQuantity:0,price:329.000,spec:6L厨夫人砂锅,worthPrice:249.000}"
+HSET selfGoods:discount under_4873955241493389341 "下架时间：2020-11-26T09:16:00.635"
+HSET selfGoods:discount stock_4915471597967466812 "134"
+```
+
+> 参考文档：  
+> 1、[redis hash结构导出](https://blog.csdn.net/wppwpp1/article/details/108109464)  
+>

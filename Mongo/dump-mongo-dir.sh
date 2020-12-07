@@ -7,8 +7,8 @@
 # Describe:     MongoDB Backup To dir
 # Create Date： 2020-10-23
 # Create Time:  15:48
-# Update Date:  2020-10-27
-# Update Time:  16:30
+# Update Date:  2020-10-30
+# Update Time:  17:17
 # Author:       MiaoCunFa
 
 #===================================================================
@@ -17,16 +17,18 @@ curDate=`date +'%Y%m%d'`
 curDateTime=`date +'%Y%m%d-%H%M'`
 EXITCODE=0
 
-unset db
-db=$1
 mongoBin="/opt/mongodb-linux-x86_64-rhel70-4.2.2/bin"
 dumpDir="/ahdata/mongodump/dir"
 tarDir="/ahdata/mongodump/tar"
-#env_tag="test"
-#host="192.168.100.226"
+
+# env_tag="test"
+# host="192.168.100.226"
+
 env_tag="prod"
 host="pg1"
+
 port="21000"
+db=$1
 dumpTar="${db}.${env_tag}.${curDateTime}.dir.tgz"
 
 #===================================================================

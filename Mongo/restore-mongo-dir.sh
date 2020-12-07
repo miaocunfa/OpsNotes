@@ -3,8 +3,8 @@
 # Describe:     MongoDB Restore From dir
 # Create Date： 2020-10-27
 # Create Time:  11:03
-# Update Date:  2020-10-27
-# Update Time:  14:45
+# Update Date:  2020-10-30
+# Update Time:  18:05
 # Author:       MiaoCunFa
 
 #===================================================================
@@ -12,12 +12,15 @@
 curDate=`date +'%Y%m%d-%H%M'`
 EXITCODE=0
 
-unset dirTar
-dirTar=$1
-dumpDir="/opt/mongodump"
-restoreDir="/opt/mongodump/restore"
+mongoBin="/opt/mongodb-linux-x86_64-rhel70-4.2.2/bin"
+dumpDir="/ahdata/mongodump/tar"
+restoreDir="/ahdata/mongodump/restore"
 host="192.168.100.226"
 port="21000"
+
+dirTar=$1
+restoreDB=$2
+UnTar=$(echo $1 | awk -F '.' '{print $1}')
 
 #===================================================================
 
@@ -31,7 +34,7 @@ __usage(){
     cat << EOF
 
 Usage:
-    ./restore-mongo-dir.sh [tar]
+    ./restore-mongo-dir.sh [tar] [db]
 
 EOF
 
@@ -42,6 +45,12 @@ EOF
 
 # 判断是否传入 dir tar
 if [ "$dirTar" == "" ]
+then
+    __usage
+fi
+
+# 判断是否传入 db
+if [ "$restoreDB" == "" ]
 then
     __usage
 fi
@@ -63,9 +72,14 @@ fi
 if [[ ! $dirTar =~ "dir" ]]
 then
     echo "$dumpDir/$dirTar: The file is not correct"
+    __exit_handler
 fi
 
-mv $dirTar $restoreDir
+cp $dumpDir/$dirTar $restoreDir
 
-# 归档
-#mongodump -h $host:$port --archive=${archive} -d $db
+cd $restoreDir
+rm -rf $UnTar
+tar -zxf $dirTar
+
+# 还原
+$mongoBin/mongorestore -h $host:$port --dir=$restoreDir/$UnTar -d $restoreDB

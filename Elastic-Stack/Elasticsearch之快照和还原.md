@@ -151,8 +151,8 @@ path.repo: ["/ahdata/elasticsearch-repository", "/mnt"]     # 多仓库路径
 ### 2.1、指定索引快照
 
 ``` json
-# 创建快照名为 snapshot_info-ad-topic 的快照，并指定将索引 info-ad-topic 写入快照。
-# wait_for_completion=true
+# 创建快照名为 snapshot_info-ad 的快照，并指定将索引 info-ad 写入快照。
+# wait_for_completion=true, 等待快照制作完成。
 
 ➜  curl -X PUT "localhost:9200/_snapshot/ah_backup/snapshot_info-ad?wait_for_completion=true" -H 'Content-Type: application/json' -d'
 {

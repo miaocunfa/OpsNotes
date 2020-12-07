@@ -13,7 +13,7 @@ original: true
 ## 1、查看哪些证书被吊销
 
 ``` zsh
-➜  /etc/openvpn/easy-rsa/3/pki
+➜  cd /etc/openvpn/easy-rsa/3/pki
 ➜  openssl crl -in crl.pem -text -noout
 Certificate Revocation List (CRL):
         Version 2 (0x1)
