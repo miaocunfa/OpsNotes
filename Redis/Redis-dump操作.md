@@ -82,6 +82,12 @@ Error fetching http://gems.ruby-china.org/:
     bad response Not Found 404 (http://gems.ruby-china.org/specs.4.8.gz)
 ```
 
+#### 3.1.1、解决办法
+
+``` zsh
+➜  gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
+```
+
 ### 3.2、Ruby版本
 
 ``` zsh

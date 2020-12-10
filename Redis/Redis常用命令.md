@@ -221,6 +221,46 @@ HSET selfGoods:discount under_4873955241493389341 "下架时间：2020-11-26T09:
 HSET selfGoods:discount stock_4915471597967466812 "134"
 ```
 
+## 四、rdb 导出
+
+### 4.1、源库操作
+
+``` zsh
+# 关闭 aof
+➜  redis-cli -h DB1 config set appendonly no
+OK
+
+# 获取 data 目录
+➜  redis-cli
+127.0.0.1:6379> config get dir
+1) "dir"
+2) "/var/lib/redis/6379"
+
+# 保存 rdb
+127.0.0.1:6379> bgsave
+Background saving started
+
+# 拷贝 rdb
+➜  cd /var/lib/redis/6379
+➜  ll
+total 4428
+-rw-r--r-- 1 root root       0 Dec 10 14:38 appendonly.aof
+-rw-r--r-- 1 root root 4530424 Dec 10 19:45 dump.rdb
+```
+
+### 4.2、目标库操作
+
+``` zsh
+# 关闭 redis
+➜  systemctl stop redis_6379
+
+# 替换 rdb
+➜  cp dump.rdb /var/lib/redis/6379
+
+# 重启 redis
+➜  systemctl start redis_6379
+```
+
 > 参考文档：  
 > 1、[redis hash结构导出](https://blog.csdn.net/wppwpp1/article/details/108109464)  
 >
