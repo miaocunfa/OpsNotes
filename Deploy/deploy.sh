@@ -1,54 +1,41 @@
 #!/bin/bash
 
+# Host: 所有部署机
+# Path: /opt/aihangxunxi/bin
+# Name: deploy.sh
+
+# Describe:     deploy jar
+# Create Date： 2020-05-28
+# Create Time:  15:48
+# Update Date:  2020-12-16
+# Update Time:  15:38
+# Author:       MiaoCunFa
+# Version:      v1.0.2
+
 #===================================================================
-ENVFILE="/etc/profile"
-EXITCODE=0
-curDate=$(date +'%Y%m%d')
-curTime=$(date +'%H%M%S')
+cur_datetime=$(date +'%Y%m%d.%H%M')
+workPath="/opt/aihangxunxi"
+worklibPath="$workPath/lib"
 
-workPath=/opt/aihangxunxi
-worklibPath=$workPath/lib
-
-tcpMessagePort=":8555"
-tcpMessageSock=":9666"
+tcpMessagePort=":8080 "
+tcpMessageSock=":9966 "
 tcpMessagePortNum=1
 tcpMessageSocktNum=1
-messagelib=info-message-service.jar
 
-deployPath=/home/miaocunfa
-deploy_ps_num=1
-deploy_ps_file=$workPath/bin/.deploy.ps.service
-
-total_service_file=$workPath/bin/.total.service
-total_service_ps_file=$workPath/bin/.total.service.ps
-total_service_logfile=$workPath/bin/.total.service.log
-total_service=${total_service:-default}
-service_num=0
-success_num=0
-failed_num=0
+deployPath="/home/miaocunfa/deployJar"
+tailServiceLogFile="$workPath/bin/tail.service.log"
+checkExceptionFile="$workPath/bin/checkException.sh"
 
 #===================================================================
-cd $deployPath
 
-total_service=$(ls *.jar)
-echo $total_service >> $total_service_file
-
-#---------------------------------------
-echo $total_service | grep -wq "$messagelib" && isMessage="0" || isMessage="1"
-
-if [ $isMessage == "0" ]
-then
-    cd $workPath/bin
-    cur_datetime=$(date +'%Y%m%d%H%M%S')
-
-    ./stop.sh $messagelib
-    
-    mv $worklibPath/$messagelib    $worklibPath/$messagelib.$cur_datetime
-    mv $deployPath/$messagelib     $worklibPath/$messagelib
-
+function __checkMessagePortStopping()
+{
     echo
-    echo -e "\tWaiting for MessageService Port Connection Close!"
+    echo "Waiting for MessageService Port Connection Close!"
     echo
+
+    tcpMessagePortNum=$(ss -an | grep $tcpMessagePort | wc -l)
+    tcpMessageSocktNum=$(ss -an | grep $tcpMessageSock | wc -l)
 
     while ( [ $tcpMessagePortNum -ge 1 ] || [ $tcpMessageSocktNum -ge 1 ] )
     do
@@ -56,69 +43,79 @@ then
         tcpMessagePortNum=$(ss -an | grep $tcpMessagePort | wc -l)
         tcpMessageSocktNum=$(ss -an | grep $tcpMessageSock | wc -l)
     done
-    
-    sleep 2
-    ./start.sh $messagelib
-fi
+}
 
-#---------------------------------------
-total_service=$(ls $deployPath/*.jar)
+function __tailServiceLog()
+{
+    tailService=$(echo $1 | awk -F'.' '{print $1".log"}')
+    echo -e "\t\ttail -f -n 200 $workPath/logs/$tailService" >> $tailServiceLogFile
+}
 
-for i in $(ls $deployPath/*.jar)
-do
+function __printTailCommand()
+{
+    echo
+    echo -e "\tIf you want to See logfile! Please execute this Command: "
+    echo 
+    cat $tailServiceLogFile
+    echo
+}
+
+function __checkException()
+{
+    checkException=$(echo $1 | awk -F'.' '{print $1".log"}')
+    echo "grep Exception $workPath/logs/$checkException" >> $checkExceptionFile
+}
+
+function __executeCheck()
+{
+    echo
+    echo -e "Wait For Service Running!"
+    echo
+    sleep 5
+    chmod u+x $checkExceptionFile
+    sh $checkExceptionFile
+}
+
+function __stopAndStart()
+{
     cd $workPath/bin
-    cur_datetime=$(date +'%Y%m%d%H%M%S')
 
-    ./stop.sh $i
+    # 停止部分
+    ./stop.sh $1
 
-    mv $worklibPath/$i    $worklibPath/$i.$cur_datetime
-    mv $deployPath/$i     $worklibPath/$i
-
-    while [ $deploy_ps_num -ge 1 ]
-    do
-        sleep 1
-        deploy_ps_num=$(ps -ef | grep $i | grep -v "grep" | wc -l)
-    done
-
-    ./start.sh $i
-done
-
-#---------------------------------------
-for i in $(cat $total_service_file)
-do
-    ps -ef| grep $i | grep -v "grep" >> $total_service_ps_file
-
-    service_prefix=$(echo $i | awk -F'.' '{print $1}')
-    service_log=$service_prefix.log
-    echo -e "\t\ttail -f $workPath/logs/$service_log" >> $total_service_logfile
-
-    if [ -s $total_service_ps_file ]
+    if [ $1 == "AitalkServer.jar" ]
     then
-        success_num=$(( $success_num + 1 ))
-    else
-        failed_num=$(( $failed_num + 1 ))
+        # Waiting for MessageService Port Connection Close
+        __checkMessagePortStopping
     fi
 
-    echo
-    cat $total_service_ps_file
-    echo
-    >$total_service_ps_file
+    # 替换备份
+    mv $worklibPath/$1    $worklibPath/$1.$cur_datetime
+    mv $deployPath/$1     $worklibPath/$1
+
+    # 启动部分
+    sleep 1
+    ./start.sh $1
+    __tailServiceLog $1
+    #__checkException $1
+}
+
+#===================================================================
+# reset
+> $tailServiceLogFile
+#> $checkExceptionFile
+
+cd $deployPath
+
+if [ -f "$deployPath/info-gateway.jar" ]
+then
+    __stopAndStart "info-gateway.jar"
+fi
+
+for i in $(ls $deployPath)
+do
+    __stopAndStart $i
 done
 
-service_num=$(awk '{print NF}' $total_service_file)
-
-echo
-printf "\tTotal [%02i] Service are Deploy\n" $service_num
-printf "\tSuccessfully [%02i], Failed [%02i]\n" $success_num $failed_num
-printf "\tHave a good Day, see you Next time!\n"
-echo
-
-echo -e "\tIf you want to See logfile! Please execute this Command: "
-echo 
-cat $total_service_logfile
-echo
-
->$total_service_ps_file
->$total_service_logfile
->$total_service_file
->$deploy_ps_file
+#__executeCheck
+__printTailCommand
