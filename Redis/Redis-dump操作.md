@@ -65,6 +65,9 @@ redis-dump v0.4.0
 ➜  vim redis-dump-2.json
 %s@"db":2,@"db":13,@g
 
+# 使用 sed
+➜  cat redis-dump-2.json | sed 's@"db":2,@"db":13,@g' > 13
+
 ➜  cat redis-dump-2.json | redis-load -u DB1:6379
 ```
 
