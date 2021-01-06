@@ -3,25 +3,26 @@
 # Describe:     create elasticsearch snapshot by date
 # Create Date： 2020-09-14
 # Create Time:  16:26
-# Update Date： 2020-09-16
-# Update Time:  16:10
+# Update Date： 2021-01-06
+# Update Time:  14:32
 # Author:       MiaoCunFa
+# Version:      v1.0.2
 #
 # Usage:
 #
 # 1、查看仓库
-# ➜  curl -X GET "localhost:9200/_snapshot/infov3_backup/_all"
+# ➜  curMon=`date +'%Y%m'`; curl -s -X GET "localhost:9200/_snapshot/infov3.backup.${curMon}/_all" | jq .
 
 #---------------------------Variable--------------------------------------
 
 curDate=`date +'%Y%m%d'`
+curMon=`date +'%Y%m'`
 curTime=`date +'%H%M'`
 error_reason=${var:-default}
 
 repository="/ahdata/elasticsearch-repository"
-es_Repo="infov3_test"
-es_Snapshot="infov3_${curDate}-${curTime}"
-#es_Snapshot="infov3_${curDate}"
+esRepo="infov3.backup.${curMon}"
+esSnapshot="infov3.${curDate}-${curTime}"
 
 logFile="${repository}/snapshot_bydate.log"
 resultFile="${repository}/result.log"
@@ -33,15 +34,28 @@ function __Write_LOG()
   echo "$(date "+%Y-%m-%d %H:%M:%S") [$1] $2" >> ${logFile}
 }
 
-function __Register_Repo()
+# 注册仓库
+function __register_repo()
 {
-    curl -s -X POST "localhost:9200/_snapshot/${es_Repo}" -H 'Content-Type: application/json' -d '
+    curl -s -X POST "localhost:9200/_snapshot/$1" -H 'Content-Type: application/json' -d '
     {
         "type": "fs",
         "settings": {
-          "location": "'"${repository}/${es_Repo}"'"
+          "location": "'"${repository}/$1"'"
         }
     }' > $resultFile
+
+    isFail=$(cat $resultFile | grep 'error' | wc -l)
+
+    if [ $isFail -ge 1 ]
+    then
+        # 获取报错信息
+        unset error_reason
+        __error_reason
+    else
+        # 返回成功
+        return 0
+    fi
 }
 
 function __error_reason()
@@ -59,12 +73,10 @@ function __error_reason()
 
 #--------------------------Main Script------------------------------------
 
-# 判断仓库状态
-if [ ! -d ${repository}/${es_Repo} ]
+# 仓库
+if [ ! -d ${repository}/${esRepo} ]
 then
-    __Register_Repo
-    unset error_reason
-    __error_reason
+    __register_repo ${esRepo}
 
     if [ $? == 0 ]
     then
@@ -77,19 +89,21 @@ then
     fi
 fi
 
-# 制作快照
-__Write_LOG  "LOG"  "Make Snapshot: ${es_Snapshot}: Begin!"
-curl -s -X PUT "localhost:9200/_snapshot/${es_Repo}/${es_Snapshot}?wait_for_completion=true" > $resultFile
-__Write_LOG  "LOG"  "Make Snapshot: ${es_Snapshot}: Done!"
+# 快照
+__Write_LOG  "LOG"  "Make Snapshot: ${esSnapshot}: Begin!"
+curl -s -X PUT "localhost:9200/_snapshot/${es_Repo}/${esSnapshot}?wait_for_completion=true" > $resultFile
+__Write_LOG  "LOG"  "Make Snapshot: ${esSnapshot}: Done!"
 
-# 判断状态
-unset error_reason
-__error_reason
+isFail=$(cat $resulFile | grep 'error' | wc -l)
 
-if [ $? == 0 ]
+if [ $isFail -ge 1 ]
 then
-    snapshot_result=$(cat $resultFile | jq .snapshot.state | awk -F'"' '{print $2}')
-    __Write_LOG  "LOG"  "Result: ${es_Snapshot}: ${snapshot_result}"
+    # 获取报错信息
+    unset error_reason
+    __error_reason
+
+    __Write_LOG  "ERR"  "Error Reason: ${esSnapshot}: ${error_reason}"
 else
-    __Write_LOG  "ERR"  "Error Reason: ${es_Snapshot}: ${error_reason}"
+    snapshot_result=$(cat $resultFile | jq .snapshot.state | awk -F'"' '{print $2}')
+    __Write_LOG  "LOG"  "Result: ${esSnapshot}: ${snapshot_result}"t
 fi
