@@ -5,7 +5,6 @@ categories:
     - "技术"
 tags:
     - "PostgreSQL"
-    - "PostGIS"
 toc: false
 original: true
 ---
@@ -157,6 +156,8 @@ postgres=# explain (analyze,verbose,buffers,timing,costs) select *,poi <-> point
 
 ## KNN 检索压力测试
 
+将数据持续添加至2000w行。
+
 ``` zsh
 ➜  vi test.sql
 \set x random(-50000,50000)
@@ -175,16 +176,16 @@ query mode: prepared
 number of clients: 64
 number of threads: 64
 duration: 100 s
-number of transactions actually processed: 5423900
-latency average = 1.176 ms
-latency stddev = 1.269 ms
-tps = 54231.751776 (including connections establishing)
-tps = 54422.206155 (excluding connections establishing)
+number of transactions actually processed: 5385082
+latency average = 1.185 ms
+latency stddev = 1.199 ms
+tps = 53824.181105 (including connections establishing)
+tps = 53952.015673 (excluding connections establishing)
 script statistics:
  - statement latencies in milliseconds:
          0.002  \set x random(-50000,50000)
-         0.001  \set y random(-50000,50000)
-         1.172  select * from tbl_point where poi <-> point(:x,:y) <100 order by poi <-> point(:x,:y) limit 1;
+         0.000  \set y random(-50000,50000)
+         1.183  select * from tbl_point where poi <-> point(:x,:y) <100 order by poi <-> point(:x,:y) limit 1;
 ```
 
 > 参考文档：
