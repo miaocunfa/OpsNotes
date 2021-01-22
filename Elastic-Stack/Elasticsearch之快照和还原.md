@@ -1,12 +1,12 @@
 ---
 title: "Elasticsearch 的快照与还原"
-date: "2019-12-03"
-categories:
+date: "2019-12-12"
+categories: 
     - "技术"
-tags:
+tags: 
     - "Elasticsearch"
-  - "搜索引擎"
-  - "数据迁移"
+    - "搜索引擎"
+    - "数据迁移"
 toc: false
 original: true
 ---
