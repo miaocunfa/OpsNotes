@@ -9,6 +9,7 @@ tags:
     - "运维"
 toc: false
 original: true
+draft: false
 ---
 
 ## 一、备份脚本

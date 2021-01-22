@@ -9,14 +9,17 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## 一、下载源码包
+
 ``` zsh
 ➜  wget http://www.haproxy.org/download/2.1/src/haproxy-2.1.3.tar.gz
 ```
 
 ## 二、编译安装
+
 ``` zsh
 # 解压源码包
 ➜  tar -zxf haproxy-2.1.3.tar.gz
@@ -29,6 +32,7 @@ original: true
 ```
 
 ## 三、haproxy版本号
+
 ``` bash
 ➜  haproxy -v
 HA-Proxy version 2.1.3 2020/02/12 - https://haproxy.org/
@@ -37,6 +41,7 @@ Known bugs: http://www.haproxy.org/bugs/bugs-2.1.3.html
 ```
 
 ## 四、示例配置文件
+
 ``` zsh
 ➜  vim haproxy.cnf
 global
@@ -84,6 +89,7 @@ listen rabbitmq_cluster
 ```
 
 ## 五、启动服务
+
 ``` zsh
 ➜  haproxy -f haproxy.cnf
 ```

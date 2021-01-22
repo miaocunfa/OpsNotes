@@ -8,9 +8,11 @@ tags:
     - "Samba"
 toc: false
 original: true
+draft: false
 ---
 
 ## 一、部署
+
 ``` bash
 yum install samba -y
 ```
@@ -18,7 +20,9 @@ yum install samba -y
 ## 二、配置
 
 ### 2.1、创建用户
+
 新增用户ssadmin、ssread
+
 ``` bash
 # 创建系统用户
 useradd -s /sbin/nologin ssadmin  # 设置为禁止登陆
@@ -39,13 +43,16 @@ ssread:1002:
 ```
 
 ### 2.2、共享目录
+
 新建/share目录，并设置属组属主为nobody。
+
 ``` bash
 mkdir /share
 chown -R nobody:nobody /share/
 ```
 
 ### 2.3、配置文件
+
 ``` bash
 vim /etc/samba/smb.conf
 # See smb.conf.example for a more detailed config file or
@@ -157,6 +164,7 @@ vim /etc/samba/smb.conf
 ```
 
 Samba安装好后，使用testparm命令可以测试smb.conf配置是否正确。使用testparm –v命令可以详细的列出smb.conf支持的配置参数。
+
 ``` bash
 testparm
 ```
@@ -164,16 +172,20 @@ testparm
 ## 三、服务
 
 ### 3.1、启动服务
+
 ``` bash
 systemctl start smb    # 启动smb服务
 systemctl status smb   # 查看smb状态
 ```
 
 ### 3.2、windows
+
 文件资源管理器中输入
-```
+
+``` zsh
 \\192.168.100.221\share
 ```
+
 然后再输入samba用户密码即可
 
 >参考列表  

@@ -7,6 +7,7 @@ tags:
     - "Redis"
 toc: false
 original: true
+draft: false
 ---
 
 ## 一、安装

@@ -9,6 +9,7 @@ tags:
     - "常用命令"
 toc: false
 original: true
+draft: false
 ---
 
 ## 一、topic

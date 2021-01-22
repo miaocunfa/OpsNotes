@@ -9,6 +9,7 @@ tags:
     - "数据导入"
 toc: false
 original: true
+draft: false
 ---
 
 ## 更新记录
@@ -223,6 +224,10 @@ See http://docs.mongodb.org/manual/reference/program/mongorestore/ for more info
 
 ``` zsh
 ➜  mongodump -h 192.168.100.226:27017 --archive -d aihang3  | mongorestore -h 192.168.100.226:21000 --archive
+```
+
+``` zsh
+➜  mongoexport -h mongo1:21000 -d aihang3-1028 -c info | mongoimport -h mongo1:21000 -d aihang3 -c info
 ```
 
 > 参考文章：  

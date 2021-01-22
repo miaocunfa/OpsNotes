@@ -9,6 +9,7 @@ tags:
     - "prometheus"
 toc: false
 original: true
+draft: true
 ---
 
 ## kafka 指标收集器

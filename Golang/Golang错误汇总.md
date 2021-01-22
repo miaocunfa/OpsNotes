@@ -9,6 +9,7 @@ tags:
 toc: false
 indent: false
 original: true
+draft: true
 ---
 
 ## 1、GOPATH

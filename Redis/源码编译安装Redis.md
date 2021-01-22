@@ -8,6 +8,7 @@ tags:
     - "服务部署"
 toc: false
 original: true
+draft: false
 ---
 
 ## 1、官网下载

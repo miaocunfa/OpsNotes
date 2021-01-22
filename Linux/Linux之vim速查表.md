@@ -8,6 +8,7 @@ tags:
     - "vim"
 toc: false
 original: false
+draft: true
 ---
 
 Vim is great, but learning to drive it is a long term process. This is my cheat sheet for vanilla installations.

@@ -10,6 +10,7 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## 更新记录
@@ -293,7 +294,6 @@ scrape_configs:
   - job_name: 'node-21x'
     static_configs:
       - targets:
-        # 监听 node_exporter 服务
         - 192.168.100.211:10091
         - 192.168.100.212:10091
         - 192.168.100.213:10091

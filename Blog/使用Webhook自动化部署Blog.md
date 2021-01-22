@@ -67,19 +67,26 @@ GLOBAL OPTIONS:
 # Create Date： 2021-01-22
 # Create Time:  14:25
 # Update Date:  2021-01-22
-# Update Time:  14:25
+# Update Time:  19:18
 # Author:       MiaoCunFa
-# Version:      v0.0.1
+# Version:      v0.0.2
 
 # ---------------------------------------------------
 
+repo="/root/OpsNotes"
 blog="/root/blog"
 post="/root/blog/content/post"
 baseurl="http://fage.io"
 
 # ---------------------------------------------------
 
-git clone https://github.com/miaocunfa/OpsNotes.git /root/OpsNotes
+if [ ! -f $repo ]
+then
+    git clone https://github.com/miaocunfa/OpsNotes.git $repo
+else
+    cd $repo
+    git pull
+fi
 
 for md in $(find /root/OpsNotes -name "*.md" -type f -print)
 do
@@ -106,6 +113,26 @@ exit 0
 
 ![github-webhook-2](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/1102222-20200524234632847-222882855.png)
 
+## Markdown
+
+现在的配置会让 Git 仓库中所有的 Markdown 文档生成出来，我们需要做一下控制，哪些展示在博客里，哪些不展示。修改元数据的 draft 标签，draft 中文是草稿的意思, 如果设置为 true，只能本地预览，不会生成到最终产物。
+
+Metadata 示例
+
+``` zsh
+---
+title: "使用 Webhook 自动化部署 Blog"
+date: "2021-01-22"
+categories:
+    - "技术"
+tags:
+    - "Blog"
+toc: false
+original: true
+draft: false
+---
+```
+
 ## 测试
 
 ``` zsh
@@ -131,4 +158,6 @@ Time:2021-01-22 18:31:11                                         # 提交时间
 ```
 
 > 参考文档：  
-> 1、[GO 使用Webhook 实现github 自动化部署](https://www.cnblogs.com/phpper/p/12951970.html)
+> 1、[GO 使用Webhook 实现github 自动化部署](https://www.cnblogs.com/phpper/p/12951970.html)  
+> 2、[Hugo + Even + GithubPages + Google Domains搭建个人博客（二）](https://tinocheng.app/post/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A22/)  
+>

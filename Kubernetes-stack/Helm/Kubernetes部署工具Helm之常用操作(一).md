@@ -10,6 +10,7 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## 一、Helm安装

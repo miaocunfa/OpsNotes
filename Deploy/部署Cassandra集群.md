@@ -9,14 +9,20 @@ tags:
     - "数据库"
 toc: false
 original: true
+draft: false
 ---
 
 ## 一、环境准备
+
 ### 1.1、下载二进制源码包
+
+``` zsh
 wget http://apache.mirrors.hoobly.com/cassandra/3.11.5/apache-cassandra-3.11.5-bin.tar.gz
+```
 
 ### 1.2、节点准备
-```
+
+``` zsh
 # 准备三台节点
 192.168.100.226
 192.168.100.227
@@ -32,6 +38,7 @@ wget http://apache.mirrors.hoobly.com/cassandra/3.11.5/apache-cassandra-3.11.5-b
 ```
 
 ### 1.3、创建 Cassandra 用户
+
 ``` bash
 # 创建用户
 ansible casd -m user -a "name=cassandra state=present"
@@ -47,6 +54,7 @@ ansible casd -m shell -a "cd /home/cassandra/; tar -zxvf apache-cassandra-3.11.5
 ```
 
 ### 1.4、Java 环境准备
+
 ``` bash
 # 拷贝jdk至部署节点
 ansible casd -m copy -a "src=java-1.8.0-amazon-corretto-devel-1.8.0_212.b04-2.x86_64.rpm dest=/root"
@@ -63,6 +71,7 @@ OpenJDK 64-Bit Server VM Corretto-8.212.04.2 (build 25.212-b04, mixed mode)
 ```
 
 ### 1.5、配置用户环境变量
+
 ``` bash
 # 切换用户
 [root@localhost ~]# su - cassandra 
@@ -79,8 +88,11 @@ export PATH=$JAVA_HOME/bin:$CASSANDRA_HOME/bin:$PATH
 ```
 
 ## 二、部署 Cassandra
+
 ### 2.1、配置文件
+
 修改配置文件 `/home/cassandra/apache-cassandra-3.11.5/conf/cassandra.yaml`
+
 ``` yaml
 cluster_name: 'test'
 data_file_directories:
@@ -97,8 +109,10 @@ rpc_address: 192.168.100.226          # rpc监听地址，不可以为127.0.0.1
 ```
 
 ### 2.2、各节点
+
 各节点的 `listen_address` 和 `rpc_address` 需要按节点配置，且不能使用 `localhost`，因子 `seeds` 配置为第一个启动的节点。
-```
+
+``` zsh
 First Node
 --------------
 seeds: "192.168.100.226"
@@ -119,7 +133,9 @@ rpc_address: 192.168.100.228
 ```
 
 ## 三、启动 Cassandra 服务
+
 ### 3.1、启动服务
+
 ``` bash
 # 先启动226, 使用-f选项启动在前台
 /home/cassandra/apache-cassandra-3.11.5/bin/cassandra
@@ -129,8 +145,10 @@ rpc_address: 192.168.100.228
 /home/cassandra/apache-cassandra-3.11.5/bin/cassandra
 ```
 
-### 3.2、验证服务
+### 3.验证服务
+
 使用 `nodetool status` 验证服务
+
 ``` bash
 [cassandra@localhost ~]$/home/cassandra/apache-cassandra-3.11.5/bin/nodetool status
 Datacenter: datacenter1

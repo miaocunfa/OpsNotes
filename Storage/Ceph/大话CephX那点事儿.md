@@ -8,17 +8,21 @@ tags:
     - "分布式存储"
 toc: false
 original: false
+draft: true
 ---
 
 >《大话Ceph》系列文章通过通俗易懂的语言并结合基础实验，用最简单的描述描述解析Ceph中的重要概念。让读者对分布式存储系统有一个清晰的理解。
 
 ## 引言
+
 简介文章主要介绍了Ceph中的一个重要系统– CephX认证系统。简要介绍了CephX的命名格式。并介绍了从重新启动到用户连接到这连接的流程中CephX所起的作用。最后通过实验操作讲解如何在使所有秘钥丢失的情况下将其完整恢复，以及在实际生产环境中使用CephX的一些注意事项。
 
 ## CephX是什么？
+
 CephX理解起来很简单，就是整个Ceph系统的**用户名/密码**，而这个用户不单单指我们平时在终端敲ceph -s而生成的client，在这套认证系统中，还有一个特殊的用户群体，那就是**MON/OSD/MDS**，则，监视器，OSD，MDS也都需要一对账号密码来登陆Ceph系统。
 
 ## CephX的命名规则
+
 而**用户名/密码**遵循着一定的命名规则：  
 
 ### 用户名
@@ -30,9 +34,11 @@ CephX理解起来很简单，就是整个Ceph系统的**用户名/密码**，而
 - client：ID为该客户端的名称，比如admin，cinder，nova。
 
 ### 密码
+
 密码通常为包含40个字符的字符串，形如：AQBh1XlZAAAAABAAcVaBh1p8w4Q3oaGoPW0R8w==。
 
 ### 样式用户
+
 想要和一个Ceph进行进行交互，我们通常需要知道最少四条信息，并且是缺一不可的：
 
 - 发挥的fsid
@@ -42,7 +48,7 @@ CephX理解起来很简单，就是整个Ceph系统的**用户名/密码**，而
   
 其实，很多同学会发现，在我们日常和Ceph交互交互时，并不需要指定这些参数，就可以执行得到ceph -s转换的状态。实际上，我们已经使用了Ceph提供了几个替代参数，而ceph -s另外参数后的全称是：
 
-```
+``` zsh
     ceph -s   \
          --conf /etc/ceph/ceph.conf \
          --name client.admin        \
@@ -50,7 +56,8 @@ CephX理解起来很简单，就是整个Ceph系统的**用户名/密码**，而
 ```
 
 从上面的指令可以研磨，Ceph使用的**替代**用户为`client.admin`，而这个用户的秘钥文件通常是保存在`/etc/ceph/ceph.client.admin.keyring`中。如果这里，我们从`/etc/ceph`目录下删除这个秘钥文件，再次执行`ceph -s`，就会得到以下这个最最常见的错误：
-```
+
+``` zsh
 2017-07-28 15：56：03.271139 7f142579c700 -1 auth：无法在/etc/ceph/ceph.client.admin.keyring、/etc/ceph/ceph.keyring、/etc/ceph/keyring上找到密钥环， /etc/ceph/keyring.bin：（2）没有这样的文件或目录
 2017-07-28 15：56：03.271145 7f142579c700 -1 monclient（hunting）：错误：缺少密钥环，无法使用cephx进行身份验证
 2017-07-28 15：56：03.271146 7f142579c700 0 librados：client.admin初始化错误（2）没有这样的文件或目录

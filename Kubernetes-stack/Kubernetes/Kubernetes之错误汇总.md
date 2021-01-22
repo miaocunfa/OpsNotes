@@ -8,6 +8,7 @@ tags:
     - "错误汇总"
 toc: false
 original: true
+draft: false
 ---
 
 ## 1、增加 master etcd 报错

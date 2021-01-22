@@ -9,10 +9,12 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## 配置文件详解
-```
+
+``` zsh
 ###########全局配置#########
 global
 　　log 127.0.0.1 local0             # [日志输出配置，所有日志都记录在本机，通过local0输出]

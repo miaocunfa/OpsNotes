@@ -9,6 +9,7 @@ tags:
     - "分布式存储"
 toc: false
 original: true
+draft: false
 ---
 
 由于节点有限，仅仅测试对象存储服务，非典型安装规划

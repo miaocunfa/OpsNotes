@@ -11,16 +11,19 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## 环境版本
-```
+
+``` zsh
     mariadb: 10.3.16
     mariabackup: 10.3.22
 ```
 
 本来开始想使用xtrabackup进行物理备份的。但是根据percona官网的 [issue：xtrabackup & mariadb 10.3](https://jira.percona.com/browse/PXB-1550) 所述  
-```
+
+``` zsh
 XtraBackup is not compatible with MariaDB 10.3 and later.
 ```
 
@@ -28,6 +31,7 @@ XtraBackup is not compatible with MariaDB 10.3 and later.
 )
 
 ## 一、安装
+
 ``` zsh
 # 下载离线包
 ➜  wget https://mirrors.ustc.edu.cn/mariadb/yum/10.3/centos7-amd64/rpms/MariaDB-backup-10.3.22-1.el7.centos.x86_64.rpm
@@ -37,7 +41,9 @@ XtraBackup is not compatible with MariaDB 10.3 and later.
 ```
 
 ## 二、语法格式
+
 ### 选项
+
 ``` zsh
 Usage: mariabackup [--defaults-file=#] [--backup | --prepare | --copy-back | --move-back] [OPTIONS]
 
@@ -53,7 +59,8 @@ Usage: mariabackup [--defaults-file=#] [--backup | --prepare | --copy-back | --m
 ```
 
 ### options
-```
+
+``` zsh
     --target-dir=name
     --tables=name       filtering by regexp for table names.
     --tables-file=name  filtering by list of the exact database.table name in the
@@ -62,7 +69,6 @@ Usage: mariabackup [--defaults-file=#] [--backup | --prepare | --copy-back | --m
     --databases-file=name 
                       filtering by list of databases in the file.
 ```
-
 
 ### 用户授权
 
@@ -102,7 +108,9 @@ mysql > GRANT RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'mariab
 Mariabackup将备份文件写入目标目录。如果目标目录不存在，那么它将创建它。如果目标目录存在并包含文件，那么它将引发错误并中止。
 
 ### 3.2、准备
+
 在恢复备份之前，首先需要使用--prepare选项。在完全备份的情况下，这使得文件的时间点保持一致。
+
 ``` zsh
 ➜  mariabackup --prepare --target-dir=/ahdata/mariabackup/$(date +'%Y%m%d') 
 ```
@@ -110,11 +118,13 @@ Mariabackup将备份文件写入目标目录。如果目标目录不存在，那
 ### 3.3、还原
 
 在MariaDB 10.1.36，MariaDB 10.2.18和MariaDB 10.3.10之前，如果您正在执行--copy-back操作，并且没有datadir在命令行或受支持的服务器选项组之一上为该选项明确指定值，在选项文件中，则Mariabackup不会默认为服务器的default datadir。相反，Mariabackup会因错误而失败。
+
 ``` log
     Error: datadir must be specified.
 ```
 
 还原准备
+
 ``` zsh
 ➜  tar -zcvf mariabackup-20200403.tgz /ahdata/mariabackup/20200403
 ➜  scp MariaDB-backup-10.3.22-1.el7.centos.x86_64.rpm n215:~
@@ -136,12 +146,14 @@ datadir=/ahdata/mysql
 ```
 
 还原
-```
+
+``` zsh
 ➜  mariabackup --copy-back --target-dir=/ahdata/mariabackup/20200403
 ```
 
 ## 四、增量备份 && 还原
-```
+
+``` zsh
     --incremental                      这个选项用于创建一个增量备份，而不是完全备份。它传递到mariabackup子进程。当指定这个选项，可以设置 --incremental-lsn 或 --incremental-basedir。如果这2个选项都没有被指定，--incremental-basedir 传递给 mariabackup 默认值，默认值为：基础备份目录的第一个时间戳备份目录。
 
 　　--incremental-basedir=DIRECTORY    该选项接受一个字符串参数，该参数指定作为增量备份的基本数据集的完整备份目录。它与 --incremental 一起使用。

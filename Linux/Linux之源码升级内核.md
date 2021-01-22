@@ -10,6 +10,7 @@ tags:
 toc: false
 indent: false
 original: false
+draft: false
 ---
 
 ## 1、升级脚本

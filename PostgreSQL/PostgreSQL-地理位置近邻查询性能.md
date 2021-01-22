@@ -7,6 +7,7 @@ tags:
     - "PostgreSQL"
 toc: false
 original: true
+draft: false
 ---
 
 ## 创建表

@@ -9,9 +9,11 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## nginx.conf
+
 ``` conf
 worker_processes  4;
 error_log  logs/error.log  warn;
@@ -36,6 +38,7 @@ http {
 ```
 
 ## ssl配置文件
+
 ```
     server {
         listen 443 ssl;
@@ -53,6 +56,7 @@ http {
 ```
 
 ## php配置文件
+
 ``` conf
     server {
         listen       80;
@@ -64,7 +68,7 @@ http {
             index  index.php;
         }
 
-		    location ~ \.php(.*)$ {
+            location ~ \.php(.*)$ {
             fastcgi_pass 127.0.0.1:9000; 
             fastcgi_index index.php;
             fastcgi_split_path_info ^((?U).+\.php)(/?.+)$;
@@ -86,6 +90,7 @@ http {
 ```  
 
 ## java 配置文件
+
 ``` conf
 server {
         listen       80;

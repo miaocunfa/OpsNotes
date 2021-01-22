@@ -10,9 +10,11 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
 ## 脚本主程序
+
 ``` shell
 [root@master ~]-cat expDB_DailyBackup.sh 
 #---------------------------Set Parameter----------------------------------------
@@ -68,8 +70,10 @@ exit_handler
 ```
 
 ## 定时任务
+
 crontab设置定时任务，每天23:55分开始备份。
-```
+
+``` zsh
 # app Daily Backup 
 55 23 * * * sh /home/app/bin/expDB_DailyBackup.sh
 ```

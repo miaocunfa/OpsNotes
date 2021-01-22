@@ -1,9 +1,23 @@
+---
+title: "Kubernetes之存储卷"
+date: "2020-06-12"
+categories:
+    - "技术"
+tags:
+    - "Kubernetes"
+toc: false
+indent: false
+original: true
+draft: false
+---
+
 ## emptyDir
+
 emptyDir生命周期同pod容器，pod结束，存储卷也结束。
 
 ### emptyDir 配置清单
 
-```
+``` yaml
 pods
 	spec
 		containers
@@ -19,14 +33,16 @@ pods
 ```
 
 ### gitRepo
+
 gitRepo，基于emptyDir，在运行过程中基于宿主机git命令将git仓库克隆至存储卷上，在pod运行过程中，git仓库发生变化，存储卷不会同步，获得一定的持久能力。
 
 ## hostPath
+
 hostPath，宿主机路径，在pod被删除时，这个存储卷不会被删除，但pod只能调度在这个宿主机上，节点级持久。
 
 ### hostPath 配置清单
 
-```
+``` zsh
 pods
 	spec
 		containers
@@ -50,7 +66,8 @@ BlockDevice  必须是一个块设备
 ```
 
 ### hostPath示例
-```
+
+``` zsh
 [root@master volume]# cat hostpath-demo.yaml 
 kind: Pod
 apiVersion: v1
@@ -229,7 +246,8 @@ PVC和PV是一一对应，一旦某个PV被某个PVC占用了，他会显示PV�
 一个PVC创建后，就相当于一个存储卷了，这个存储卷可以被多个pod访问。
 
 ### PV 配置清单解析
-```
+
+``` zsh
 apiVersion: v1
 kind: PersistentVolume
 metadata
@@ -259,7 +277,8 @@ Recycle #回收，把数据全删掉
 ```
 
 ### PVC 配置清单解析
-```
+
+``` yaml
 apiversion: v1
 kind: persistentVolumeClaim
 metadata:
@@ -281,7 +300,9 @@ spec
 ```
 
 ### PV实例
+
 现在通过NFS服务器做测试，先将NFS的卷做成PV
+
 ```bash
 [root@note04 ~]# cd /data/volumes/
 # 创建挂载点
@@ -413,6 +434,7 @@ pv005   10Gi       RWO,RWX        Retain           Available                    
 ```
 
 ### PVC实例
+
 ```bash
 [root@master volume]# cat pvc-demo.yaml 
 apiVersion: v1
@@ -483,8 +505,3 @@ total 0
 [root@master volume]# curl 10.100.72.19
 note04:pv-pv004
 ```
-
-
-
-
-

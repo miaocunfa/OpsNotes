@@ -9,6 +9,7 @@ tags:
     - "运维"
 toc: false
 original: false
+draft: false
 ---
 
 ## test命令

@@ -9,6 +9,7 @@ tags:
     - "DevOps"
 toc: false
 original: true
+draft: false
 ---
 
 group模块是用来添加或者删除组

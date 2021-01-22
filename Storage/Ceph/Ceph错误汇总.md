@@ -8,6 +8,7 @@ tags:
     - "错误汇总"
 toc: false
 original: true
+draft: true
 ---
 
 ## Ceph错误汇总

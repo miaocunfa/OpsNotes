@@ -12,11 +12,11 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 ---
 
-# 部署使用elassandra
-
 ## 一、环境准备
+
 ``` bash
 $ wget https://github.com/strapdata/elassandra/releases/download/v6.2.3.22/elassandra-6.2.3.22.tar.gz
 $ tar -zxvf elassandra-6.2.3.22.tar.gz
@@ -27,6 +27,7 @@ $ chown -R elassandra:elassandra elassandra-6.2.3.22
 ## 二、配置部署
 
 ### 2.1、目录结构
+
 ``` bash
 $ su - elassandra               #切换用户
 $ cd /opt/elassandra-6.2.3.22   #进入工作路径
@@ -48,7 +49,8 @@ drwxr-xr-x.  2 elassandra elassandra     48 Jan  2 03:19 logs
 ```
 
 ### 2.2、修改limits.conf文件
-```
+
+``` zsh
 $ vi /etc/security/limits.conf
 # allow user 'elassandra' mlockall
 elassandra soft memlock unlimited
@@ -56,7 +58,8 @@ elassandra hard memlock unlimited
 ```
 
 ### 2.3、修改.bash_profile文件
-```
+
+``` zsh
 $ vi ~/.bash_profile
 export CASSANDRA_HOME=/opt/elassandra-6.2.3.22
 export CASSANDRA_CONF=/opt/elassandra-6.2.3.22/conf
@@ -64,7 +67,8 @@ $ source ~/.bash_profile
 ```
 
 ### 2.4、Cassandra配置文件
-```
+
+``` zsh
 $ cat cassandra.yaml | grep -v ^# | grep -v ^$
 cluster_name: 'Test Cluster'
 seed_provider:
@@ -77,13 +81,17 @@ endpoint_snitch: GossipingPropertyFileSnitch
 ```
 
 ### 2.5、删除cassandra拓扑
+
 该文件存在时GossipingPropertyFileSnitch始终加载cassandra-topology.properties
-```
+
+``` zsh
 $ mv cassandra-topology.properties topology
 ```
 
 ## 三、启动验证
+
 ### 3.1、启动
+
 ``` bash
 # -e 选项启动 elasticsearch, 否则只启动 cassandra
 # -f 选项启动在前台, 否则启动在后台
@@ -91,6 +99,7 @@ $ bin/cassandra -e -f
 ```
 
 ### 3.2、验证
+
 ``` bash
 $ bin/nodetool status
 Datacenter: DC1
@@ -101,7 +110,8 @@ Status=Up/Down
 UN  192.168.100.217  70.86 KiB  8            100.0%            3eca39ee-614e-44be-8dc3-24a57e258588  r1
 ```
 
-> 参考列表 
-> 1、https://www.strapdata.com/blog/?__hstc=45866619.604d7d24da3130719d6ad13e1d96868c.1577946442157.1577946442157.1577946442157.1&__hssc=45866619.1.1577946442157&__hsfp=156548688&_ga=2.21459963.1978597677.1577946441-1461110499.1577946441   
+> 参考文档：  
+> 1、https://www.strapdata.com/blog/?__hstc=45866619.604d7d24da3130719d6ad13e1d96868c.1577946442157.1577946442157.1577946442157.1&__hssc=45866619.1.1577946442157&__hsfp=156548688&_ga=2.21459963.1978597677.1577946441-1461110499.1577946441  
 > 2、https://medium.com/rahasak/deploy-multi-data-center-elassandra-cluster-c6cb4abf50d1  
 > 3、http://opensourceforu.com/2017/07/elassandra-to-leverage-huge-data-stack/  
+>

@@ -1,11 +1,22 @@
-# Sealos安装Kubernetes v1.16.0 HA集群
+---
+title: "Sealos安装Kubernetes v1.16.0 HA集群"
+date: "2020-06-03"
+categories:
+    - "技术"
+tags:
+    - "Kubernetes"
+toc: false
+indent: false
+original: true
+draft: false
+---
 
-> github项目链接
-> https://github.com/fanux/sealos
+> [github 地址](https://github.com/fanux/sealos)
 
 ## 初始化master节点与worker节点
 
 初始化脚本 init.sh
+
 ``` shell
 #!/bin/bash
 
@@ -107,6 +118,7 @@ docker version
 ```
 
 ## Sealos
+
 ``` bash
 # 下载sealos
 wget https://github.com/fanux/sealos/releases/download/v2.0.7/sealos
@@ -115,7 +127,8 @@ chmod +x sealos && mv sealos /usr/bin
 ```
 
 ### sealos选项
-```
+
+``` zsh
 --master   master服务器地址列表
 --node     node服务器地址列表
 --user     服务器ssh用户名
@@ -125,6 +138,7 @@ chmod +x sealos && mv sealos /usr/bin
 ```
 
 ## 初始化k8s HA集群
+
 ``` bash
 sealos init --passwd YOUR_SERVER_PASSWD  
   --master 172.31.194.114  --master 172.31.194.116  --master 172.31.194.115 \
@@ -134,11 +148,13 @@ sealos init --passwd YOUR_SERVER_PASSWD
 ```
 
 执行完成后shell最后一行输出如下说明集群部署成功
+
 ``` log
 2019-11-07 17:30:20 [INFO] [github.com/fanux/sealos/install/print.go:25] sealos install success.
 ```
 
 我们来获取一下节点的状态
+
 ``` bash
 [root@master01 ~]# kubectl get nodes
 NAME       STATUS   ROLES    AGE   VERSION
@@ -164,4 +180,3 @@ TCP  10.96.0.1:443 rr
   -> 172.31.194.115:6443          Masq    1      2          0         
   -> 172.31.194.116:6443          Masq    1      0          0         
 ```
-

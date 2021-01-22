@@ -9,9 +9,11 @@ tags:
     - "服务部署"
 toc: true
 original: true
+draft: false
 ---
 
 ## 一、环境准备
+
 ``` bash
 # 创建组和用户
 groupadd postgre
@@ -23,12 +25,14 @@ passwd postgre  # web2019+
 ```
 
 ## 二、源码包下载
+
 ``` bash
 [root@jiexian ~]#cd /home/postgresql/
 [root@jiexian /home/postgresql]# wget https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v12.0/postgresql-12.0.tar.bz2
 ```
 
 ## 三、编译安装
+
 ``` bash
 [root@jiexian /home/postgresql]# bunzip2 postgresql-12.0.tar.bz2
 [root@jiexian /home/postgresql]# tar -xvf ./postgresql-12.0.tar
@@ -39,11 +43,13 @@ passwd postgre  # web2019+
 ```
 
 make及make install完成后最后一行输出信息为下即为安装成功
-```
+
+``` zsh
 PostgreSQL installation complete.
 ```
 
 安装完成后，PostgreSQL安装在如下位置
+
 ``` bash
 [root@jiexian /home/postgresql/postgresql-12.0]# cd /home/postgresql/dbhome/
 [root@jiexian /home/postgresql/dbhome]# ll
@@ -55,6 +61,7 @@ drwxr-xr-x 6 root root 4096 11月  8 21:07 share
 ```
 
 ## 四、环境变量
+
 ``` bash
 [root@jiexian ~]# su - postgre
 [postgre@jiexian ~]$ vi .bash_profile
@@ -66,6 +73,7 @@ export PATH=$HOME/dbhome/bin:$PATH
 ```
 
 ## 五、PostgreSQL使用
+
 ``` bash
 # 创建PostgreSQL的数据路径
 [postgre@jiexian ~]$ mkdir $HOME/data
@@ -129,12 +137,15 @@ drwx------ 2 postgre postgre  4096 11月  8 21:31 pg_xact
 ```
 
 ## 六、配置文件
+
 主要修改 $HOME/data 中的 postgresql.conf 及 pg_hba.conf 文件
 postgresql.conf 用来配置数据库实例
 pg_hba.conf 用来配置数据库访问授权
 
 ### postgresql.conf
+
 将监听地址修改为 ifconfig 中的地址，端口禁用去掉。
+
 ``` conf
 listen_addresses = '172.16.100.187'             # what IP address(es) to listen on;
                                         # comma-separated list of addresses;
@@ -144,19 +155,24 @@ port = 5432                             # (change requires restart)
 ```
 
 ### pg_hba.conf
+
 将下列内容追加至 pg_hba.conf 最后一行
-```
+
+``` zsh
 # 允许所有网段访问 PostgreSQL
 host    all             all             0.0.0.0/0               trust
 ```
 
 ## 七、数据库启停
+
 PostgreSQL启动关闭命令
-```
+
+``` zsh
 pg_ctl -D <数据存放路径> [ stop | start ]
 ```
 
 示例如下
+
 ``` bash
 [postgre@jiexian ~/data]$pg_ctl -D $HOME/data -l logfile start
 waiting for server to start.... done
@@ -166,7 +182,7 @@ waiting for server to shut down.... done
 server stopped
 ```
 
-```
+``` zsh
 # 启动时 -l logfile 指明日志输出的位置
 [postgre@jiexian ~/data]$ll
 -rw------- 1 postgre postgre   929 11月  8 21:44 logfile

@@ -8,6 +8,7 @@ tags:
 toc: false
 indent: false
 original: true
+draft: false
 --- 
 
 > 一旦在存储超过95％的磁盘中的节点上分配了一个或多个分片的任何索引，该索引将被强制进入只读模式

@@ -9,9 +9,8 @@ tags:
     - "filter"
 toc: false
 original: true
+draft: false
 ---
-
-# iptables详解之filter
 
 iptables令很多小伙伴脑阔疼，下面我们来说说如何使用iptables。
 
@@ -38,6 +37,7 @@ Usage: iptables -[ACD] chain rule-specification [options]
 ```
 
 ### 1.2、iptables 格式
+
 ``` bash
 iptables [-t table] COMMAND chain [-m matchname [per-match-options]] -j targetname [per-target-options]
 ```
@@ -79,6 +79,7 @@ iptables由四表五链组成。每个表分别实现不同的功能，每个表
 iptables命令有三大类，查看，链管理，规则管理
 
 ### 3.1、查看iptables规则
+
 -t ： 查看的表  
 -n ：不进行 IP 与 HOSTNAME 的反解  
 -v ：列出更多的信息，包括通过该规则的封包总位数、相关的网络接口等.  
@@ -118,7 +119,9 @@ num   pkts bytes target     prot opt in     out     source               destina
 ```
 
 ### 3.2、链管理
+
 #### 3.2.1、-N 新建链
+
 -N：new, 自定义一条新的规则链；
 
 ``` bash
@@ -126,6 +129,7 @@ iptables -N test
 ```
 
 #### 3.2.2、-X 删除链
+
 -X：delete，删除自定义的规则链；
 ​	   注意：仅能删除用户自定义的引用计数为0的空的链；
 
@@ -134,13 +138,16 @@ iptables -X test
 ```
 
 #### 3.2.3、-E 重命名
+
 -E：重命名自定义链；引用计数不为0的自定义链不能够被重命名，也不能被删除；
 
 ``` bash
 iptables -N testrn
 iptables -E testrn testrename
 ```
+
 #### 3.2.4、-P 默认策略
+
 -P：Policy，设置默认策略；对filter表中的链而言，其默认策略有：
 
 + ACCEPT：接受
@@ -148,15 +155,19 @@ iptables -E testrn testrename
 + REJECT：拒绝
 
 使用需**谨慎**，由于我测试时，没有先增加一条放行ssh的规则，所以在我将filter的INPUT链默认策略改为DROP后，我已经无法通过Xshell链接虚拟机了，需要进入VMware放行ssh。
+
 ``` bash
 iptables -P INPUT DROP
 ```
 
 增加了放行规则后，我们已经成功使用Xshell重新连上了主机
+
 ``` bash
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 ```
+
 使用命令添加默认策略
+
 ``` bash
 #先放行ssh，INPUT链及OUTPUT链都要放行。
 iptables -A INPUT -d 176.16.128.1 -p tcp --dport 22 -j ACCEPT
@@ -170,7 +181,9 @@ iptables -P OUTPUT ACCEPT
 ```
 
 ### 3.3、规则管理
+
 #### 3.3.1、-A 追加规则
+
 -A：append，在已有规则后追加规则；
 
 ``` bash
@@ -191,6 +204,7 @@ curl: (7) Failed connect to note1:80; 拒绝连接
 ```
 
 #### 3.3.2、-R 替换规则
+
 -R：replace，替换指定链上的指定规则；
 
 ``` bash
@@ -211,6 +225,7 @@ num   pkts bytes target     prot opt in     out     source               destina
 ```
 
 #### 3.3.3、-I 插入规则
+
 -I：insert, 插入，要指明位置，省略时表示第一条；
 
 ```bash
@@ -238,6 +253,7 @@ num   pkts bytes target     prot opt in     out     source               destina
 ```
 
 #### 3.3.4、-D 删除规则
+
 -D：delete，删除规则按照规则序号或规则本身
 
 ##### 3.3.4.1、指明规则序号
@@ -262,7 +278,7 @@ num   pkts bytes target     prot opt in     out     source               destina
 
 ##### 3.3.4.2、 指明规则本身
 
-```
+``` zsh
 [root@note1 ~]# iptables -vnL INPUT --line-number
 Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
 num   pkts bytes target     prot opt in     out     source               destination         
@@ -279,6 +295,7 @@ num   pkts bytes target     prot opt in     out     source               destina
 ```
 
 #### 3.3.5、-Z 置零
+
 iptables的每条规则都有两个计数器：
 - (1) 匹配到的报文的个数；pkts
 - (2) 匹配到的所有报文的大小之和；bytes
@@ -314,7 +331,9 @@ num   pkts bytes target     prot opt in     out     source               destina
 ```
 
 ## 四、iptables匹配条件
+
 ### 4.1、基本匹配条件
+
 无需加载任何模块，由iptables/netfilter自行提供；
 
 ```bash
@@ -334,15 +353,18 @@ protocol: tcp, udp, udplite, icmp, icmpv6,esp, ah, sctp, mh or  "all"
 [!] -o, --out-interface 
 数据报文流出的接口；只能应用于数据报文流出的环节，只能应用于FORWARD、OUTPUT和POSTROUTING链；
 ```
+
 > [!]中的叹号表示取反的意思
 
 ### 4.2、扩展匹配条件
 
 #### 4.2.1、隐式扩展
+
 隐式扩展：不需要手动加载扩展模块；因为它们是对协议的扩展，所以在使用-p选项指明了特定的协议时，就表示已经指明了要扩展的模块，无需再同时使用-m选项指明扩展模块的扩展机制。
 
 ##### 4.2.1.1、tcp
-```
+
+``` zsh
 [!] --source-port, --sport port[:port]：
 匹配报文的源端口；可以是端口范围；
 
@@ -356,9 +378,11 @@ comp是必须设置的标志，例如SYN
 
 [!] --syn：用于匹配第一次握手，相当于”--tcp-flags  SYN,ACK,FIN,RST  SYN“；	
 ```
-> [!]叹号表示取反的意思							
+
+> [!]叹号表示取反的意思
 
 ##### 4.2.1.2、udp 
+
 ``` bash
 [!] --source-port, --sport port[:port]：
 匹配报文的源端口；可以是端口范围；
@@ -366,15 +390,18 @@ comp是必须设置的标志，例如SYN
 [!] --destination-port, --dport port[:port]：
 匹配报文的目标端口；可以是端口范围；
 ```
+
 > [!]叹号表示取反的意思
 
-##### 4.2.1.3、icmp 
+##### 4.2.1.3、icmp
+
 ```bash
 [!] --icmp-type {type[/code]|typename}
 ```
+
 > [!]叹号表示取反的意思
 
-###### icmp type 
+###### icmp type
 
 类型为8：请求回送echo-request(Ping 请求) 
 
@@ -451,13 +478,14 @@ rtt min/avg/max/mdev = 0.432/0.804/1.443/0.382 ms
 
 若要允许其他主机也能ping我们。在INPUT链中追加一条放行icmp-type类型为8的报文，OUTPUT放行icmp-type类型为0的报文，这样就都可以ping通了。
 
-
 #### 4.2.2、显式扩展
-显式扩展：必须使用-m选项指明要调用的扩展模块的扩展机制； 	
 
-> 使用`man iptables-extensions`来查看显示扩展的用法。			
+显式扩展：必须使用-m选项指明要调用的扩展模块的扩展机制；
+
+> 使用`man iptables-extensions`来查看显示扩展的用法。
 
 #### 4.2.2.1、multiport
+
 以离散或连续的方式定义多端口匹配条件，最多15个；
 
 ```bash
@@ -475,9 +503,10 @@ iptables -A INPUT -p tcp -m multiport --dports 21:23,80,139,443,445,3306 -j ACCE
 ```
 
 #### 4.2.2.2、iprange
+
 以连续地址块的方式来指明多IP地址匹配条件；
 
-```
+``` zsh
 [!] --src-range from[-to] #源地址区间
 [!] --dst-range from[-to] #目标地址区间
 ```
@@ -512,6 +541,7 @@ rtt min/avg/max/mdev = 0.539/0.730/0.922/0.193 ms
 ```
 
 #### 4.2.2.3、time
+
 指定数据包到达时间/日期范围的匹配条件。
 
 ``` bash
@@ -530,7 +560,7 @@ rtt min/avg/max/mdev = 0.539/0.730/0.922/0.193 ms
 >
 > 一般时间或与周几联用，或时间与每月几号联用。日期一般不常用。
 
-```
+``` zsh
 #INPUT链放行工作区域176.16.128.5-176.16.128.10的主机在周一至周五的早9点到晚5点可以访问telnet服务。
 iptables -I INPUT 2 -d 176.16.128.1 -p tcp --dport 23 -m iprange --src-range 176.16.128.5-176.16.128.10 -m time --timestart 9:00:00 --timestop 17:00:00 --weekdays 1,2,3,4,5 --kerneltz -j ACCEPT
 
@@ -554,12 +584,13 @@ iptables -I OUTPUT 2 -s 176.16.128.1 -p tcp --sport 23 -j ACCEPT
 >
 > 只对明文编码的协议生效。
 
-```
+``` zsh
 # 出栈报文中包含字符串gay拒绝访问。
 iptables -I OUTPUT -m string --algo bm --string "gay" -j REJECT
 ```
 
-#### 4.2.2.5、connlimit 
+#### 4.2.2.5、connlimit
+
 允许您限制每个客户端地址与服务器的并行连接数。
 
 ```bash
@@ -574,7 +605,7 @@ iptables -I OUTPUT -m string --algo bm --string "gay" -j REJECT
 iptables -I INPUT -p tcp -d 176.16.128.1 --dport 22 -m connlimit --connlimit-upto 2 -j ACCEPT
 ```
 
-#### 4.2.2.6、limit 
+#### 4.2.2.6、limit
 
 此模块使用令牌桶限制请求的速率。
 
@@ -642,11 +673,11 @@ UNTRACKED：未追踪的连接；
 
 state扩展：  
 内核模块装载：  
-nf_conntrack   
+nf_conntrack  
 nf_conntrack_ipv4  
 
 手动装载：  
-nf_conntrack_ftp   
+nf_conntrack_ftp
 
 追踪到的连接：  
 /proc/net/nf_conntrack  
@@ -662,16 +693,18 @@ nf_conntrack_ftp
 -j targetname [per-target-options]
 
 ### 5.1、基本处理动作
+
 ACCEPT   允许  
 DROP     丢弃  
 
 ### 5.2、扩展处理动作
 
 #### 5.2.1、REJECT 拒绝
+
 --reject-with type  
 type 拒绝理由 以什么理由去拒绝  
 
-```
+``` zsh
 icmp-net-unreachable     网络不可达
 icmp-host-unreachable    主机不可达
 icmp-port-unreachable    端口不可达    默认
@@ -682,10 +715,11 @@ icmp-admin-prohibited    管理被禁止
 ```
 
 #### 5.2.2、LOG 日志
-当有客户端访问用于记录日志  
-默认日志保存于/var/log/messages文件中    
 
-```
+当有客户端访问用于记录日志  
+默认日志保存于/var/log/messages文件中
+
+``` zsh
 --log-level   日志级别
 --log-prefix  日志前缀
 ```
@@ -698,7 +732,8 @@ iptables -R INPUT 3 -d 172.16.0.67 -p tcp --dport 23 -m state --state NEW -j LOG
 grep -i "access telnet" /var/log/messages
 ```
 
-### 5.3、自定义链作为target 
+### 5.3、自定义链作为target
+
 我们假设所有的ping请求都通过自己定义的链中的定义来处理  
 
 ``` bash
@@ -718,9 +753,11 @@ $ iptables -X in_ping_rules
 ```
 
 #### 5.3.1、RETURN 返回  
+
 自定义链的调用跟函数类似，如果在某条链内部直接返回，使用RETURN函数，返回主链
 
 ## 六、保存、重载
+
 对 iptables 来讲，我们的所有规则都是定义在内存中，重启主机，所有规则全部清空。
 所有规则都是立即送往内核，立即生效的。我们使用命令进行保存、重载。
 
@@ -728,9 +765,10 @@ $ iptables -X in_ping_rules
 
 重载：`iptabls-restore < /PATH/FROM/SOME_RULE_FILE`
             `-n, --noflush`：不清除原有规则
-            `-t, --test`：仅分析生成规则集，但不提交		
+            `-t, --test`：仅分析生成规则集，但不提交
 
 ### CentOS6
+
 保存规则：
 `service iptables save`
 保存规则于`/etc/sysconfig/iptables`文件，覆盖保存；
@@ -742,11 +780,13 @@ $ iptables -X in_ping_rules
 配置文件：`/etc/sysconfig/iptables-config`
 
 ### CentOS7
+
 (1) 自定义Unit File，进行`iptables-restore`  
 (2) firewalld服务；  
 (3) 自定义脚本；  
 
 ## 七、规则优化
+
 1. 使用自定义链管理特定应用的相关规则，模块化管理规则；
 2. 优先放行双方向状态为ESTABLISHED的报文；
 3. 服务于不同类别的功能的规则，匹配到报文可能性更大的放前面；
