@@ -14,21 +14,53 @@ draft: false
 
 上一篇说到今年不要那么咸鱼了，github 积累了那么多文章，也不发到小站上来。其实还是懒癌犯了。
 
-为什么写那么多，不发出来？那我就要给你聊聊发一篇文章有多么不便利了，写那么多东西不是所有的文章都能发来吧？是的。
+为什么不发出来？那我就要给你聊聊发一篇文章有多么不便利了。
 
-一方面文笔有限，写的不好。一方面水平有限，写的浅薄。
+首先，写那么多东西不是所有的文章都能发来吧？是的。一方面文笔有限，写的不好；一方面水平有限，写的浅薄。
 
-每次想想我要
+每次想想我要面对我那一长串的目录去把哪些文章发，哪些文章不发挑出来就觉得很难。再就是哪天我如果对历史文章做了修改，没有顺手把他上传到博客服务器更新的话，事后想起来就得一篇篇文章的去比对更新时间，再去把他更新上来。实在是太难了。
 
-由此引出我给自己的博客搞一个自动化部署的想法了。
+有鉴于此，自动化部署就迫在眉睫了。
 
 ## 思路
 
-## Webhook 选型
+简单点来说就是 通过 github 上的 webhook 机制来监听代码的变化，比如说代码提交就触发这个事件，源网站调用定义好的回调地址 (发起一个HTTP请求来告诉你，源网站发生变化了，快来拉代码啊)
+
+## github-webhook（回调监听）
+
+这是一个监听 github 回调请求的服务 [源码地址](https://github.com/yezihack/github-webhook) && [下载地址](http://img.sgfoot.com/github-webhook1.4.1.linux-amd64.tar.gz)
+
+``` zsh
+# 下载
+➜  wget http://img.sgfoot.com/github-webhook1.4.1.linux-amd64.tar.gz
+➜  tar -zxf github-webhook1.4.1.linux-amd64.tar.gz
+➜  mkdir webhook && mv github-webhook webhook
+```
+
+## 使用方法
+
+``` zsh
+➜  ./github-webhook --help
+GLOBAL OPTIONS:
+   --bash value, -b value    Execute the script path. eg: /home/hook.sh
+   --port value, -p value    http port (default: 2020)
+   --secret value, -s value  github hook secret
+   --quiet, -q               quiet operation (default: false)
+   --verbose, --vv           print verbose (default: false)
+   --help, -h                show help (default: false)
+   --version, -v             print the version (default: false)
+
+-b：指定运行脚本
+-p：指定监听端口
+-s：指定 hook 密码
+-q：安全模式，不输出任何信息 默认关闭
+```
 
 ## 自动化脚本
 
 ``` zsh
+➜  vim /root/webhook/deploy_fage.sh
+➜  chmod u+x deploy_fage.sh
 #!/bin/bash
 
 # Describe:     DevOps for fage.io
@@ -41,21 +73,62 @@ draft: false
 
 # ---------------------------------------------------
 
-gitURL="https://github.com/miaocunfa/OpsNotes.git"
-local="~/OpsNotes"
 blog="/root/blog"
-post="$blog/content/post"
+post="/root/blog/content/post"
 baseurl="http://fage.io"
 
 # ---------------------------------------------------
 
-git clone $giturl $local
+git clone https://github.com/miaocunfa/OpsNotes.git /root/OpsNotes
 
-for md in $(find $local -name "*.md" -type f -print)
+for md in $(find /root/OpsNotes -name "*.md" -type f -print)
 do
-    mv $md $post
+    cp $md $post
 done
 
 cd $blog
 ./hugo -b $baseurl
+
+exit 0
 ```
+
+## 启动回调监听
+
+``` zsh
+➜  ./github-webhook -b /root/webhook/deploy_fage.sh -p 2020 -s hook@2020
+或
+➜  ./github-webhook -b /root/webhook/deploy_fage.sh -p 2020 -s hook@2020 >> /root/webhook/hook.log 2>&1 &
+```
+
+## Github 需要做什么
+
+![github-webhook-1](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/1102222-20200524234602944-445101555.png)
+
+![github-webhook-2](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/1102222-20200524234632847-222882855.png)
+
+## 测试
+
+``` zsh
+
+# 本机做一次提交
+# Blog 主机已经监听到了 github的提交
+# 并执行了指定的 部署脚本
+
+➜  ./github-webhook -b /root/webhook/deploy_fage.sh -p 2020 -s hook@2020
+[Gorestful-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using code:	gorestful.SetMode(gorestful.ReleaseMode)
+
+[Gorestful-debug] GET    /ping                     --> github.com/yezihack/github-webhook/router.pong
+[Gorestful-debug] POST   /web-hook                 --> github.com/yezihack/github-webhook/internal.Handler.func1
+Event: push ,for: OpsNotes                                       # push 事件；仓库 OpsNotes
+Can clone repo at: https://github.com/miaocunfa/OpsNotes.git     # 仓库地址
+Commit information:
+Name:miao
+Email:miaocunf@163.com
+Branch:refs/heads/master
+CommitID:175f10d626d5f3083134bdf2a16940a2d617c233
+Time:2021-01-22 18:31:11                                         # 提交时间
+```
+
+> 参考文档：  
+> 1、[GO 使用Webhook 实现github 自动化部署](https://www.cnblogs.com/phpper/p/12951970.html)
