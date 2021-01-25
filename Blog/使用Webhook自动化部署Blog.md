@@ -24,7 +24,9 @@ draft: false
 
 ## 思路
 
-简单点来说就是 通过 github 上的 webhook 机制来监听代码的变化，比如说代码提交就触发这个事件，源网站调用定义好的回调地址 (发起一个HTTP请求来告诉你，源网站发生变化了，快来拉代码啊)
+简单点来说就是 通过 `github` 上的 `webhook 机制`来监听代码的变化，比如说代码提交就触发这个事件，源网站调用定义好的`回调地址` (发起一个`HTTP请求`来告诉你，源网站发生变化了，快来拉代码啊)
+
+![devops 流程图](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/deploy_fage.png)
 
 ## github-webhook（回调监听）
 
@@ -103,7 +105,8 @@ exit 0
 
 ``` zsh
 ➜  ./github-webhook -b /root/webhook/deploy_fage.sh -p 2020 -s hook@2020
-或
+
+# 监听在后台
 ➜  ./github-webhook -b /root/webhook/deploy_fage.sh -p 2020 -s hook@2020 >> /root/webhook/hook.log 2>&1 &
 ```
 
@@ -115,7 +118,7 @@ exit 0
 
 ## Markdown
 
-现在的配置会让 Git 仓库中所有的 Markdown 文档生成出来，我们需要做一下控制，哪些展示在博客里，哪些不展示。修改元数据的 draft 标签，draft 中文是草稿的意思, 如果设置为 true，只能本地预览，不会生成到最终产物。
+现在的配置会让 Git 仓库中所有的 Markdown 文档生成出来，我们需要做一下控制，哪些展示在博客里，哪些不展示。修改元数据的 `draft 标签`，draft 中文是草稿的意思, 如果设置为 true，只能本地预览，不会生成到最终产物。
 
 Metadata 示例
 
@@ -143,7 +146,7 @@ draft: false
 
 ➜  ./github-webhook -b /root/webhook/deploy_fage.sh -p 2020 -s hook@2020
 [Gorestful-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using code:	gorestful.SetMode(gorestful.ReleaseMode)
+ - using code:  gorestful.SetMode(gorestful.ReleaseMode)
 
 [Gorestful-debug] GET    /ping                     --> github.com/yezihack/github-webhook/router.pong
 [Gorestful-debug] POST   /web-hook                 --> github.com/yezihack/github-webhook/internal.Handler.func1
@@ -160,4 +163,6 @@ Time:2021-01-22 18:31:11                                         # 提交时间
 > 参考文档：  
 > 1、[GO 使用Webhook 实现github 自动化部署](https://www.cnblogs.com/phpper/p/12951970.html)  
 > 2、[Hugo + Even + GithubPages + Google Domains搭建个人博客（二）](https://tinocheng.app/post/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A22/)  
+> 3、[使用 Travis CI 自动更新 GitHub Pages](https://notes.iissnan.com/2016/publishing-github-pages-with-travis-ci/)  
+> 4、[Webhook到底是个啥？](https://segmentfault.com/a/1190000015437514)  
 >
