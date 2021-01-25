@@ -10,6 +10,13 @@ original: true
 draft: false
 ---
 
+## 更新记录
+
+| 时间       | 内容                   |
+| ---------- | ---------------------- |
+| 2021-01-22 | 初稿                   |
+| 2021-01-25 | 更新脚本 && 添加流程图  |
+
 ## 楔子
 
 上一篇说到今年不要那么咸鱼了，github 积累了那么多文章，也不发到小站上来。其实还是懒癌犯了。
@@ -68,10 +75,10 @@ GLOBAL OPTIONS:
 # Describe:     DevOps for fage.io
 # Create Date： 2021-01-22
 # Create Time:  14:25
-# Update Date:  2021-01-22
-# Update Time:  19:18
+# Update Date:  2021-01-25
+# Update Time:  10:58
 # Author:       MiaoCunFa
-# Version:      v0.0.2
+# Version:      v1.0.0
 
 # ---------------------------------------------------
 
@@ -82,17 +89,17 @@ baseurl="http://fage.io"
 
 # ---------------------------------------------------
 
-if [ ! -f $repo ]
+if [ -d $repo ]
 then
-    git clone https://github.com/miaocunfa/OpsNotes.git $repo
-else
     cd $repo
     git pull
+else
+    git clone https://github.com/miaocunfa/OpsNotes.git $repo
 fi
 
 for md in $(find /root/OpsNotes -name "*.md" -type f -print)
 do
-    cp $md $post
+    /bin/cp -rf $md $post
 done
 
 cd $blog
@@ -161,8 +168,10 @@ Time:2021-01-22 18:31:11                                         # 提交时间
 ```
 
 > 参考文档：  
-> 1、[GO 使用Webhook 实现github 自动化部署](https://www.cnblogs.com/phpper/p/12951970.html)  
-> 2、[Hugo + Even + GithubPages + Google Domains搭建个人博客（二）](https://tinocheng.app/post/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A22/)  
-> 3、[使用 Travis CI 自动更新 GitHub Pages](https://notes.iissnan.com/2016/publishing-github-pages-with-travis-ci/)  
-> 4、[Webhook到底是个啥？](https://segmentfault.com/a/1190000015437514)  
+>
+> - [GO 使用Webhook 实现github 自动化部署](https://www.cnblogs.com/phpper/p/12951970.html)  
+> - [Hugo + Even + GithubPages + Google Domains搭建个人博客（二）](https://tinocheng.app/post/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A22/)  
+> - [使用 Travis CI 自动更新 GitHub Pages](https://notes.iissnan.com/2016/publishing-github-pages-with-travis-ci/)  
+> - [Webhook到底是个啥？](https://segmentfault.com/a/1190000015437514)  
+> - [Linux 使用 cp 命令强制覆盖功能](https://blog.csdn.net/xinluke/article/details/52229431)  
 >
