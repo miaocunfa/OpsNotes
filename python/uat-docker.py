@@ -1,48 +1,47 @@
 #!/usr/bin/python
 # encoding: utf-8
 """
-Created by VS Code.
+Created by PyCharm.
 File:               OpsNotes:uat-docker.py
 User:               miaocunfa
 Create Date:        2021-03-02
 Create Time:        16:46
-Update Date:        2021-03-02
-Update Time:        17:40
+Update Date:        2021-03-03
+Update Time:        08:51
+Version:            v0.0.2
 """
 
-import os
-import sys
-import json
-import time
+import yaml
+import docker
 
-"""
+service_info = yaml.safe_load('''
 service: 
   coupon: 
-    ports:
+    ports: 
     - name: 
         HostPort: 4488
         ContainerPort: 8896
   admin:
-    ports:
+    ports: 
     - name: 
         HostPort: 8071
         ContainerPort: 8070
   bidding:
-    ports:
+    ports: 
     - name: 
         HostPort: 8958
         ContainerPort: 9588
   business:
-    ports:
+    ports: 
     - name: 
         HostPort: 8051
         ContainerPort: 8050
-  communication
+  communication: 
     ports:
     - name: 
         HostPort: 16969
         ContainerPort: 16969
-  craftsman
+  craftsman:
     ports:
     - name: 
         HostPort: 8041
@@ -140,4 +139,7 @@ service:
     - name: 
         HostPort: 4888
         ContainerPort: 8888
-"""
+''')
+
+print(service_info)
+

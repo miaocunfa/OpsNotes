@@ -1,5 +1,5 @@
 ---
-title: "如何利用python编写类shell脚本"
+title: "如何使用python编写类shell脚本"
 date: "2020-05-04"
 categories:
     - "技术"
@@ -65,6 +65,23 @@ http://pypi.douban.com/simple/
 https://pypi.tuna.tsinghua.edu.cn/simple/
 # 中国科学技术大学
 http://pypi.mirrors.ustc.edu.cn/simple/
+```
+
+### 1.3、查看已安装模块
+
+``` zsh
+➜  pip list
+Package                          Version
+-------------------------------- ----------
+backports.ssl-match-hostname     3.5.0.1
+certifi                          2018.10.15
+chardet                          3.0.4
+Cheetah                          2.4.4
+cloud-init                       0.7.6
+configobj                        4.7.2
+decorator                        3.4.0
+idna                             2.7
+iniparse                         0.4
 ```
 
 ## 二、os 模块
