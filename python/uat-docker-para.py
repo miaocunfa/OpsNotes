@@ -6,9 +6,9 @@ File:               OpsNotes:uat-docker-para.py
 User:               miaocunfa
 Create Date:        2021-03-02
 Create Time:        16:46
-Update Date:        2021-03-05
-Update Time:        16:46
-Version:            v0.1.0
+Update Date:        2021-03-08
+Update Time:        11:10
+Version:            v0.1.3
 """
 
 import yaml
@@ -17,6 +17,7 @@ import getopt
 
 service_info = yaml.safe_load('''
   coupon:
+    name: V_Test_Coupon
     target: /target/uat-coupon
     ports:
     - name:
@@ -28,6 +29,8 @@ service_info = yaml.safe_load('''
         HostPort: 8071
         ContainerPort: 8070
   bidding:
+    name: V_Test_Bidding
+    target: /target/uat-bidding
     ports:
     - name:
         HostPort: 8958
@@ -168,23 +171,36 @@ def main(argv):
     # 处理选项
     print(opts)
     for opt, arg in opts:
-        if opt in ("-p", "--port"):
-            #print('getPort')
-            getServicePort(service)
+        if opt in ("-n", "--name"):
+            getContainerName(service)
+        elif opt in ("-p", "--port"):
+            getContainerPort(service)
         elif opt in ("-t", "--target"):
-            #print('getTarget')
             getServiceTarget(service)
         elif opt in ("-h", "--help"):
             printUsage()
             sys.exit()
 
 
-def getServicePort(service):
-    print(service_info[service]['ports'])
+def getContainerName(service):
+    if service_info[service]['name']:
+        return service_info[service]['name']
+    else:
+        return ''
+
+
+def getContainerPort(service):
+    if service_info[service]['ports']:
+        return service_info[service]['ports']
+    else:
+        return ''
 
 
 def getServiceTarget(service):
-    print(service_info[service]['target'])
+    if service_info[service]['target']:
+        return service_info[service]['target']
+    else:
+        return ''
 
 
 def printUsage():
@@ -192,8 +208,9 @@ def printUsage():
     print('Usage: uat-docker-para.py [options] Service')
     print()
     print('Options:')
-    print('  -p, --port     return service expose port')
-    print('  -t, --target   return service target path')
+    print('  -n, --name     return container name')
+    print('  -p, --port     return container expose port')
+    print('  -t, --target   return image build PATH')
     print('  -h, --help     return Usage')
     print()
 

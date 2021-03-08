@@ -6,7 +6,6 @@ categories:
 tags:
     - "zabbix"
     - "告警"
-    - "自动化运维"
 toc: false
 original: true
 draft: false
