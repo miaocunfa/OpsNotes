@@ -6,6 +6,8 @@ categories:
 tags:
     - "zabbix"
     - "告警"
+    - "自动化运维"
+    - "ansible"
 toc: false
 original: true
 draft: false
