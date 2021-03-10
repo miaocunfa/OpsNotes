@@ -7,15 +7,16 @@ User:               miaocunfa
 Create Date:        2021-03-02
 Create Time:        16:46
 Update Date:        2021-03-10
-Update Time:        14:49
-Version:            v0.1.6
+Update Time:        15:42
+Version:            v0.1.7
 """
 
 import yaml
+import json
 import sys
 import getopt
 
-service_info = yaml.safe_load('''
+service_yaml = yaml.safe_load('''
 coupon:
     name: V_Test_Coupon
     target: /target/uat-coupon
@@ -33,12 +34,12 @@ admin:
         HostPort: 8071
         ContainerPort: 8082
 bidding:
-    name: V_Test_Bidding
+    name: V_Test_Bidding-0310
     target: /target/uat-bidding
     host: docker-2
     ports:
       - name: port1
-        HostPort: 8958
+        HostPort: 8959
         ContainerPort: 9588
 business:
     name: V_Test_Business
@@ -226,11 +227,11 @@ def main(argv):
         printUsage()
         sys.exit(2)
 
-    # 先判断service是否存在
+    # 先判断 service 是否存在
     if args:
-        # 校验 service 合法性
+        # 校验 service 合法
         service = args[0]
-        if service not in service_info.keys():
+        if service not in service_yaml.keys():
             print("service_info: " + service + " 不存在, 请检查!")
             sys.exit()
     else:
@@ -238,7 +239,6 @@ def main(argv):
         sys.exit()
 
     # 处理选项
-    #print(opts)
     for opt, arg in opts:
         if opt in ("-n", "--name"):
             getContainerName(service)
@@ -254,29 +254,29 @@ def main(argv):
 
 
 def getContainerName(service):
-    if 'name' in service_info[service]:
-        print(service_info[service]['name'])
+    if 'name' in service_yaml[service]:
+        print(service_yaml[service]['name'])
     else:
         print('null')
 
 
 def getContainerPort(service):
-    if 'ports' in service_info[service]:
-        print(service_info[service]['ports'])
+    if 'ports' in service_yaml[service]:
+        print(json.dumps(service_yaml[service]['ports']))
     else:
         print('null')
 
 
 def getServiceTarget(service):
-    if 'target' in service_info[service]:
-        print(service_info[service]['target'])
+    if 'target' in service_yaml[service]:
+        print(service_yaml[service]['target'])
     else:
         print('null')
 
 
 def getContainerHost(service):
-    if 'host' in service_info[service]:
-        print(service_info[service]['host'])
+    if 'host' in service_yaml[service]:
+        print(service_yaml[service]['host'])
     else:
         print('null')
 
