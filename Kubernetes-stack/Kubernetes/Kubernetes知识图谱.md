@@ -1,0 +1,91 @@
+---
+title: "Kubernetes知识图谱"
+date: "2021-03-10"
+categories:
+    - "技术"
+tags:
+    - "Kubernetes"
+toc: false
+indent: false
+original: false
+draft: true
+---
+
+- Kubernetes
+    - 基本理念
+        - 自动化部署，缩扩容和管理容器应用
+        - 预期状态管理(Desired State Management)
+            - Kubernetes API 对象（声明预期状态）
+            - Kubernetes Control Plane（确保集群当前状态匹配预期状态）
+                - Kubernetes Master
+                    - kube-apiserver（API Server）
+                        - 对外提供各种对象的CRUD REST接口
+                        - 对外提供Watch机制，通知对象变化
+                        - 将对象存储到Etcd中
+                    - kube-controller-manager（守护进程）
+                        - 功能：通过apiserver监视集群的状态，并做出相应更改，以使得集群的当前状态向预期状态靠拢
+                        - controllers
+                            - replication controller
+                            - endpoints controller
+                            - namespace controller
+                            - serviceaccounts controller
+                            - ...
+                    - kube-scheduler（调度器）
+                        - 功能：将Pod调度到合适的工作节点上运行
+                        - 调度的考虑因素
+                            - 资源需求
+                            - 服务治理要求
+                            - 硬件/软件/策略限制
+                            - 亲和以及反亲和要求
+                            - 数据局域性
+                            - 负载间的干扰
+                - Work Node
+                    - Kubelet（节点代理）
+                        - 接受通过各种机制（主要是通过apiserver）提供的一组PodSpec
+                        - 确保PodSpec中描述的容器处于运行状态且运行状况良好
+                    - Kube-proxy（节点网络代理）
+                        - 在节点上提供Kubernetes API中定义Service
+                        - 设置Service对应的IPtables规则
+                        - 进行流量转发（userspace模式）
+    - 部署模式
+        - Single node
+        - Single head node，multiple workers
+            - API Server，Scheduler，and Controller Manager run on a single node
+        - Single etcd，HA heade nodes，multiple workers
+            - Multiple API Server instances fronted by a load balancer
+            - Multiple Scheduler and Controller Manager instances with leader election
+            - Single etcd node
+        - HA etcd，HA head nodes，multiple workers
+            - Multiple API Server instances fronted by a load balancer
+            - Multiple Scheduler and Controller Manager instances with leader election
+            - Etcd cluster run on nodes seperate from the Kubernetes head nodes
+        - Kubernetes Federation
+    - 商业模式
+        - 云服务用户：避免使用单一云提供商导致的厂商锁定，避免技术和成本风险
+        - 云服务厂商：使用Kubernetes来打破AWS的先入垄断地位，抢夺市场份额
+    - Network
+        - Linux Network Virtualization
+            - Linux tun/tap
+        - Network Namespace
+        - Veth Pair
+        - Linux bridge
+        - Vlan
+        - Vxlan
+            - Vxlan原理
+            - Linux 上实现 vxlan 网络
+        - Routing Protocol
+            - Distance Vector Protocol
+                - BGP
+            - Link-State Protocol
+                - OSPF
+        - K8s Network
+            - Service - Cluster IP - Headless - NodePort - LoadBalancer
+                - Ingress
+                    - K8s Ingress
+                    - Istio Ingress Gateway
+            - API Gateway+Service Mesh
+            - Kubernetes CNI插件
+                - Calico
+    - Security
+        - Certificate and PKI
+        - Kubernetes 中使用到的证书
