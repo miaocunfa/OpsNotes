@@ -7,8 +7,8 @@ User:               miaocunfa
 Create Date:        2021-03-02
 Create Time:        16:46
 Update Date:        2021-03-10
-Update Time:        14:03
-Version:            v0.1.5
+Update Time:        14:49
+Version:            v0.1.6
 """
 
 import yaml
@@ -221,7 +221,7 @@ def main(argv):
     service = ""
 
     try:
-        opts, args = getopt.getopt(argv, "hnpt", ["help", "name", "port", "target"])
+        opts, args = getopt.getopt(argv, "hnptH", ["help", "name", "port", "target", "host"])
     except getopt.GetoptError:
         printUsage()
         sys.exit(2)
@@ -246,6 +246,8 @@ def main(argv):
             getContainerPort(service)
         elif opt in ("-t", "--target"):
             getServiceTarget(service)
+        elif opt in ("-H", "--host"):
+            getContainerHost(service)
         elif opt in ("-h", "--help"):
             printUsage()
             sys.exit()
@@ -272,12 +274,20 @@ def getServiceTarget(service):
         print('null')
 
 
+def getContainerHost(service):
+    if 'host' in service_info[service]:
+        print(service_info[service]['host'])
+    else:
+        print('null')
+
+
 def printUsage():
     print()
     print('Usage: uat-docker-para.py [options] Service')
     print()
     print('Options:')
     print('  -n, --name     return container name')
+    print('  -H, --host     return container host')
     print('  -p, --port     return container expose port')
     print('  -t, --target   return image build PATH')
     print('  -h, --help     return Usage')
