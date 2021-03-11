@@ -14,10 +14,11 @@ draft: false
 
 ## 更新记录
 
-| 时间       | 内容                                                                |
-| ---------- | ------------------------------------------------------------------- |
-| 2021-03-08 | 初稿                                                                |
-| 2021-03-09 | 1、批量更新主机 </br> 2、CPU </br> 3、内存 </br> 4、IO </br> 5、TCP |
+| 时间       | 内容                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| 2021-03-08 | 初稿                                                                                                        |
+| 2021-03-09 | 1、批量更新主机 </br> 2、CPU </br> 3、内存 </br> 4、IO </br> 5、TCP                                         |
+| 2021-03-11 | 1、CPU 增加整体负载百分比 </br> 2、内存 增加使用率 </br> 3、TCP 增加 CLOSEWAIT 状态 </br> 4、增加磁盘使用率 |
 
 ## 软件版本
 
@@ -66,9 +67,11 @@ Include=/etc/zabbix/zabbix_agentd.d/*.conf
 # @Function:        cpu Status
 # @Author:          guozhimin
 # @Create Date:     2018-06-23
-# @Update Date：    2021-03-08
+# @Update Date：    2021-03-11
 # @Description:     Monitor CPU Service Status
 ############################################################
+
+export TERM=linux
 
 function minute_1(){
         uptime | awk '{print $10}'
@@ -82,7 +85,14 @@ function minute_15(){
        uptime | awk '{print $12}'
 }
 
-[ $# -ne 1 ] && echo "minute_1|minute_5|minute_15" && exit 1
+function Usage(){
+        cpucore=`cat /proc/cpuinfo | grep 'processor' |wc -l`
+        cpuload=`top -bn 1 | grep 'load average' | awk -F":" '{print $5}' | awk -F"," '{print $1*100}'`
+        cpuload_percent=$[${cpuload}/${cpucore}]
+        echo $cpuload_percent
+}
+
+[ $# -ne 1 ] && echo "minute_1|minute_5|minute_15|Usage" && exit 1
 
 $1
 ```
@@ -177,7 +187,14 @@ function Swap_free(){
     /usr/bin/free -m |sed -n '3p'|awk -F' ' '{print $4}'
 }
 
-[ $# -ne 1 ] && echo "Total|Used|Free|Shared|Buff_Cache|Available|Swap_total|Swap_userd|Swap_free" && exit 1
+function Usage(){
+    total=$(/usr/bin/free -m |sed -n '2p'|awk -F' ' '{print $2}')
+    used=$(/usr/bin/free -m |sed -n '2p'|awk -F' ' '{print $3}')
+    usage=$(awk 'BEGIN{printf "%.2f\n",('$used'/'$total')*100}')
+    echo $usage
+}
+
+[ $# -ne 1 ] && echo "Total|Used|Free|Shared|Buff_Cache|Available|Swap_total|Swap_userd|Swap_free|Usage" && exit 1
 
 #根据脚本参数执行对应函数
 $1
@@ -288,31 +305,35 @@ UserParameter=io_status[*],/bin/bash /etc/zabbix/scripts/io_status.sh "$1"
 ➜  vim /etc/zabbix/scripts/tcp_status.sh
 #!/bin/bash
 
-function SYNRECV { 
+function SYNRECV {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'SYN-RECV' | awk '{print $2}'
 }
 
-function ESTAB { 
+function ESTAB {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'ESTAB' | awk '{print $2}'
 }
 
-function FINWAIT1 { 
+function FINWAIT1 {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'FIN-WAIT-1' | awk '{print $2}'
 }
 
-function FINWAIT2 { 
+function FINWAIT2 {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'FIN-WAIT-2' | awk '{print $2}'
 }
 
-function TIMEWAIT { 
+function TIMEWAIT {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'TIME-WAIT' | awk '{print $2}'
 }
 
-function LASTACK { 
+function CLOSEWAIT {
+    /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'CLOSE-WAIT' | awk '{print $2}'
+}
+
+function LASTACK {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'LAST-ACK' | awk '{print $2}'
 }
 
-function LISTEN { 
+function LISTEN {
     /usr/sbin/ss -ant | awk '{++s[$1]} END {for(k in s) print k,s[k]}' | grep 'LISTEN' | awk '{print $2}'
 }
 
@@ -331,5 +352,41 @@ UserParameter=tcp_status[*],/bin/bash /etc/zabbix/scripts/tcp_status.sh "$1"
 ``` zsh
 ➜  ansible all -m copy -a "src=/root/ansible/tcp_status.conf dest=/etc/zabbix/zabbix_agentd.d/tcp_status.conf"
 ➜  ansible all -m copy -a "src=/root/ansible/tcp_status.sh   dest=/etc/zabbix/scripts/tcp_status.sh"
+➜  ansible all -m shell -a "systemctl restart zabbix-agent"
+```
+
+## 七、磁盘
+
+### 7.1、脚本 && 配置
+
+脚本
+
+``` zsh
+➜  vim /etc/zabbix/scripts/disk_usage.sh
+#!/bin/bash
+############################################################
+# @Name:            disk Usage Shell
+# @Version:         v0.0.1
+# @Author:          miaocunfa
+# @Create Date:     2021-03-11
+# @Update Date：    2021-03-11
+# @Description:     return disk usage
+############################################################
+
+df -h | grep -w vda1 | awk -F'[ %]+' '{print $5}'
+```
+
+配置
+
+``` zsh
+➜  vim /etc/zabbix/zabbix_agentd.d/disk_usage.conf
+UserParameter=disk_usage,/bin/bash /etc/zabbix/scripts/disk_usage.sh
+```
+
+### 7.2、使用 ansible 批量推送
+
+``` zsh
+➜  ansible all -m copy -a "src=/root/ansible/disk_usage.conf dest=/etc/zabbix/zabbix_agentd.d/disk_usage.conf"
+➜  ansible all -m copy -a "src=/root/ansible/disk_usage.sh   dest=/etc/zabbix/scripts/disk_usage.sh"
 ➜  ansible all -m shell -a "systemctl restart zabbix-agent"
 ```
