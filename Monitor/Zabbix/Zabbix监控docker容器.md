@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
 ## 二、Zabbix Server
 
-导入监控[模板]()
+打开链接，导入 [此模板](https://github.com/miaocunfa/OpsNotes/blob/master/Monitor/Zabbix/docker/zbx_docker_templates.xml)
 
 点击 '配置' --> '模板' --> 找到对应模板 --> '自动发现' --> '监控项原型'
 
@@ -161,3 +161,7 @@ srwxr-xr-x 1 root docker 0 Oct 10  2019 /var/run/docker.sock
 检测 --> 最新数据 --> 应用集选 'docker_monitor'
 
 ![docker数据](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_docker_data_20210315.jpg)
+
+> 参考文档：
+> 1、[zabbix自发现实时监控docker容器及容器中各个服务的状态线上业务展示](https://blog.51cto.com/13120271/2312106)  
+>
