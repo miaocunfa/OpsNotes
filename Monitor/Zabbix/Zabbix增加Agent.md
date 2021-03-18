@@ -1,5 +1,5 @@
 ---
-title: "Zabbix增加主机"
+title: "Zabbix增加Agent"
 date: "2020-07-30"
 categories:
     - "技术"

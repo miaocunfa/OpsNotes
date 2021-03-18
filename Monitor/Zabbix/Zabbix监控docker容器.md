@@ -79,12 +79,12 @@ def status(name,action):
             print(0)
     # 网络收包
     elif action == "network_rx_bytes":
-        cmd = """sudo /usr/bin/docker exec %s cat /proc/net/dev|sed -n 3p|awk '{print $2,$10}'""" %name
+        cmd = """docker exec %s cat /proc/net/dev|sed -n 3p|awk '{print $2,$10}'""" %name
         result = os.popen(cmd).read().split()[0]
         print(result)
     # 网络发包
     elif action == "network_tx_bytes":
-        cmd = """sudo /usr/bin/docker exec %s cat /proc/net/dev|sed -n 3p|awk '{print $2,$10}'""" %name
+        cmd = """docker exec %s cat /proc/net/dev|sed -n 3p|awk '{print $2,$10}'""" %name
         result = os.popen(cmd).read().split()[1]
         print(result)
     # 使用 docker stats 命令获得容器指标
