@@ -1,0 +1,41 @@
+//def ProjectName="Plan_Prod_Cashcard(H5返现卡项目)"
+//def projectPath="h5_cashcard"
+
+//def gitlab_addr="http://172.31.229.139:6088/web/gjr-web-cashcard.git"
+def gitlab_auth="ef2b2b87-3ff0-4dc8-862e-565e00ea06f8"
+
+def Version="生产部署"
+def ng1="192.168.189.164"
+def ng2="192.168.189.165"
+
+node {
+    stage('钉钉推送'){
+        node('master'){
+            wrap([$class: 'BuildUser']) {
+               input '是否确定上线'
+               sh "sh -e /script/dingding/version_start.sh '${ProjectName}' ${BUILD_USER} '${Version}' ${BUILD_URL} '${release}'"
+            }
+        }
+    }
+    stage("拉取代码"){
+        //git credentialsId: 'ef2b2b87-3ff0-4dc8-862e-565e00ea06f8', url: 'http://172.31.229.139:6088/web/gjr-web-cashcard.git'
+        checkout([$class: 'GitSCM', branches: [[name: '${branch}']], userRemoteConfigs: [[credentialsId: "${gitlab_auth}", url: "${gitlab_addr}"]]])
+    }
+	stage("版本控制"){
+        sh "sh -e /script/jenkins-tools/clone_code.sh $JOB_NAME $branch"
+    }
+    stage("代码打包"){
+        sh "sh -e /script/jenkins-tools/pack_h5.sh $JOB_NAME $projectPath"
+    }
+    stage("发布节点一"){
+        sh "sh -e /script/jenkins-tools/deploy_h5.sh $projectPath $ng1"
+    }
+    stage("发布节点二"){
+        sh "sh -e /script/jenkins-tools/deploy_h5.sh $projectPath $ng2"
+    }
+    stage("结束推送"){
+        wrap([$class: 'BuildUser']) {
+            sh "sh -e /script/dingding/version_end.sh '${ProjectName}' ${BUILD_USER} '${Version}' ${BUILD_URL} '${release}'"
+        }
+    }
+}
