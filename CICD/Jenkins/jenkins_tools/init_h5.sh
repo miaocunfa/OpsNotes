@@ -1,10 +1,14 @@
 #!/bin/bash
 
-# Describe:     init project: local path and remote path && scp conf file to remote and reload the nginx
+# Describe:     init H5 project: 
+#               mkdir: local and remote 
+#               configuration: scp and sed
+#               Nginx: check and reload
+#
 # Create Date： 2021-03-19
 # Create Time:  11:29
 # Update Date:  2021-03-22
-# Update Time:  13:58
+# Update Time:  14:40
 # Author:       MiaoCunFa
 # Version:      v0.0.13
 
@@ -42,6 +46,8 @@ if [ "$3" == "" ]; then
     exit 0
 fi
 
+#===================================================================
+
 # 先判断远端Nginx是否已存在该配置文件
 ssh root@$ng1 "if [ -f $vhost/${configName}.conf ]; then echo "$ng1: $vhost/${configName}.conf: is already exists, Please Check it"; exit 130; fi"
 
@@ -62,13 +68,14 @@ mkdir -p /script/h5_pack/$project
 ssh root@$ng1 "mkdir -p /var/www/$project"
 ssh root@$ng2 "mkdir -p /var/www/$project"
 
+#===================================================================
+
 # 推送配置文件模板
 scp $tools/sample_nginx.conf root@$ng1:$vhost/${configName}.conf
 scp $tools/sample_nginx.conf root@$ng2:$vhost/${configName}.conf
 
 # sed 替换命令
-sedcmd=$(
-cat<<EOF
+sedcmd=$(cat<<EOF
     sed -i 's@domain@$domain@g' ${configName}.conf;
     sed -i 's@roothome@/var/www/$project@g' ${configName}.conf;
     sed -i 's@accesslog@/logs/${configName}.access.log@g' ${configName}.conf;
@@ -76,15 +83,14 @@ cat<<EOF
 EOF
 )
 
-#echo $sedcmd
-
 # 将模板文件进行替换
 ssh root@$ng1 "cd $vhost; $sedcmd"
 ssh root@$ng2 "cd $vhost; $sedcmd"
 
+#===================================================================
+
 # nginx -t
-testcmd=$(
-cat<<EOF
+testcmd=$(cat<<EOF
     syntax_status=\`$ngbin/nginx -t 2>&1 | grep syntax | awk '{print \$8}'\`;
     test_status=\`$ngbin/nginx -t 2>&1 | grep test | awk '{print \$7}'\`;
     if ([ "\$syntax_status" == "ok" ] && [ "\$test_status" == "successful" ]); then
@@ -95,8 +101,6 @@ cat<<EOF
     fi
 EOF
 )
-
-#echo $testcmd
 
 # 测试Nginx配置文件
 ssh root@$ng1 "$testcmd"

@@ -1,10 +1,11 @@
 ---
-title: "Zabbix 监控 ZooKeeper"
+title: "Zabbix 监控 Kafka"
 date: "2021-03-19"
 categories:
     - "技术"
 tags:
     - "Zabbix"
+    - "Kafka"
     - "ZooKeeper"
 toc: false
 original: true
@@ -106,9 +107,9 @@ Java Heap Size                   ZooKeeper Java进程的
 
 ``` zsh
 # 检测 状态
-➜  vim /root/ansible/zookeeper/zookeeper_check.sh
+➜  vim /etc/zabbix/scripts/zookeeper_check.sh
 #!/bin/bash
-zk=$(echo ruok | nc localhost 2181)
+zk=$(echo ruok | nc 127.0.0.1 2181)
 if [[ "$zk" == "imok" ]]; then
     echo 1
 else
@@ -120,13 +121,13 @@ fi
 
 ``` zsh
 # 检测 mntr
-➜  vim /root/ansible/zookeeper/zookeeper_mntr.sh
+➜  vim /etc/zabbix/scripts/zookeeper_mntr.sh
 #!/bin/bash
 para=$1
 echo mntr | nc localhost 2181 | grep $para | awk '{print $2}'
 
 # 检测 srvr
-➜  vim /root/ansible/zookeeper/zookeeper_srvr.sh
+➜  vim /etc/zabbix/scripts/zookeeper_srvr.sh
 #!/bin/bash
 para=$1
 echo srvr | nc localhost 2181 | grep $para | awk '{print $2}'
@@ -136,31 +137,13 @@ echo srvr | nc localhost 2181 | grep $para | awk '{print $2}'
 
 ``` zsh
 # 配置文件
-➜  vim /root/ansible/zookeeper.conf
-UserParameter=zookeeper.status, /bin/sh /etc/zabbix/scripts/zookeeper/zookeeper_check.sh
-UserParameter=zookeeper.mntr.[*], /bin/sh /etc/zabbix/scripts/zookeeper/zookeeper_mntr.sh $1
-UserParameter=zookeeper.srvr.[*], /bin/sh /etc/zabbix/scripts/zookeeper/zookeeper_srvr.sh $1
-```
-
-### 推送脚本 && 配置文件
-
-``` zsh
-# 推送文件
-➜  ansible mq -m copy -a "src=/root/ansible/zookeeper/ dest=/etc/zabbix/scripts/zookeeper/"
-➜  ansible mq -m copy -a "src=/root/ansible/zookeeper.conf dest=/etc/zabbix/zabbix_agentd.d/"
-
-# 修改权限
-➜  ansible mq -m shell -a "cd /etc/zabbix/scripts/zookeeper/; chown -R zabbix:zabbix ./*; chmod u+x ./*"
-
-# 重启agent
-➜  ansible mq -m shell -a "systemctl restart zabbix-agent"
+➜  vim /etc/zabbix/zabbix_agentd.d/zookeeper.conf
+UserParameter=zookeeper.status, /bin/sh /etc/zabbix/scripts/zookeeper_check.sh
+UserParameter=zookeeper.mntr.[*], /bin/sh /etc/zabbix/scripts/zookeeper_mntr.sh $1
+UserParameter=zookeeper.srvr.[*], /bin/sh /etc/zabbix/scripts/zookeeper_srvr.sh $1
 ```
 
 ## Zabbix Server
-
-``` zsh
-
-```
 
 > 参考文档：
 > 1、[Zabbix监控Zookeeper健康状况](https://www.cnblogs.com/wjoyxt/p/6738437.html)  
