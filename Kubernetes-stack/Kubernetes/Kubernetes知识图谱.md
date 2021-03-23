@@ -5,10 +5,11 @@ categories:
     - "技术"
 tags:
     - "Kubernetes"
+    - "图谱"
 toc: false
 indent: false
 original: false
-draft: true
+draft: false
 ---
 
 - Kubernetes
