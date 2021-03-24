@@ -18,7 +18,6 @@ node {
         }
     }
     stage("拉取代码"){
-        //git credentialsId: 'ef2b2b87-3ff0-4dc8-862e-565e00ea06f8', url: 'http://172.31.229.139:6088/web/gjr-web-cashcard.git'
         checkout([$class: 'GitSCM', branches: [[name: '${branch}']], userRemoteConfigs: [[credentialsId: "${gitlab_auth}", url: "${gitlab_addr}"]]])
     }
 	stage("版本控制"){
