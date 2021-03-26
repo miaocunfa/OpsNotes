@@ -1,3 +1,37 @@
+---
+title: "Zabbix实现钉钉告警"
+date: "2021-03-26"
+categories:
+    - "技术"
+tags:
+    - "zabbix"
+    - "告警"
+toc: false
+original: true
+draft: true
+---
+
+## 软件版本
+
+| soft          | Version |
+| ------------- | ------- |
+| zabbix server | 4.0.21  |
+| zabbix agent  | 4.0.29  |
+
+## 告警脚本
+
+``` zsh
+# 查找alertscripts路径
+➜  cd /etc/zabbix/
+➜  grep alertscripts /etc/zabbix/zabbix_server.conf
+AlertScriptsPath=/usr/lib/zabbix/alertscripts
+
+# 创建钉钉告警程序路径
+➜  cd /usr/lib/zabbix/alertscripts
+➜  mkdir -p dingding/{bin,logs}
+
+# 创建钉钉告警脚本
+➜  vim dingding/bin/dingding.sh
 #!/bin/bash
 
 # Describe:     dingding.sh
@@ -39,3 +73,10 @@ __log INFO request "$request"
 
 eval $request > response
 __log INFO response "$(cat response)"
+```
+
+## Zabbix Server
+
+### 创建报警媒介
+
+### 动作
