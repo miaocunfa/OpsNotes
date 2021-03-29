@@ -166,6 +166,6 @@ Include=/etc/zabbix/zabbix_agentd.d/*.conf
 我们看到自动发现的主机 已经添加至主机群组 Discovered hosts 中了。
 
 > 参考文章：  
-> 1、[Zabbix自动发现和自动注册](https://blog.csdn.net/achenyuan/article/details/87806272)  
-> 2、[Zabbix配置自动发现，实现批量添加主机](https://blog.csdn.net/qq_39626154/article/details/86306252)  
+> [1] [Zabbix自动发现和自动注册](https://blog.csdn.net/achenyuan/article/details/87806272)  
+> [2] [Zabbix配置自动发现，实现批量添加主机](https://blog.csdn.net/qq_39626154/article/details/86306252)  
 >

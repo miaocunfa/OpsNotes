@@ -11,6 +11,13 @@ original: true
 draft: true
 ---
 
+## 更新记录
+
+| 时间       | 内容 |
+| ---------- | ---- |
+| 2021-03-26 | 初稿 |
+| 2021-03-29 | 文档结构优化 && Zabbix UI |
+
 ## 软件版本
 
 | soft          | Version |
@@ -19,6 +26,8 @@ draft: true
 | zabbix agent  | 4.0.29  |
 
 ## 告警脚本
+
+Zabbix的自定义告警脚本, 要放在Zabbix Server的AlertScripts路径下, 首先我们查看zabbix_server.conf
 
 ``` zsh
 # 查找alertscripts路径
@@ -29,27 +38,27 @@ AlertScriptsPath=/usr/lib/zabbix/alertscripts
 # 创建钉钉告警程序路径
 ➜  cd /usr/lib/zabbix/alertscripts
 ➜  mkdir -p dingding/{bin,logs}
+```
 
-# 创建钉钉告警脚本
+钉钉告警脚本
+
+``` zsh
 ➜  vim dingding/bin/dingding.sh
 #!/bin/bash
 
 # Describe:     dingding.sh
 # Create Date： 2021-03-26
 # Create Time:  15:11
-# Update Date:  2021-03-26
-# Update Time:  17:25
+# Update Date:  2021-03-29
+# Update Time:  13:35
 # Author:       MiaoCunFa
-# Version:      v0.0.5
+# Version:      v0.0.7
 
 #===================================================================
 
 curDate=$(date +'%Y-%m-%d %H:%M:%S')
 workdir="/usr/lib/zabbix/alertscripts/dingding"
-
-##Dingding_Url="https://oapi.dingtalk.com/robot/send?access_token=3a5304eedad3d97413073803ff2c2878727c037938adb7b99cbcb45b6c325f3c"
-Dingding_Url="https://oapi.dingtalk.com/robot/send?access_token=7467a33248e96fb61c1ed610c00b6ea7ef07e6560abcb751a97e9b586c5da513"
-
+Dingding_Url="https://oapi.dingtalk.com/robot/send?access_token="
 logfile="$workdir/logs/dingding.log"
 
 function __log(){
@@ -57,26 +66,67 @@ function __log(){
 }
 
 content=$1
-#content="发布"
 __log INFO content "$content"
 
-request=$(cat<<EOF
-curl -s $Dingding_Url -H 'Content-Type: application/json' -d '{
+response=$(curl -s $Dingding_Url -H 'Content-Type: application/json' -d '{
     "msgtype": "text",
     "text": {
         "content": "'"$content"'"
     }
-}'
-EOF
-)
-__log INFO request "$request"
-
-eval $request > response
-__log INFO response "$(cat response)"
+}')
+__log INFO response "$response"
 ```
 
-## Zabbix Server
+告警脚本权限
+
+``` zsh
+➜  cd /usr/lib/zabbix/alertscripts
+➜  chown -R zabbix:zabbix dingding
+➜  chmod u+x dingding/bin/dingding.sh
+```
+
+## Zabbix UI
 
 ### 创建报警媒介
 
-### 动作
+点击 '管理' --> '报警媒介类型' --> '创建媒体类型'
+
+![创建报警媒介](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_04.jpg)
+
+### 创建动作
+
+点击 '配置' --> '动作' --> '创建动作'
+
+创建动作 - '动作'选项卡
+
+![创建动作 - 动作](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_03.jpg)
+
+创建动作 - '操作'选项卡
+
+![创建动作 - 操作](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_01.jpg)
+
+创建动作 - '恢复操作'选项卡
+
+![创建动作 - 恢复操作](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_02.jpg)
+
+### 创建用户群组
+
+点击 '管理' --> '用户群组' --> '创建用户群组'
+
+![创建用户群组](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_07.jpg)
+
+### 创建用户
+
+点击 '管理' --> '用户' --> '创建用户'
+
+创建用户 - '用户'选项卡
+
+![创建用户 - 用户](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_05.jpg)
+
+创建用户 - '报警媒介'选项卡
+
+![创建用户 - 报警媒介](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_06.jpg)
+
+创建用户 - '权限'选项卡
+
+![创建用户 - 权限](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_08.jpg)

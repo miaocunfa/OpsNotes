@@ -33,16 +33,22 @@ draft: false
 ``` zsh
 ➜  vim /etc/apt/sources.list
 deb https://deb.debian.org/debian buster-backports main
+➜  apt-get update
 ```
 
 执行 apt update 更新软件列表，然后执行以下命令进行安装：
 
 ``` zsh
-➜  apt install -t buster-backports linux-image-cloud-amd64 linux-headers-cloud-amd64
+➜  sudo apt install -t buster-backports linux-image-cloud-amd64 linux-headers-cloud-amd64
 ```
 
+> 注意：如果你使用的不是 buster，而是更早的 stretch 或是未来的版本，请替换 buster 为你的版本代号。当然，也不要忘了替换包名...
+
+安装成功后重启即默认使用最新版本内核，如有疑问可以运行 uname -r 再次确认正在运行的系统内核版本。
+
+> 注意: 如果安装了新的内核导致设备无法启动，在重新启动时的 GRUB 菜单中选择旧版内核启动并执行 sudo apt purge -t buster-backports linux-image-cloud-amd64 linux-headers-cloud-amd64即可卸载 Backports 内核。
 
 > 参考文档:  
-> [1] [为Debian 10升级Linux Kernel 5.x](https://async.sh/2019/09/25/upgrade-linux-kernel-5-for-debian-buster/)
+> [1] [为Debian 10升级Linux Kernel 5.x](https://async.sh/2019/09/25/upgrade-linux-kernel-5-for-debian-buster/)  
 > [2] [Debian Backports](https://backports.debian.org/)  
 >

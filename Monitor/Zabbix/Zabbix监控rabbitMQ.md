@@ -85,6 +85,6 @@ PORT=15672                                       # rabbit管理界面访问端�
 修改客户端类型为 'Zabbix 客户端(主动式)' --> 'Zabbix 客户端'
 
 > 参考文档：  
-> 1、[github - rabbitmq-zabbix](https://github.com/jasonmcintosh/rabbitmq-zabbix)  
-> 2、[使用Zabbix监控RabbitMQ消息队列](https://www.cnblogs.com/minseo/p/10309121.html)  
+> [1] [github - rabbitmq-zabbix](https://github.com/jasonmcintosh/rabbitmq-zabbix)  
+> [2] [使用Zabbix监控RabbitMQ消息队列](https://www.cnblogs.com/minseo/p/10309121.html)  
 >

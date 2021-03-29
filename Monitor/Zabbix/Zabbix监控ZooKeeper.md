@@ -146,5 +146,5 @@ UserParameter=zookeeper.srvr.[*], /bin/sh /etc/zabbix/scripts/zookeeper_srvr.sh 
 ## Zabbix Server
 
 > 参考文档：
-> 1、[Zabbix监控Zookeeper健康状况](https://www.cnblogs.com/wjoyxt/p/6738437.html)  
+> [1] [Zabbix监控Zookeeper健康状况](https://www.cnblogs.com/wjoyxt/p/6738437.html)  
 >
