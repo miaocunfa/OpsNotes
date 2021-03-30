@@ -13,9 +13,16 @@ draft: false
 
 ## 更新记录
 
-| 时间       | 内容            |
-| ---------- | --------------- |
-| 2020-08-07 | 初稿            |
+| 时间       | 内容                           |
+| ---------- | ------------------------------ |
+| 2020-08-07 | 初稿                           |
+| 2021-03-30 | 文档结构优化 && 用户 && 数据库 |
+
+## 软件版本
+
+| soft    | Version |
+| ------- | ------- |
+| Mongodb | 4.2.13  |
 
 ## 常用命令
 
@@ -45,19 +52,74 @@ mongos> help
     exit                         quit the mongo shell
 ```
 
-## 数据查询
+## 数据库
 
 ``` zsh
-db.getCollection("info").find( {"description":"个人一信息1"} );
-
-db.getCollection("concern_store").find( {"user_id": NumberLong("4478710120144633929")} );
-
-db.getCollection('conversation').find({"_id":ObjectId("5f3f82598dd9e24bce25e167")});
+# 查看数据库列表
+> show dbs
+admin      0.000GB
+config     0.000GB
+craftsman  0.000GB
+local      0.000GB
 ```
 
-## 数据删除
+## 数据
+
+### 数据查询
 
 ``` zsh
-db.conversation.remove({"receiverType":"group"});
-db.getCollection('conversation').remove({"receiverType":"group"});
+> db.getCollection("info").find( {"description":"个人一信息1"} );
+
+> db.getCollection("concern_store").find( {"user_id": NumberLong("4478710120144633929")} );
+
+> db.getCollection('conversation').find({"_id":ObjectId("5f3f82598dd9e24bce25e167")});
 ```
+
+### 数据删除
+
+``` zsh
+> db.conversation.remove({"receiverType":"group"});
+> db.getCollection('conversation').remove({"receiverType":"group"});
+```
+
+## 用户
+
+### 创建用户
+
+``` zsh
+# root用户
+> use admin;
+> db.createUser({
+    user: 'root',
+    pwd: 'gjr_mongo_2021',
+    roles: [
+    'clusterAdmin',
+    'dbAdminAnyDatabase',
+    'userAdminAnyDatabase',
+    'readWriteAnyDatabase'
+    ]
+})
+
+# 程序用户
+> use craftsman
+> db.createUser(
+{
+    user: "craftsman",
+    pwd: "cm_mongo_2021",
+    roles: [ 
+        { role: "readWrite", db: "craftsman" } 
+    ]
+});
+```
+
+### 删除用户
+
+``` zsh
+> use craftsman
+> db.dropUser("craftsman");
+true
+```
+
+> 参考文档：  
+> [1] [MongoDB 教程](https://www.runoob.com/mongodb/mongodb-tutorial.html)  
+>

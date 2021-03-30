@@ -14,9 +14,10 @@ draft: false
 
 ## 更新记录
 
-| 时间       | 内容 |
-| ---------- | ---- |
-| 2021-03-26 | 初稿 |
+| 时间       | 内容         |
+| ---------- | ------------ |
+| 2021-03-26 | 初稿         |
+| 2021-03-30 | 添加程序用户 |
 
 ## 软件版本
 
@@ -118,6 +119,21 @@ auth=true  # 启用验证
 
 # 重新启动服务
 ➜  bin/mongod -f conf/mongodb.conf
+```
+
+## 程序用户
+
+``` zsh
+➜  bin/mongo --port 28018 -u root
+> use craftsman
+> db.createUser(
+{
+    user: "craftsman",
+    pwd: "cm_mongo_2021",
+    roles: [ 
+        { role: "readWrite", db: "craftsman" } 
+    ]
+});
 ```
 
 > 参考文档：  

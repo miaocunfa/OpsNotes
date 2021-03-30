@@ -189,6 +189,8 @@ EOF
 ➜  systemctl enable k3s-agent --now
 ```
 
+## 错误解决
+
 > 参考文档：  
 > [1] [跨云厂商部署 k3s 集群](https://fuckcloudnative.io/posts/deploy-k3s-cross-public-cloud/)  
 > [2] [K3S的一些基础使用配置](https://sspai.com/post/59081)  
