@@ -17,6 +17,7 @@ draft: true
 | ---------- | ---- |
 | 2021-03-26 | 初稿 |
 | 2021-03-29 | 文档结构优化 && Zabbix UI |
+| 2021-04-06 | 调试钉钉告警脚本：去掉多余"引号" |
 
 ## 软件版本
 
@@ -49,10 +50,10 @@ AlertScriptsPath=/usr/lib/zabbix/alertscripts
 # Describe:     dingding.sh
 # Create Date： 2021-03-26
 # Create Time:  15:11
-# Update Date:  2021-03-29
-# Update Time:  13:35
+# Update Date:  2021-04-06
+# Update Time:  17:21
 # Author:       MiaoCunFa
-# Version:      v0.0.7
+# Version:      v0.0.8
 
 #===================================================================
 
@@ -65,7 +66,7 @@ function __log(){
     echo $curDate $1 [$2]: "$3" >> $logfile
 }
 
-content=$1
+content=$(echo $1 | sed 's/\"//g')
 __log INFO content "$content"
 
 response=$(curl -s $Dingding_Url -H 'Content-Type: application/json' -d '{

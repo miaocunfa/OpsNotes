@@ -7,10 +7,10 @@
 #
 # Create Date： 2021-03-24
 # Create Time:  13:45
-# Update Date:  2021-03-24
-# Update Time:  14:08
+# Update Date:  2021-04-06
+# Update Time:  16:26
 # Author:       MiaoCunFa
-# Version:      v0.0.3
+# Version:      v0.0.5
 
 #===================================================================
 
@@ -56,7 +56,7 @@ if [ -f $vhost/${configName}.conf ]; then
 fi
 
 # 本地 位置初始化
-mkdir -p /script/h5/$project
+mkdir -p /script/h5-pack/$project
 
 # nginx 位置初始化
 mkdir -p $roothome
@@ -71,8 +71,8 @@ cd $vhost
 
 sed -i "s@domain@$domain@g" ${configName}.conf;
 sed -i "s@roothome@$roothome@g" ${configName}.conf;
-sed -i "s@accesslog@/logs/${configName}.access.log@g" ${configName}.conf;
-sed -i "s@errorlog@/logs/${configName}.error.log@g" ${configName}.conf;
+sed -i "s@accesslog@/logs/nginx/${configName}.access.log@g" ${configName}.conf;
+sed -i "s@errorlog@/logs/nginx/${configName}.error.log@g" ${configName}.conf;
 
 # nginx -t
 syntax_status=$($ngbin/nginx -t 2>&1 | grep syntax | awk '{print $8}');
