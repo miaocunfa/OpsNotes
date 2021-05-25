@@ -5,6 +5,7 @@ categories:
     - "技术"
 tags:
     - "mysql"
+    - "deploy"
 toc: false
 indent: false
 original: true
