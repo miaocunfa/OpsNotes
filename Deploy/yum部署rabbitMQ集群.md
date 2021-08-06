@@ -28,6 +28,8 @@ draft: false
 ①下载安装包 && 安装
 
 ``` zsh
+# 三台主机都执行
+
 ➜  unzip rabbitMQ3.7.7.zip 
 ➜  cd rabbitMQ3.7.7
 
@@ -55,6 +57,8 @@ draft: false
 ①host文件
 
 ``` zsh
+# 三台主机都执行
+
 ➜  vim /etc/hosts
 # rabbitMQ
 192.168.31.30    MQ1
@@ -65,6 +69,8 @@ draft: false
 ②创建持久化目录
 
 ``` zsh
+# 三台主机都执行
+
 ➜  mkdir -p /disk2/rabbitmq/{store,logs}
 ➜  cd /disk2
 ➜  chown -R rabbitmq:rabbitmq rabbitmq/
@@ -127,10 +133,36 @@ DGXKRZAJARTBMFEXIRGV
 
 ➜  scp .erlang.cookie root@MQ2:/var/lib/rabbitmq
 ➜  scp .erlang.cookie root@MQ3:/var/lib/rabbitmq
+
+# 在MQ2、MQ3执行
+➜  cd /var/lib/rabbitmq/; chown -R rabbitmq:rabbitmq ./.erlang.cookie
 ```
 
 ②加入集群
 
 ``` zsh
+# MQ2
+➜  rabbitmqctl stop_app
+➜  rabbitmqctl join_cluster rabbit@MQ1
+➜  rabbitmqctl start_app
 
+# MQ3
+➜  rabbitmqctl stop_app
+➜  rabbitmqctl join_cluster rabbit@MQ1 --ram
+➜  rabbitmqctl start_app
+```
+
+## WEB管理
+
+``` zsh
+➜  rabbitmq-plugins enable rabbitmq_management
+➜  rabbitmqctl add_user gongjiangren-test gongjiangrenQAWSED@@
+➜  rabbitmqctl set_user_tags gongjiangren-test administrator
+```
+
+``` zsh
+➜  ss -tnlp|grep 5672
+LISTEN     0      128          *:25672                    *:*                   users:(("beam.smp",pid=13071,fd=65))
+LISTEN     0      128          *:15672                    *:*                   users:(("beam.smp",pid=13071,fd=80))
+LISTEN     0      128       [::]:5672                  [::]:*                   users:(("beam.smp",pid=13071,fd=76))
 ```

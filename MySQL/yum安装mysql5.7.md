@@ -117,3 +117,14 @@ mysql> alter user 'root'@'localhost' identified by 'gjr155!@#@@$$';
 mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'gjr155!@#@@$$' WITH GRANT OPTION;
 mysql> FLUSH PRIVILEGES;
 ```
+
+### 创建用户
+
+``` zsh
+CREATE DATABASE nacos;
+
+use nacos;
+CREATE USER 'nacos'@'%' IDENTIFIED BY 'qawsEDRF@@';
+GRANT ALL PRIVILEGES ON nacos.* TO 'nacos'@'%'  WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```

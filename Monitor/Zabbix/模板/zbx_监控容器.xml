@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.0</version>
-    <date>2021-03-17T02:48:19Z</date>
+    <date>2021-08-06T10:57:26Z</date>
     <groups>
         <group>
-            <name>Templates</name>
+            <name>Linux servers</name>
+        </group>
+        <group>
+            <name>容器主机</name>
         </group>
     </groups>
     <templates>
@@ -14,7 +17,10 @@
             <description/>
             <groups>
                 <group>
-                    <name>Templates</name>
+                    <name>Linux servers</name>
+                </group>
+                <group>
+                    <name>容器主机</name>
                 </group>
             </groups>
             <applications>
@@ -61,7 +67,7 @@
                             <type>0</type>
                             <snmp_community/>
                             <snmp_oid/>
-                            <key>docker.[{#CONTAINERNAME} ,BlockIO]</key>
+                            <key>docker.[{#CONTAINERNAME},BlockIO]</key>
                             <delay>60</delay>
                             <history>90d</history>
                             <trends>0</trends>
@@ -301,7 +307,7 @@
                             <type>0</type>
                             <snmp_community/>
                             <snmp_oid/>
-                            <key>docker.[{#CONTAINERNAME} ,network_rx_bytes]</key>
+                            <key>docker.[{#CONTAINERNAME},network_rx_bytes]</key>
                             <delay>30</delay>
                             <history>90d</history>
                             <trends>365d</trends>
@@ -361,7 +367,7 @@
                             <type>0</type>
                             <snmp_community/>
                             <snmp_oid/>
-                            <key>docker.[{#CONTAINERNAME} ,network_tx_bytes]</key>
+                            <key>docker.[{#CONTAINERNAME},network_tx_bytes]</key>
                             <delay>30</delay>
                             <history>90d</history>
                             <trends>365d</trends>
@@ -421,7 +427,7 @@
                             <type>0</type>
                             <snmp_community/>
                             <snmp_oid/>
-                            <key>docker.[{#CONTAINERNAME} ,ping]</key>
+                            <key>docker.[{#CONTAINERNAME},ping]</key>
                             <delay>30</delay>
                             <history>90d</history>
                             <trends>365d</trends>
@@ -479,9 +485,9 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{docker-status:docker.[{#CONTAINERNAME} ,ping].last()}=0</expression>
-                            <recovery_mode>0</recovery_mode>
-                            <recovery_expression/>
+                            <expression>{docker-status:docker.[{#CONTAINERNAME},ping].last()}=0</expression>
+                            <recovery_mode>1</recovery_mode>
+                            <recovery_expression>{docker-status:docker.[{#CONTAINERNAME},ping].last()}=1</recovery_expression>
                             <name>docker_{#CONTAINERNAME}_down</name>
                             <correlation_mode>0</correlation_mode>
                             <correlation_tag/>

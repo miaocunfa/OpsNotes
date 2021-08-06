@@ -8,7 +8,7 @@ tags:
     - "告警"
 toc: false
 original: true
-draft: true
+draft: false
 ---
 
 ## 更新记录
@@ -18,6 +18,7 @@ draft: true
 | 2021-03-26 | 初稿 |
 | 2021-03-29 | 文档结构优化 && Zabbix UI |
 | 2021-04-06 | 调试钉钉告警脚本：去掉多余"引号" |
+| 2021-07-22 | 调整 Zabbix UI 操作顺序 && 增加告警内容 |
 
 ## 软件版本
 
@@ -88,9 +89,15 @@ __log INFO response "$response"
 
 ## Zabbix UI
 
+### 创建用户群组
+
+①点击 '管理' --> '用户群组' --> '创建用户群组'
+
+![创建用户群组](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_07.jpg)
+
 ### 创建报警媒介
 
-点击 '管理' --> '报警媒介类型' --> '创建媒体类型'
+①点击 '管理' --> '报警媒介类型' --> '创建媒体类型'
 
 ![创建报警媒介](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_04.jpg)
 
@@ -98,36 +105,50 @@ __log INFO response "$response"
 
 点击 '配置' --> '动作' --> '创建动作'
 
-创建动作 - '动作'选项卡
+①创建动作 - '动作'选项卡
 
 ![创建动作 - 动作](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_03.jpg)
 
-创建动作 - '操作'选项卡
+②创建动作 - '操作'选项卡
 
 ![创建动作 - 操作](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_01.jpg)
 
-创建动作 - '恢复操作'选项卡
+```
+
+标题：
+Problem:{EVENT.NAME}
+
+内容：
+{TRIGGER.STATUS}: {TRIGGER.NAME}\n告警主机: {HOST.NAME}\n主机地址: {HOST.IP}\n告警时间: {EVENT.DATE}-{EVENT.TIME}\n告警等级: {TRIGGER.SEVERITY}告警信息: {TRIGGER.NAME}\n问题详情: {ITEM.NAME}:{ITEM.VALUE}\n事件代码: {EVENT.ID}
+
+```
+
+③创建动作 - '恢复操作'选项卡
 
 ![创建动作 - 恢复操作](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_02.jpg)
 
-### 创建用户群组
+```
 
-点击 '管理' --> '用户群组' --> '创建用户群组'
+标题：
+OK:{EVENT.NAME}
 
-![创建用户群组](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_07.jpg)
+内容：
+{TRIGGER.STATUS}:{TRIGGER.NAME}\n告警主机: {HOST.NAME}\n主机地址: {HOST.IP}\n故障持续时间: {EVENT.AGE}\n恢复时间: {EVENT.RECOVERY.TIME}\n告警等级: {TRIGGER.SEVERITY}告警信息: {TRIGGER.NAME}\n问题详情: {ITEM.NAME}:{ITEM.VALUE}\n事件代码: {EVENT.ID}
+
+```
 
 ### 创建用户
 
 点击 '管理' --> '用户' --> '创建用户'
 
-创建用户 - '用户'选项卡
+①创建用户 - '用户'选项卡
 
 ![创建用户 - 用户](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_05.jpg)
 
-创建用户 - '报警媒介'选项卡
+②创建用户 - '报警媒介'选项卡
 
 ![创建用户 - 报警媒介](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_06.jpg)
 
-创建用户 - '权限'选项卡
+③创建用户 - '权限'选项卡
 
 ![创建用户 - 权限](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zabbix_dingding_20210329_08.jpg)
