@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.0</version>
-    <date>2021-08-10T11:25:04Z</date>
+    <date>2021-08-12T09:27:25Z</date>
     <groups>
         <group>
             <name>Linux servers</name>
@@ -44,6 +44,65 @@
                     <snmp_community/>
                     <snmp_oid/>
                     <key>jps[DataNode]</key>
+                    <delay>30s</delay>
+                    <history>90d</history>
+                    <trends>365d</trends>
+                    <status>0</status>
+                    <value_type>3</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>big-prod</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                    <preprocessing/>
+                    <jmx_endpoint/>
+                    <timeout>3s</timeout>
+                    <url/>
+                    <query_fields/>
+                    <posts/>
+                    <status_codes>200</status_codes>
+                    <follow_redirects>1</follow_redirects>
+                    <post_type>0</post_type>
+                    <http_proxy/>
+                    <headers/>
+                    <retrieve_mode>0</retrieve_mode>
+                    <request_method>0</request_method>
+                    <output_format>0</output_format>
+                    <allow_traps>0</allow_traps>
+                    <ssl_cert_file/>
+                    <ssl_key_file/>
+                    <ssl_key_password/>
+                    <verify_peer>0</verify_peer>
+                    <verify_host>0</verify_host>
+                    <master_item/>
+                </item>
+                <item>
+                    <name>HDFS</name>
+                    <type>0</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>jps[DFSZKFailoverController]</key>
                     <delay>30s</delay>
                     <history>90d</history>
                     <trends>365d</trends>
@@ -1160,6 +1219,183 @@
                     <master_item/>
                 </item>
                 <item>
+                    <name>craftsman_gps_diff 离线找补</name>
+                    <type>0</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>py_status[craftsman_gps_diff]</key>
+                    <delay>30s</delay>
+                    <history>90d</history>
+                    <trends>0</trends>
+                    <status>0</status>
+                    <value_type>4</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>big-prod-node3</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                    <preprocessing/>
+                    <jmx_endpoint/>
+                    <timeout>3s</timeout>
+                    <url/>
+                    <query_fields/>
+                    <posts/>
+                    <status_codes>200</status_codes>
+                    <follow_redirects>1</follow_redirects>
+                    <post_type>0</post_type>
+                    <http_proxy/>
+                    <headers/>
+                    <retrieve_mode>0</retrieve_mode>
+                    <request_method>0</request_method>
+                    <output_format>0</output_format>
+                    <allow_traps>0</allow_traps>
+                    <ssl_cert_file/>
+                    <ssl_key_file/>
+                    <ssl_key_password/>
+                    <verify_peer>0</verify_peer>
+                    <verify_host>0</verify_host>
+                    <master_item/>
+                </item>
+                <item>
+                    <name>craftsman_gps_split 抽稀分段</name>
+                    <type>0</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>py_status[craftsman_gps_split]</key>
+                    <delay>30s</delay>
+                    <history>90d</history>
+                    <trends>0</trends>
+                    <status>0</status>
+                    <value_type>4</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>big-prod-node3</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                    <preprocessing/>
+                    <jmx_endpoint/>
+                    <timeout>3s</timeout>
+                    <url/>
+                    <query_fields/>
+                    <posts/>
+                    <status_codes>200</status_codes>
+                    <follow_redirects>1</follow_redirects>
+                    <post_type>0</post_type>
+                    <http_proxy/>
+                    <headers/>
+                    <retrieve_mode>0</retrieve_mode>
+                    <request_method>0</request_method>
+                    <output_format>0</output_format>
+                    <allow_traps>0</allow_traps>
+                    <ssl_cert_file/>
+                    <ssl_key_file/>
+                    <ssl_key_password/>
+                    <verify_peer>0</verify_peer>
+                    <verify_host>0</verify_host>
+                    <master_item/>
+                </item>
+                <item>
+                    <name>craftsman_gps_wash 清洗数据</name>
+                    <type>0</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>py_status[craftsman_gps_wash]</key>
+                    <delay>30s</delay>
+                    <history>90d</history>
+                    <trends>0</trends>
+                    <status>0</status>
+                    <value_type>4</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>big-prod-node3</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                    <preprocessing/>
+                    <jmx_endpoint/>
+                    <timeout>3s</timeout>
+                    <url/>
+                    <query_fields/>
+                    <posts/>
+                    <status_codes>200</status_codes>
+                    <follow_redirects>1</follow_redirects>
+                    <post_type>0</post_type>
+                    <http_proxy/>
+                    <headers/>
+                    <retrieve_mode>0</retrieve_mode>
+                    <request_method>0</request_method>
+                    <output_format>0</output_format>
+                    <allow_traps>0</allow_traps>
+                    <ssl_cert_file/>
+                    <ssl_key_file/>
+                    <ssl_key_password/>
+                    <verify_peer>0</verify_peer>
+                    <verify_host>0</verify_host>
+                    <master_item/>
+                </item>
+                <item>
                     <name>prod_auto</name>
                     <type>0</type>
                     <snmp_community/>
@@ -1699,7 +1935,7 @@
                     <delay>30s</delay>
                     <history>90d</history>
                     <trends>0</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>4</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1758,7 +1994,7 @@
                     <delay>30s</delay>
                     <history>90d</history>
                     <trends>0</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>4</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1817,7 +2053,7 @@
                     <delay>30s</delay>
                     <history>90d</history>
                     <trends>0</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>4</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1876,7 +2112,7 @@
                     <delay>30s</delay>
                     <history>90d</history>
                     <trends>0</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>4</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1935,7 +2171,7 @@
                     <delay>30s</delay>
                     <history>90d</history>
                     <trends>0</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>4</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1994,6 +2230,57 @@
         </template>
     </templates>
     <triggers>
+        <trigger>
+            <expression>{bigdata_prod_status:py_status[craftsman_gps_diff].last(#1,30)}=0 and {bigdata_prod_status:py_status[craftsman_gps_diff].last(#2,30)}=0 and &#13;
+{bigdata_prod_status:py_status[craftsman_gps_diff].last(#3,30)}=0</expression>
+            <recovery_mode>1</recovery_mode>
+            <recovery_expression>{bigdata_prod_status:py_status[craftsman_gps_diff].last(#1,30)}&lt;&gt;0</recovery_expression>
+            <name>生产大数据 python程序：craftsman_gps_diff 不存活</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>5</priority>
+            <description>离线找补</description>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+        <trigger>
+            <expression>{bigdata_prod_status:py_status[craftsman_gps_split].last(#1,30)}=0 and {bigdata_prod_status:py_status[craftsman_gps_split].last(#2,30)}=0 and &#13;
+{bigdata_prod_status:py_status[craftsman_gps_split].last(#3,30)}=0</expression>
+            <recovery_mode>1</recovery_mode>
+            <recovery_expression>{bigdata_prod_status:py_status[craftsman_gps_split].last(#1,30)}&lt;&gt;0</recovery_expression>
+            <name>生产大数据 python程序：craftsman_gps_split 不存活</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>5</priority>
+            <description>抽稀分段</description>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+        <trigger>
+            <expression>{bigdata_prod_status:py_status[craftsman_gps_wash].last(#1,30)}=0 and {bigdata_prod_status:py_status[craftsman_gps_wash].last(#2,30)}=0 and &#13;
+{bigdata_prod_status:py_status[craftsman_gps_wash].last(#3,30)}=0</expression>
+            <recovery_mode>1</recovery_mode>
+            <recovery_expression>{bigdata_prod_status:py_status[craftsman_gps_wash].last(#1,30)}&lt;&gt;0</recovery_expression>
+            <name>生产大数据 python程序：craftsman_gps_wash 不存活</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>5</priority>
+            <description>清洗数据</description>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
         <trigger>
             <expression>{bigdata_prod_status:py_status[prod_auto].last(#1,30)}=0 and {bigdata_prod_status:py_status[prod_auto].last(#2,30)}=0 and {bigdata_prod_status:py_status[prod_auto].last(#3,30)}=0</expression>
             <recovery_mode>1</recovery_mode>
@@ -2151,7 +2438,7 @@
             <correlation_mode>0</correlation_mode>
             <correlation_tag/>
             <url/>
-            <status>0</status>
+            <status>1</status>
             <priority>5</priority>
             <description/>
             <type>0</type>
@@ -2168,7 +2455,7 @@
             <correlation_mode>0</correlation_mode>
             <correlation_tag/>
             <url/>
-            <status>0</status>
+            <status>1</status>
             <priority>5</priority>
             <description/>
             <type>0</type>
@@ -2185,7 +2472,7 @@
             <correlation_mode>0</correlation_mode>
             <correlation_tag/>
             <url/>
-            <status>0</status>
+            <status>1</status>
             <priority>5</priority>
             <description/>
             <type>0</type>
@@ -2202,7 +2489,7 @@
             <correlation_mode>0</correlation_mode>
             <correlation_tag/>
             <url/>
-            <status>0</status>
+            <status>1</status>
             <priority>5</priority>
             <description/>
             <type>0</type>
@@ -2219,7 +2506,7 @@
             <correlation_mode>0</correlation_mode>
             <correlation_tag/>
             <url/>
-            <status>0</status>
+            <status>1</status>
             <priority>5</priority>
             <description/>
             <type>0</type>
@@ -2519,7 +2806,7 @@
             <expression>{bigdata_prod_status:num[zookeeper-3.4.13.jar].last(#1,30)}=0</expression>
             <recovery_mode>1</recovery_mode>
             <recovery_expression>{bigdata_prod_status:num[zookeeper-3.4.13.jar].last(#1,30)}&lt;&gt;0</recovery_expression>
-            <name>生产大数据组件 zookeeper 不存活</name>
+            <name>生产大数据组件 zookeeper 主程序 不存活</name>
             <correlation_mode>0</correlation_mode>
             <correlation_tag/>
             <url/>

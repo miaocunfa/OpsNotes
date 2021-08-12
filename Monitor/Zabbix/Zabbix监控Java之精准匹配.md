@@ -29,7 +29,7 @@ draft: false
 
 ![zabbix 检测](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zbx_jps_20210810_05.jpg)
 
-明明使用jps做的匹配，怎么会获得进程数为2
+明明使用jps做的匹配，怎么会获得进程数为2  
 打开jps，发现问题了，grep把 `Master` 和 `HMaster` 都匹配出来了
 
 ![jps](https://cdn.jsdelivr.net/gh/miaocunfa/imghosting/img/zbx_jps_20210810_06.jpg)

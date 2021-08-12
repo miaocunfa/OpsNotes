@@ -14,23 +14,24 @@ draft: false
 
 ## 更新记录
 
-| 时间       | 内容         |
-| ---------- | ------------ |
-| 2021-05-25 | 初稿         |
-| 2021-05-26 | 安装 && 使用 |
+| 时间       | 内容             |
+| ---------- | ---------------- |
+| 2021-05-25 | 初稿             |
+| 2021-05-26 | 安装 && 使用     |
+| 2021-08-12 | 更新版本为 2.3.1 |
 
 ## 软件版本
 
 | soft           | Version |
 | -------------- | ------- |
 | CentOS         | 7.6     |
-| harbor         | v2.2.2  |
-| docker-ce      | 20.10.6 |
-| docker-compose | 1.18.0  |
+| harbor         | v2.3.1  |
+| docker-ce      | 19.03.5 |
+| docker-compose | 1.22.0  |
 
 ## 环境
 
-harbor 依赖 docker 以及 docker-compose
+harbor 依赖 docker 以及 docker-compose 
 
 ``` zsh
 ➜  yum install -y docker-ce.x86_64
@@ -44,18 +45,18 @@ harbor 依赖 docker 以及 docker-compose
 
 ``` zsh
 ➜  cd /usr/local/
-➜  wget https://github.com/goharbor/harbor/releases/download/v2.2.2/harbor-offline-installer-v2.2.2.tgz
-➜  tar -zxf harbor-offline-installer-v2.2.2.tgz
+➜  wget https://github.com/goharbor/harbor/releases/download/v2.3.1/harbor-offline-installer-v2.3.1.tgz
+➜  tar -zxf harbor-offline-installer-v2.3.1.tgz
 
 ➜  cd harbor
 ➜  ll
-total 494976
--rw-r--r--. 1 root root      3361 May 15 05:30 common.sh
--rw-r--r--. 1 root root 506818941 May 15 05:30 harbor.v2.2.2.tar.gz
--rw-r--r--. 1 root root      7840 May 15 05:30 harbor.yml.tmpl
--rwxr-xr-x. 1 root root      2500 May 15 05:30 install.sh
--rw-r--r--. 1 root root     11347 May 15 05:30 LICENSE
--rwxr-xr-x. 1 root root      1881 May 15 05:30 prepare
+total 618128
+-rw-r--r-- 1 root root      3361 Jul 19 18:45 common.sh
+-rw-r--r-- 1 root root 632922189 Jul 19 18:46 harbor.v2.3.1.tar.gz
+-rw-r--r-- 1 root root      7840 Jul 19 18:45 harbor.yml.tmpl
+-rwxr-xr-x 1 root root      2500 Jul 19 18:45 install.sh
+-rw-r--r-- 1 root root     11347 Jul 19 18:45 LICENSE
+-rwxr-xr-x 1 root root      1881 Jul 19 18:45 prepare
 ```
 
 ## 配置
