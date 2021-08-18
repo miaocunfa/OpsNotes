@@ -3,34 +3,36 @@
 # Describe:     run container && check status 
 # Create Date： 2021-08-12
 # Create Time:  11:19
-# Update Date:  2021-08-13
-# Update Time:  17:24
+# Update Date:  2021-08-17
+# Update Time:  15:02
 # Author:       MiaoCunFa
-# Version:      v0.0.1
+# Version:      v0.0.2
 
 #===================================================================
 
+programm=$(basename $0)
+
 if [ "$1" == "" ];
 then
-    echo "harbor: is null! please check!"
+    echo "$programm: harbor: is null! please check!"
     exit 0
 fi
 
 if [ "$2" == "" ];
 then
-    echo "service: is null! please check!"
+    echo "$programm: service: is null! please check!"
     exit 0
 fi
 
 if [ "$3" == "" ];
 then
-    echo "BUILD_TAG: is null! please check!"
+    echo "$programm: BUILD_TAG: is null! please check!"
     exit 0
 fi
 
 if [ "$4" == "" ];
 then
-    echo "port: is null! please check!"
+    echo "$programm: port: is null! please check!"
     exit 0
 fi
 
