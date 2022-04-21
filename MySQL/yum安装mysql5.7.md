@@ -1,5 +1,5 @@
 ---
-title: "yum安装mysql5.7"
+title: "yum 安装 mysql5.7"
 date: "2021-05-21"
 categories:
     - "技术"
