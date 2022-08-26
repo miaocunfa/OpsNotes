@@ -88,3 +88,21 @@ draft: false
         __getSidImage ${test_id} ${student_id}       # 根据学号将原始图片存入临时文件夹
     done < $sid_file
 ```
+
+## 5、yum查看软件所有版本
+
+``` zsh
+yum --showduplicates list mysql-community-server
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+Available Packages
+mysql-community-server.x86_64                                                                          8.0.22-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.23-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.24-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.25-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.26-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.27-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.28-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.29-1.el7                                                                           mysql80-community
+mysql-community-server.x86_64                                                                          8.0.30-1.el7                                                                           mysql80-community
+```
