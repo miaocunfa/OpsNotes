@@ -1,11 +1,12 @@
 ---
-title: "Harbor 部署"
+title: "部署 Harbor v2.3.1"
 date: "2021-05-25"
 categories:
     - "技术"
 tags:
     - "harbor"
     - "容器化"
+    - "运维操作"
 toc: false
 indent: false
 original: true
@@ -110,6 +111,7 @@ proxy:
 ## 安装
 
 ``` zsh
+➜  cd /usr/local/harbor
 ➜  ./install.sh
 
 # 出现下列语句证明安装成功

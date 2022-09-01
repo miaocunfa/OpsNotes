@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: enterprise-api-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx" # 绑定ingress-class
+    nginx.ingress.kubernetes.io/ssl-redirect: "false" # 关闭SSL跳转
+spec:
+  rules:
+  - host: enterprise.apitest.gongjiangren.net
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: enterprise-gateway
+          servicePort: 8800

@@ -1,5 +1,5 @@
 ---
-title: "OpenVPN使用tcp协议"
+title: "OpenVPN 使用 TCP 协议"
 date: "2020-08-17"
 categories:
     - "技术"

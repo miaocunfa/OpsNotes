@@ -1,5 +1,5 @@
 ---
-title: "部署K8S-单Master-集群"
+title: "Kubeadm 部署 k8s-v1.16.10 单master"
 date: "2020-06-04"
 categories:
     - "技术"
@@ -12,11 +12,29 @@ original: true
 draft: false
 ---
 
+## 更新记录
+
+| 时间       | 内容 |
+| ---------- | ---- |
+| 2020-06-04 | 初稿 |
+| 2022-09-01 | 整理文档 |
+
+## 软件版本
+
+| soft       | Version |
+| ---------- | ------- |
+| CentOS     | 7.6     |
+| kubectl    | 1.16.10  |
+| kubelet    | 1.16.10  |
+| kubeadm    | 1.16.10  |
+
 ## 一、初始化所有节点
 
+### 1.1、指定 docker 仓库
+
+在master节点和worker节点都要执行命令, 以指定docker仓库
+
 ``` zsh
-# 在 master 节点和 worker 节点都要执行
-# 最后一个参数 1.18.2 用于指定 kubenetes 版本，支持所有 1.18.x 版本的安装
 # 腾讯云 docker hub 镜像
 # export REGISTRY_MIRROR="https://mirror.ccs.tencentyun.com"
 # DaoCloud 镜像
@@ -25,13 +43,13 @@ draft: false
 ➜  export REGISTRY_MIRROR=https://registry.cn-hangzhou.aliyuncs.com
 ```
 
-### 1.1、初始化脚本
+### 1.2、创建初始化脚本
 
-``` shell
+在master节点和worker节点全都创建初始化脚本 init.sh
+
+``` zsh
 ➜  vim init.sh
 #!/bin/bash
-
-# 在 master 节点和 worker 节点都要执行
 
 # 安装 docker
 # 参考文档如下
@@ -139,37 +157,39 @@ systemctl enable kubelet && systemctl start kubelet
 docker version
 ```
 
-### 1.2、初始化
+### 1.3、执行初始化脚本
+
+在master节点和worker节点 全都执行初始化脚本 init.sh, 并传入 k8s版本号
 
 ``` zsh
 ➜  ./init.sh 1.16.10
 ```
 
-> 如果此时执行 service status kubelet 命令，将得到 kubelet 启动失败的错误提示，请忽略此错误，因为必须完成后续步骤中 kubeadm init 的操作，kubelet 才能正常启动
+## 二、初始化 master节点
 
-## 二、初始化Master节点（只在Master节点执行）
+只在 master 节点执行
 
 ### 2.1、设置环境变量
 
-```bash
-# 只在 master 节点执行
-# 替换 x.x.x.x 为 master 节点的内网IP
-# export 命令只在当前 shell 会话中有效，开启新的 shell 窗口后，如果要继续安装过程，请重新执行此处的 export 命令
+``` zsh
+# 在每一个节点执行 下列命令
+
+# 指定当前 master节点IP
 ➜  export MASTER_IP=192.168.100.236
-# 替换 apiserver.demo 为 您想要的 dnsName
+# 指定 apiserver名称
 ➜  export APISERVER_NAME=apiserver
-# Kubernetes 容器组所在的网段，该网段安装完成后，由 kubernetes 创建，事先并不存在于您的物理网络中
+# Kubernetes 容器组所在的网段，该网段由 kubernetes创建，事先并不存在于您的物理网络中
 ➜  export POD_SUBNET=10.100.0.1/16
-➜  echo "${MASTER_IP}    ${APISERVER_NAME}" >> /etc/hosts
+➜  echo "${MASTER_IP}  ${APISERVER_NAME}" >> /etc/hosts
 ```
 
-### 2.2、初始化master脚本
+### 2.2、创建初始化master脚本
 
-``` shell
+只在 master 节点执行
+
+``` zsh
 ➜  vim init_master.sh
 #!/bin/bash
-
-# 只在 master 节点执行
 
 # 脚本出错时终止执行
 set -e
@@ -213,12 +233,20 @@ echo "安装calico-3.13.1"
 rm -f calico-3.13.1.yaml
 wget https://kuboard.cn/install-script/calico/calico-3.13.1.yaml
 kubectl apply -f calico-3.13.1.yaml
+
 ```
 
-### 2.3、查看k8s集群状态
+### 2.3、执行初始化 master脚本
+
+在所有 master节点都执行 初始化脚本
 
 ``` zsh
-# 只在 master 节点执行
+➜  ./init_master.sh
+```
+
+### 2.4、查看 k8s集群状态
+
+``` zsh
 # 执行如下命令，等待 3-10 分钟，直到所有的容器组处于 Running 状态
 ➜  watch kubectl get pod -n kube-system -o wide
 
@@ -226,54 +254,41 @@ kubectl apply -f calico-3.13.1.yaml
 ➜  kubectl get nodes -o wide
 ```
 
-## 三、初始化Worker节点
+## 三、初始化 worker节点
 
-### 3.1、获得 join命令参数
+### 3.1、获得 join 命令参数
+
+在 master节点执行
 
 ``` zsh
-# 只在 master 节点执行
 ➜  kubeadm token create --print-join-command
-kubeadm join apiserver.demo:6443 --token mpfjma.4vjjg8flqihor4vt     --discovery-token-ca-cert-hash sha256:6f7a8e40a810323672de5eee6f4d19aa2dbdb38411845a1bf5dd63485c43d303
+kubeadm join apiserver:6443 --token mpfjma.4vjjg8flqihor4vt     --discovery-token-ca-cert-hash sha256:6f7a8e40a810323672de5eee6f4d19aa2dbdb38411845a1bf5dd63485c43d303
 ```
 
 #### 3.2、worker节点加入集群
 
-``` zsh
-# 只在 worker 节点执行
-# 替换 x.x.x.x 为 master 节点的内网 IP
-➜  export MASTER_IP=192.168.100.236
-# 替换 apiserver.demo 为初始化 master 节点时所使用的 APISERVER_NAME
-➜  export APISERVER_NAME=apiserver
-echo "${MASTER_IP}    ${APISERVER_NAME}" >> /etc/hosts
+在每一个 worker节点执行
 
-# 替换为 master 节点上 kubeadm token create 命令的输出
-➜  kubeadm join apiserver.demo:6443 --token mpfjma.4vjjg8flqihor4vt     --discovery-token-ca-cert-hash sha256:6f7a8e40a810323672de5eee6f4d19aa2dbdb38411845a1bf5dd63485c43d303
+``` zsh
+# 指定当前 master节点IP
+➜  export MASTER_IP=192.168.100.236
+# 指定 apiserver名称
+➜  export APISERVER_NAME=apiserver
+# 将节点信息加入到 hosts文件中
+➜  echo "${MASTER_IP}    ${APISERVER_NAME}" >> /etc/hosts
+
+# 执行 master节点 获取到的 join命令
+➜  kubeadm join apiserver:6443 --token mpfjma.4vjjg8flqihor4vt     --discovery-token-ca-cert-hash sha256:6f7a8e40a810323672de5eee6f4d19aa2dbdb38411845a1bf5dd63485c43d303
 ```
 
 #### 3.3、检查初始化结果
 
-在 master 节点上执行
-
-ps：需提前配置好kubectl的config文件
-
 ``` zsh
-# 只在 master 节点执行
-➜  kubectl get nodes -o wide
-```
-
-## 四、错误
-
-### 4.1、无法拉取google镜像
-
-直接拉取sealos的离线资源包
-
-``` zsh
-➜  wget https://sealyun.oss-cn-beijing.aliyuncs.com/272b4d02bcacf3fc317d399db7bc0f30-1.16.10/kube1.16.10.tar.gz
-➜  tar -zxvf kube1.16.10.tar.gz
-➜  cd kube/images
-➜  docker load -i images.tar
+# 在 master节点执行
+➜  watch kubectl get nodes -o wide
 ```
 
 > 参考列表：
-> 1、<https://kuboard.cn/install/install-k8s.html>
+>
+> - [kuboard 安装 k8s](https://kuboard.cn/install/install-k8s.html)  
 >

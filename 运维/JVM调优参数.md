@@ -1,0 +1,27 @@
+java
+-server
+-Xmx200M                                表示java堆可以扩展到的最大值，在很多情况下，通常将-Xms和-Xmx设置成一样的，因为当堆不够用而发生扩容时，会发生内存抖动影响程序运行时的稳定性。
+-Xms60M     
+-XX:+UseG1GC                            它会从内存中删除垃圾对象
+-XX:MaxGCPauseMillis=200
+-XX:+UnlockExperimentalVMOptions
+-XX:+ParallelRefProcEnabled
+-XX:-ResizePLAB
+-XX:+PerfDisableSharedMem
+-XX:-OmitStackTraceInFastThrow
+-XX:G1NewSizePercent=2
+-XX:ParallelGCThreads=23
+-XX:InitiatingHeapOccupancyPercent=40
+-XX:G1HeapRegionSize=32M
+-XX:G1HeapWastePercent=10
+-XX:G1MixedGCCountTarget=16
+-verbose:gc
+-XX:+PrintGCDetails
+-XX:+PrintGCDateStamps
+-XX:+PrintGCTimeStamps
+-XX:+UseGCLogFileRotation
+-XX:NumberOfGCLogFiles=5
+-XX:GCLogFileSize=100M
+-XX:+UseStringDeduplication            从内存中删除重复的字符串对象
+
+-jar enterprise-customer.jar

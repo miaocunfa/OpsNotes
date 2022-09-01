@@ -325,8 +325,9 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-> 参考链接：  
-> 1、[Systemd 入门教程：实战篇](http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html)  
-> 2、[systemctl服务编写，及日志控制](https://blog.csdn.net/jeccisnd/article/details/103166554/)  
-> 3、[linux kill信号列表](https://www.cnblogs.com/the-tops/p/5604537.html)  
+> 参考链接：
+>  
+> - [Systemd 入门教程：实战篇](http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html)  
+> - [systemctl服务编写，及日志控制](https://blog.csdn.net/jeccisnd/article/details/103166554/)  
+> - [linux kill信号列表](https://www.cnblogs.com/the-tops/p/5604537.html)  
 >

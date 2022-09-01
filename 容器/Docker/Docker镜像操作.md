@@ -1,5 +1,5 @@
 ---
-title: "Docker镜像操作"
+title: "Docker 镜像操作"
 date: "2020-06-12"
 categories:
     - "技术"
@@ -11,13 +11,22 @@ original: true
 draft: false
 ---
 
-## 一、docker老命令
+## 更新记录
+
+| 时间       | 内容     |
+| ---------- | -------- |
+| 2020-06-12 | 初稿     |
+| 2022-09-01 | 文档整理 |
+
+## 一、docker 老命令
 
 由于docker的发展历史，
 docker关于操作image的指令有两种：
 一种是下面这些老命令。
 
 ### 1.1、Usage
+
+docker --help
 
 ``` zsh
 ➜  docker -h
@@ -41,6 +50,8 @@ Commands:
 
 Run 'docker COMMAND --help' for more information on a command.
 ```
+
+docker 命令详解
 
 ``` zsh
 Usage:  docker [OPTIONS] COMMAND
@@ -359,7 +370,7 @@ Hello, Nginx!
 docker的导出命令有两个save、export
 
 ``` zsh
-
+➜  docker save jdk8:v1.1 > jdk8v11.tar
 ```
 
 ### 1.10、镜像构建
@@ -367,8 +378,14 @@ docker的导出命令有两个save、export
 ``` zsh
 Usage:  docker build [OPTIONS] PATH | URL | -
 
-# 通过Dockerfile构建镜像
-➜  docker build
+# Dockerfile 层级
+➜  tree /target/openjdk:8u201-jre-font
+/target/openjdk:8u201-jre-font
+└── Dockerfile
+
+# 通过 Dockerfile构建镜像
+➜  cd /target/openjdk:8u201-jre-font
+➜  docker build -t openjdk:8u201-jre-font .
 ```
 
 ## 二、docker image
@@ -399,6 +416,8 @@ Commands:
 Run 'docker image COMMAND --help' for more information on a command.
 ```
 
+docker image 详解
+
 ``` zsh
 ➜  docker image build      # 根据Dockfile构建镜像
 ➜  docker image history    # 查看镜像历史
@@ -415,5 +434,6 @@ Run 'docker image COMMAND --help' for more information on a command.
 ```
 
 > 参考列表：
-> 1、<https://docs.docker.com/engine/reference/commandline/pull/>  
+> 
+> - [Docker官网 - docker pull 用法](https://docs.docker.com/engine/reference/commandline/pull/)
 >

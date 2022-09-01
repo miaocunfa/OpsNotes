@@ -1,17 +1,23 @@
 ---
-title: "Kubernetes部署工具Helm之常用操作(一)"
+title: "Helm之常用操作"
 date: "2020-07-06"
 categories:
     - "技术"
 tags:
-    - "Kubernetes"
-    - "容器化"
     - "Helm"
+    - "容器化"
 toc: false
 indent: false
 original: true
 draft: false
 ---
+
+## 更新记录
+
+| 时间       | 内容     |
+| ---------- | -------- |
+| 2020-07-06 | 初稿     |
+| 2022-09-01 | 文档整理 |
 
 ## 一、Helm安装
 
@@ -24,6 +30,8 @@ linux-amd64/
 linux-amd64/helm
 linux-amd64/README.md
 linux-amd64/LICENSE
+
+# 拷贝 helm 至 /usr/local/bin
 ➜  cp linux-amd64/helm /usr/local/bin
 ```
 
@@ -1035,7 +1043,8 @@ REVISION    UPDATED                     STATUS        CHART           APP VERSIO
 5           Wed Jul  8 09:10:37 2020    deployed      tomcat-0.4.1    7.0            Rollback to 3
 ```
 
-> 参考链接:  
-> 1、<https://blog.csdn.net/twingao/article/details/104282223>  
-> 2、<https://www.qikqiak.com/post/use-loki-monitor-alert/>
+> 参考链接: 
+>  
+> - [](https://blog.csdn.net/twingao/article/details/104282223)  
+> - [](https://www.qikqiak.com/post/use-loki-monitor-alert/)  
 >
