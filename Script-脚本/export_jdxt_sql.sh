@@ -23,4 +23,4 @@ rm jdxt_db_${curDate}.sql
 echo
 echo "Tar File: "
 ls -lh /home/miaocunfa/jdxt_db_${curDate}.tgz
-echo
+echo 
